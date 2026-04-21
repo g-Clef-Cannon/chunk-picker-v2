@@ -113,6 +113,42 @@ let outputTasks = {};
 let multiTasks = {};
 let intitalDataPosted = false;
 
+// Tool efficiency relative to best-in-slot (used by Strict Tool Gating rule)
+const toolEfficiency = {
+    "Axe[+]": {
+        "Bronze axe": 0.52, "Bronze felling axe": 0.52,
+        "Iron axe": 0.52, "Iron felling axe": 0.52,
+        "Steel axe": 0.65, "Steel felling axe": 0.65,
+        "Black axe": 0.72, "Black felling axe": 0.72,
+        "Mithril axe": 0.765, "Mithril felling axe": 0.765,
+        "Adamant axe": 0.8125, "Adamant felling axe": 0.8125,
+        "Rune axe": 0.929, "Rune felling axe": 0.929,
+        "Gilded axe": 0.929,
+        "Dragon axe": 1.0, "Dragon felling axe": 1.0,
+        "3rd age axe": 1.0, "3rd age felling axe": 1.0,
+        "Infernal axe": 1.0,
+        "Crystal axe": 1.0, "Crystal felling axe": 1.0
+    },
+    "Pickaxe[+]": {
+        "Bronze pickaxe": 0.344,
+        "Iron pickaxe": 0.393,
+        "Steel pickaxe": 0.458,
+        "Black pickaxe": 0.55,
+        "Mithril pickaxe": 0.55,
+        "Adamant pickaxe": 0.688,
+        "Rune pickaxe": 0.917, "Gilded pickaxe": 0.917,
+        "Dragon pickaxe": 0.972,
+        "3rd age pickaxe": 0.972,
+        "Infernal pickaxe": 0.972,
+        "Crystal pickaxe": 1.0
+    }
+};
+
+// Buffer formula: cap = level + floor(10 - level * 0.10)
+const calcLevelCap = function(level) {
+    return level + Math.floor(10 - level * 0.10);
+};
+
 let type;
 let chunks;
 let baseChunkData;
@@ -164,6 +200,7 @@ let assignedXpRewards;
 let isDiary2Tier = false;
 let manualAreas;
 let secondaryPrimaryNum;
+let toolGatingThreshold;
 let constructionLocked;
 let isOnlyManualAreas = false;
 let bestEquipmentAltsGlobal = {};
@@ -240,6 +277,7 @@ onmessage = function(e) {
             isDiary2Tier,
             manualAreas,
             secondaryPrimaryNum,
+            toolGatingThreshold,
             constructionLocked,
             isOnlyManualAreas,
             manualSections,
@@ -4622,6 +4660,77 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             valids[skill][name] = chunkInfo['challenges'][skill][name]['Level'] || chunkInfo['challenges'][skill][name]['Label'] || true;
         });
     });
+
+    // Strict Tool Gating: cap gathering skill tasks by best available tool tier
+    if (rules['Strict Tool Gating'] && !!chunkInfo['toolLevels']) {
+        let toolSkillMap = { 'Woodcutting': 'Axe[+]', 'Mining': 'Pickaxe[+]' };
+        Object.keys(toolSkillMap).forEach((skill) => {
+            if (!valids[skill]) return;
+            let toolType = toolSkillMap[skill];
+            if (!chunkInfo['toolLevels'][toolType] || !itemsPlus[toolType]) return;
+
+            // Find best available tool's efficiency and highest tool level
+            let bestEfficiency = 0;
+            let bestToolLevel = 0;
+            itemsPlus[toolType].forEach((toolName) => {
+                if (items[toolName] || items[toolName + '*']) {
+                    let eff = (toolEfficiency[toolType] && toolEfficiency[toolType][toolName]) || 0;
+                    if (eff > bestEfficiency) bestEfficiency = eff;
+                    let tLevel = chunkInfo['toolLevels'][toolType][toolName] || 0;
+                    if (tLevel > bestToolLevel) bestToolLevel = tLevel;
+                }
+            });
+
+            // If best tool meets efficiency threshold, no cap needed
+            if (bestEfficiency >= toolGatingThreshold) return;
+
+            // Cap tasks at best tool level + buffer
+            if (bestToolLevel > 0) {
+                let cap = calcLevelCap(bestToolLevel);
+                Object.keys(valids[skill]).forEach((name) => {
+                    let taskLevel = chunkInfo['challenges'][skill][name]['Level'] || 0;
+                    if (taskLevel > cap) {
+                        delete valids[skill][name];
+                    }
+                });
+            }
+        });
+    }
+
+    // Method-Based Cap: cap all skill tasks at highest available primary method level + buffer
+    if (rules['Method-Based Cap']) {
+        skillNames.forEach((skill) => {
+            if (!valids[skill] || Object.keys(valids[skill]).length === 0) return;
+
+            // Find highest level primary (non-secondary) task that is accessible
+            let highestPrimaryLevel = 0;
+            Object.keys(valids[skill]).forEach((name) => {
+                let task = chunkInfo['challenges'][skill][name];
+                if (!task) return;
+                let isPrimary = task['Primary'] && !task['Secondary'];
+                if (!isPrimary) return;
+                let taskLevel = task['Level'] || 0;
+                // Primary must be accessible: level 1, or passive skill covers it, or quest XP covers it
+                let accessible = taskLevel === 1
+                    || (!!passiveSkill && passiveSkill.hasOwnProperty(skill) && passiveSkill[skill] >= taskLevel)
+                    || (!!skillQuestXp && skillQuestXp.hasOwnProperty(skill) && skillQuestXp[skill]['level'] >= taskLevel);
+                if (accessible && taskLevel > highestPrimaryLevel) {
+                    highestPrimaryLevel = taskLevel;
+                }
+            });
+
+            // If no primary method found, don't cap (avoid breaking skills with no primary tasks)
+            if (highestPrimaryLevel === 0) return;
+
+            let cap = calcLevelCap(highestPrimaryLevel);
+            Object.keys(valids[skill]).forEach((name) => {
+                let taskLevel = chunkInfo['challenges'][skill][name]['Level'] || 0;
+                if (taskLevel > cap) {
+                    delete valids[skill][name];
+                }
+            });
+        });
+    }
 
     // Kill X
     if (rules['Kill X']) {

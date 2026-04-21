@@ -7055,6 +7055,11 @@ input#searchChunks {
     pointer-events: all;
 }
 
+.tool-gating-input {
+    width: 55px;
+    pointer-events: all;
+}
+
 .addEquipment {
     cursor: pointer;
     -webkit-transition-duration: 0.4s;
