@@ -7086,6 +7086,13 @@ input#searchChunks {
     pointer-events: all;
 }
 
+.skill-cap-info {
+    color: var(--colorLink, #6ca0dc);
+    margin-left: 4px;
+    cursor: help;
+    font-size: 13px;
+}
+
 .addEquipment {
     cursor: pointer;
     -webkit-transition-duration: 0.4s;
