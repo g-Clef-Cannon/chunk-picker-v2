@@ -201,6 +201,8 @@ let isDiary2Tier = false;
 let manualAreas;
 let secondaryPrimaryNum;
 let toolGatingThreshold;
+let skillTaskCap;
+let skillTaskCapAmount;
 let constructionLocked;
 let isOnlyManualAreas = false;
 let bestEquipmentAltsGlobal = {};
@@ -278,6 +280,8 @@ onmessage = function(e) {
             manualAreas,
             secondaryPrimaryNum,
             toolGatingThreshold,
+            skillTaskCap,
+            skillTaskCapAmount,
             constructionLocked,
             isOnlyManualAreas,
             manualSections,
@@ -4732,7 +4736,46 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
         });
     }
 
-    // Kill X
+    // Skill Task Cap: cap skill tasks based on quest/diary requirements or custom level
+    if (skillTaskCap && skillTaskCap !== 'none') {
+        let capPerSkill = {};
+
+        if (skillTaskCap === 'quest' || skillTaskCap === 'diary') {
+            // Scan quest or diary challenges for max skill requirements
+            let sourceType = skillTaskCap === 'quest' ? 'Quest' : 'Diary';
+            if (chunkInfo['challenges'][sourceType]) {
+                Object.keys(chunkInfo['challenges'][sourceType]).forEach((taskName) => {
+                    let task = chunkInfo['challenges'][sourceType][taskName];
+                    if (task && task['Skills']) {
+                        Object.keys(task['Skills']).forEach((skill) => {
+                            let reqLevel = parseInt(task['Skills'][skill]) || 0;
+                            if (!capPerSkill[skill] || reqLevel > capPerSkill[skill]) {
+                                capPerSkill[skill] = reqLevel;
+                            }
+                        });
+                    }
+                });
+            }
+        } else if (skillTaskCap === 'custom') {
+            // Cap all skills at the custom level
+            skillNames.forEach((skill) => {
+                capPerSkill[skill] = skillTaskCapAmount || 50;
+            });
+        }
+
+        // Apply caps to valids
+        skillNames.forEach((skill) => {
+            if (!valids[skill] || Object.keys(valids[skill]).length === 0) return;
+            let cap = capPerSkill[skill];
+            if (!cap) return; // No cap for this skill (e.g., quest/diary doesn't require it)
+            Object.keys(valids[skill]).forEach((name) => {
+                let taskLevel = chunkInfo['challenges'][skill][name]['Level'] || 0;
+                if (taskLevel > cap) {
+                    delete valids[skill][name];
+                }
+            });
+        });
+    }
     if (rules['Kill X']) {
         if (!valids['Extra']) {
             valids['Extra'] = {};
