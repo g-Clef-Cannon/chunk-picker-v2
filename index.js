@@ -363,6 +363,7 @@ let rules = {
     "Show Quest Tasks": false,
     "Show Diary Tasks": false,
     "Show Best in Slot Tasks": false,
+    "BiS Respect Skill Caps": false,
     "Show Best in Slot Prayer Tasks": false,
     "Show Best in Slot Defensive Tasks": false,
     "Show Best in Slot Flinching Tasks": false,
@@ -473,6 +474,7 @@ let ruleNames = {
     "Show Quest Tasks": "Show Quest Tasks",
     "Show Diary Tasks": "Show Diary Tasks",
     "Show Best in Slot Tasks": "Show Best in Slot (Accuracy + Strength, or secondarily Defence) Tasks",
+    "BiS Respect Skill Caps": "BiS tasks respect skill task level caps (skip equipment you can't realistically train to craft/obtain)",
     "Show Best in Slot Prayer Tasks": "Show Best in Slot Tasks for Prayer-boosting gear",
     "Show Best in Slot Defensive Tasks": "Show Best in Slot Tasks for Tank gear (highest defence-only against Melee/Ranged/Magic)",
     "Show Best in Slot Flinching Tasks": "Show Best in Slot Tasks for Flinching weapons (pure offensive stats and strength, no speed)",
@@ -736,7 +738,7 @@ let ruleStructure = {
         "Show Skill Tasks": ["Strict Tool Gating", "Method-Based Cap", "Skill Task Cap"],
         "Show Quest Tasks": ["Show Quest Tasks Complete"],
         "Show Diary Tasks": ["Show Diary Tasks Complete", "Show Diary Tasks Any", "Fossil Island Tasks", "Combat Diary Tasks", "Sea Charting"],
-        "Show Best in Slot Tasks": ["Show Best in Slot Prayer Tasks", "Show Best in Slot Defensive Tasks", "Show Best in Slot Flinching Tasks", "Show Best in Slot Weight Tasks", "Show Best in Slot Melee Style Tasks", "Show Best in Slot 1H and 2H", "Consumable Primary BiS"]
+        "Show Best in Slot Tasks": ["BiS Respect Skill Caps", "Show Best in Slot Prayer Tasks", "Show Best in Slot Defensive Tasks", "Show Best in Slot Flinching Tasks", "Show Best in Slot Weight Tasks", "Show Best in Slot Melee Style Tasks", "Show Best in Slot 1H and 2H", "Consumable Primary BiS"]
     },
     "Overall Skill": {
         "Starting Items": true,
