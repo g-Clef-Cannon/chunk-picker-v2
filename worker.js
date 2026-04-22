@@ -5390,20 +5390,19 @@ let calcBIS = function(completedOnly) {
             !!chunkInfo['equipment'][equip].requirements && Object.keys(chunkInfo['equipment'][equip].requirements).filter(skill => (rules['Skiller'] && chunkInfo['equipment'][equip].requirements[skill] > 1) || (!primarySkill[skill] && chunkInfo['equipment'][equip].requirements[skill] > 1 && (!passiveSkill || !passiveSkill.hasOwnProperty(skill) || passiveSkill[skill] < chunkInfo['equipment'][equip].requirements[skill])) || (skill === 'Slayer' && !!slayerLocked && chunkInfo['equipment'][equip].requirements[skill] > slayerLocked['level']) || (!!maxSkill && maxSkill.hasOwnProperty(skill) && maxSkill[skill] < chunkInfo['equipment'][equip].requirements[skill])).length > 0 && (validWearable = false);
             chunkInfo['taskUnlocks']['Items'].hasOwnProperty(equip) && chunkInfo['taskUnlocks']['Items'][equip].filter(task => !globalValids || !globalValids[Object.values(task)[0]] || !globalValids[Object.values(task)[0]].hasOwnProperty(Object.keys(task)[0])).length > 0 && (validWearable = false);
             rules['Consumable Primary BiS'] && chunkInfo['equipment'][equip].is_consumable && Object.keys(baseChunkData['items'][equip]).filter(source => !baseChunkData['items'][equip][source].includes('secondary-')).length === 0 && (validWearable = false);
-            // BiS Respect Skill Caps: skip equipment if all sources are skill tasks removed by our caps
+            // BiS Respect Skill Caps: skip equipment if ALL sources are skill tasks removed by our caps
             if (validWearable && rules['BiS Respect Skill Caps'] && (rules['Strict Tool Gating'] || rules['Method-Based Cap'] || (skillTaskCap && skillTaskCap !== 'none'))) {
                 let hasObtainableSource = false;
                 Object.keys(baseChunkData['items'][equip]).forEach((source) => {
                     if (hasObtainableSource) return;
                     let sourceVal = baseChunkData['items'][equip][source];
-                    if (!sourceVal.includes('-')) {
-                        // Non-skill source (monster drop, shop, etc.) — always obtainable
+                    let sourceSkill = sourceVal.includes('-') ? sourceVal.split('-')[1] : null;
+                    if (!sourceSkill || !chunkInfo['challenges'][sourceSkill]) {
+                        // Non-skill source (monster drop, shop, spawn, etc.) — always obtainable
                         hasObtainableSource = true;
-                    } else {
-                        let sourceSkill = sourceVal.split('-')[1];
-                        if (globalValids && globalValids[sourceSkill] && globalValids[sourceSkill].hasOwnProperty(source)) {
-                            hasObtainableSource = true;
-                        }
+                    } else if (globalValids && globalValids[sourceSkill] && globalValids[sourceSkill].hasOwnProperty(source)) {
+                        // Skill source that survived our caps — still obtainable
+                        hasObtainableSource = true;
                     }
                 });
                 if (!hasObtainableSource) {
