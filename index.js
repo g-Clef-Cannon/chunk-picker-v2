@@ -10949,9 +10949,15 @@ let showDetails = function(challenge, skill, dataType, isNested) {
         chunkInfo['challenges'][skill][challenge].hasOwnProperty('Description') && $('#details-data').append(`<span class="details-subtitle details-description noscroll"><i class="noscroll">${chunkInfo['challenges'][skill][challenge]['Description']}</i></span><br />`);
         // Show which rules passed for this task
         if (globalTaskRuleInfo && globalTaskRuleInfo[skill] && globalTaskRuleInfo[skill][challenge]) {
-            let ruleTags = globalTaskRuleInfo[skill][challenge].map(r => `<span class="noscroll rule-tag">${r}</span>`).join(' ');
-            $('#details-data').append(`<span class="details-subtitle noscroll"><u class="noscroll"><b class="noscroll">active rules</b></u></span><br /><span class="noscroll rule-tags-row">${ruleTags}</span><br />`);
-        }        detailsKeys.forEach((key) => {
+            let ruleRows = globalTaskRuleInfo[skill][challenge].map(r => {
+                if (typeof r === 'object' && r.label) {
+                    return `<div class="noscroll rule-entry"><span class="noscroll rule-tag">${r.label}</span><div class="noscroll rule-tag-detail">${r.detail}</div></div>`;
+                }
+                return `<div class="noscroll rule-entry"><span class="noscroll rule-tag">${r}</span></div>`;
+            }).join('');
+            $('#details-data').append(`<span class="details-subtitle noscroll"><u class="noscroll"><b class="noscroll">active rules</b></u></span><br /><div class="noscroll rule-tags-container">${ruleRows}</div>`);
+        }
+        detailsKeys.forEach((key) => {
             if (key === 'Skill RequirementsDetails' && skill !== 'Quest' && skill !== 'Diary') {
                 return;
             }

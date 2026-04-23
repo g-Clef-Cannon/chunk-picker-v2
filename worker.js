@@ -2585,11 +2585,15 @@ const FLINCH_CYCLE_TICKS = 14; // measured corner-flinch cycle in game ticks
 // Shop Cost Gate: module-level state
 let shopCostGateActive = false;
 let bestCoinsPerHour = 0;
+let bestCoinsMonsterName = '';
 let globalTaskRuleInfo = {};
+let monsterGateDetails = {};
+let shopGateDetails = {};
 
 // Estimate coins per hour from the best monster source in player's chunks
 const calcBestCoinsPerHour = function(atkLevel, strLevel, weaponAtk, weaponStr, weaponSpeed) {
     let best = 0;
+    bestCoinsMonsterName = '';
     Object.keys(dropRatesGlobal).forEach((monster) => {
         if (!dropRatesGlobal[monster]['Coins'] && !dropRatesGlobal[monster]['Coins*']) return;
         let coinEntry = dropRatesGlobal[monster]['Coins'] || dropRatesGlobal[monster]['Coins*'];
@@ -2632,7 +2636,10 @@ const calcBestCoinsPerHour = function(atkLevel, strLevel, weaponAtk, weaponStr, 
         if (expectedCoinsPerKill <= 0) return;
         let killsPerHour = 3600 / killTimeSec;
         let coinsPerHour = killsPerHour * expectedCoinsPerKill;
-        if (coinsPerHour > best) best = coinsPerHour;
+        if (coinsPerHour > best) {
+            best = coinsPerHour;
+            bestCoinsMonsterName = monster;
+        }
     });
     return best;
 };
@@ -2642,26 +2649,28 @@ const calcBestCoinsPerHour = function(atkLevel, strLevel, weaponAtk, weaponStr, 
 const passesMonsterGate = function(itemName, itemSources, combatContext) {
     if (!monsterGateActive) return true;
     let hasReasonableSource = false;
+    let bestDetail = null;
     Object.keys(itemSources).forEach((source) => {
         if (hasReasonableSource) return;
         let sourceVal = itemSources[source];
         if (!sourceVal.includes('drop')) {
-            // For combat context, skip processing-skill sources (e.g. primary-Smithing)
             if (combatContext && sourceVal.includes('-') && !rules['Wield Crafted Items']) {
                 let srcSkill = sourceVal.split('-')[1];
                 if (srcSkill && processingSkill[srcSkill]) return;
             }
             hasReasonableSource = true;
+            bestDetail = 'Non-drop source available — auto-pass';
         } else {
             let ms = monsterStats[source] || {hp: 10, def: 1, db: 0};
             let killTime = estimateEffectiveKillTime(gatePlayerAtkLevel, gatePlayerStrLevel, gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed, ms.hp || 10, ms.def || 1, ms.db || 0, ms.al || 0, ms.ab || 0, ms.mh || 0, ms.as || 4);
             let avgKills = 128;
+            let rateStr = '1/128';
             if (dropRatesGlobal[source] && dropRatesGlobal[source][itemName]) {
-                let rate = dropRatesGlobal[source][itemName];
-                if (rate === 'Always') {
+                rateStr = dropRatesGlobal[source][itemName];
+                if (rateStr === 'Always') {
                     avgKills = 1;
                 } else {
-                    let parts = rate.split('/');
+                    let parts = rateStr.split('/');
                     if (parts.length === 2) {
                         avgKills = Math.ceil(parseFloat(parts[1]) / parseFloat(parts[0]));
                     }
@@ -2670,9 +2679,11 @@ const passesMonsterGate = function(itemName, itemSources, combatContext) {
             let totalHours = (killTime * avgKills) / 3600;
             if (totalHours <= bisMonsterGateHours) {
                 hasReasonableSource = true;
+                bestDetail = source + ': ~' + Math.round(killTime) + 's/kill, rate ' + rateStr + ', ~' + totalHours.toFixed(1) + 'h to farm (threshold: ' + bisMonsterGateHours + 'h)';
             }
         }
     });
+    if (bestDetail) monsterGateDetails[itemName] = bestDetail;
     return hasReasonableSource;
 };
 
@@ -2697,10 +2708,16 @@ const passesShopCostGate = function(itemName, itemSources) {
             hasNonShopSource = true;
         }
     });
-    if (!hasShopSource || hasNonShopSource) return true;
+    if (!hasShopSource || hasNonShopSource) {
+        if (hasNonShopSource) shopGateDetails[itemName] = 'Non-shop source available — auto-pass';
+        return true;
+    }
     if (lowestPrice === Infinity || lowestPrice <= 0) return true;
     let hoursToFarm = lowestPrice / bestCoinsPerHour;
     let result = hoursToFarm <= shopCostGateHours;
+    if (result) {
+        shopGateDetails[itemName] = itemName + ': ' + lowestPrice.toLocaleString() + 'gp, best coins/hr ' + bestCoinsPerHour.toFixed(1) + (bestCoinsMonsterName ? ' (' + bestCoinsMonsterName + ')' : '') + ', ~' + hoursToFarm.toFixed(1) + 'h to earn (threshold: ' + shopCostGateHours + 'h)';
+    }
     return result;
 };
 
@@ -3090,17 +3107,33 @@ onmessage = function(e) {
         //console.log(nonValids);
         //console.log(baseChunkData);
 
-        // Annotate BiS tasks with active rule tags
+        // Annotate BiS tasks with active rule details
         if (globalValids['BiS'] && Object.keys(globalValids['BiS']).length > 0) {
             if (!globalTaskRuleInfo['BiS']) globalTaskRuleInfo['BiS'] = {};
             Object.keys(globalValids['BiS']).forEach((name) => {
-                let tags = [];
-                if (monsterGateActive) tags.push('Monster Gate');
-                if (shopCostGateActive) tags.push('Shop Gate');
-                if (rules['BiS Respect Skill Caps'] && (rules['Strict Tool Gating'] || rules['Method-Based Cap'] || (skillTaskCap && skillTaskCap !== 'none'))) {
-                    tags.push('BiS Skill Cap');
+                let rules_arr = [];
+                // BiS tasks reference equipment items via ItemsDetails
+                let bisItems = (chunkInfo['challenges']['BiS'] && chunkInfo['challenges']['BiS'][name] && chunkInfo['challenges']['BiS'][name]['ItemsDetails']) || [];
+                if (monsterGateActive) {
+                    let details = [];
+                    bisItems.forEach((item) => { if (monsterGateDetails[item]) details.push(monsterGateDetails[item]); });
+                    rules_arr.push({
+                        label: 'Monster Gate',
+                        detail: details.length > 0 ? details.join('; ') : 'Active (est. ATK/STR lv' + gatePlayerAtkLevel + ', threshold ' + bisMonsterGateHours + 'h)'
+                    });
                 }
-                if (tags.length > 0) globalTaskRuleInfo['BiS'][name] = tags;
+                if (shopCostGateActive) {
+                    let details = [];
+                    bisItems.forEach((item) => { if (shopGateDetails[item]) details.push(shopGateDetails[item]); });
+                    rules_arr.push({
+                        label: 'Shop Gate',
+                        detail: details.length > 0 ? details.join('; ') : 'Active (best coins/hr ' + bestCoinsPerHour.toFixed(1) + (bestCoinsMonsterName ? ' from ' + bestCoinsMonsterName : '') + ', threshold ' + shopCostGateHours + 'h)'
+                    });
+                }
+                if (rules['BiS Respect Skill Caps'] && (rules['Strict Tool Gating'] || rules['Method-Based Cap'] || (skillTaskCap && skillTaskCap !== 'none'))) {
+                    rules_arr.push({ label: 'BiS Skill Cap', detail: 'Equipment blocked if all skill sources exceed active caps' });
+                }
+                if (rules_arr.length > 0) globalTaskRuleInfo['BiS'][name] = rules_arr;
             });
         }
         postMessage({
@@ -3258,6 +3291,8 @@ let calcChallenges = function(chunks, baseChunkData) {
     if (!baseChunkData) {
         return;
     }
+    monsterGateDetails = {};
+    shopGateDetails = {};
     let valids = {};
     let outputs = {};
     let outputObjects = {};
@@ -7343,6 +7378,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
 
     // Strict Tool Gating: cap gathering skill tasks by best available tool tier
     let toolGatingCaps = {}; // saved for task rule info
+    let toolGatingToolNames = {}; // best tool name per skill
     if (rules['Strict Tool Gating'] && !!chunkInfo['toolLevels']) {
         let toolSkillMap = { 'Woodcutting': 'Axe[+]', 'Mining': 'Pickaxe[+]' };
         Object.keys(toolSkillMap).forEach((skill) => {
@@ -7350,15 +7386,18 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             let toolType = toolSkillMap[skill];
             if (!chunkInfo['toolLevels'][toolType] || !itemsPlus[toolType]) return;
 
-            // Find best available tool's efficiency and highest tool level
             let bestEfficiency = 0;
             let bestToolLevel = 0;
+            let bestToolName = '';
             itemsPlus[toolType].forEach((toolName) => {
                 if (items[toolName] || items[toolName + '*']) {
                     let eff = (toolEfficiency[toolType] && toolEfficiency[toolType][toolName]) || 0;
                     if (eff > bestEfficiency) bestEfficiency = eff;
                     let tLevel = chunkInfo['toolLevels'][toolType][toolName] || 0;
-                    if (tLevel > bestToolLevel) bestToolLevel = tLevel;
+                    if (tLevel > bestToolLevel) {
+                        bestToolLevel = tLevel;
+                        bestToolName = toolName;
+                    }
                 }
             });
 
@@ -7369,6 +7408,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             if (bestToolLevel > 0) {
                 let cap = calcLevelCap(bestToolLevel);
                 toolGatingCaps[skill] = cap;
+                toolGatingToolNames[skill] = bestToolName;
                 Object.keys(valids[skill]).forEach((name) => {
                     let taskLevel = chunkInfo['challenges'][skill][name]['Level'] || 0;
                     if (taskLevel > cap) {
@@ -7381,11 +7421,11 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
 
     // Method-Based Cap: cap all skill tasks at highest available primary method level + buffer
     let methodBasedCaps = {}; // saved for task rule info
+    let methodBasedHighestLevel = {}; // highest primary method level per skill
     if (rules['Method-Based Cap']) {
         skillNames.forEach((skill) => {
             if (!valids[skill] || Object.keys(valids[skill]).length === 0) return;
 
-            // Find highest level primary (non-secondary) task that is accessible
             let highestPrimaryLevel = 0;
             Object.keys(valids[skill]).forEach((name) => {
                 let task = chunkInfo['challenges'][skill][name];
@@ -7393,7 +7433,6 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                 let isPrimary = task['Primary'] && !task['Secondary'];
                 if (!isPrimary) return;
                 let taskLevel = task['Level'] || 0;
-                // Primary must be accessible: level 1, or passive skill covers it, or quest XP covers it
                 let accessible = taskLevel === 1
                     || (!!passiveSkill && passiveSkill.hasOwnProperty(skill) && passiveSkill[skill] >= taskLevel)
                     || (!!skillQuestXp && skillQuestXp.hasOwnProperty(skill) && skillQuestXp[skill]['level'] >= taskLevel);
@@ -7402,11 +7441,11 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                 }
             });
 
-            // If no primary method found, don't cap (avoid breaking skills with no primary tasks)
             if (highestPrimaryLevel === 0) return;
 
             let cap = calcLevelCap(highestPrimaryLevel);
             methodBasedCaps[skill] = cap;
+            methodBasedHighestLevel[skill] = highestPrimaryLevel;
             Object.keys(valids[skill]).forEach((name) => {
                 let taskLevel = chunkInfo['challenges'][skill][name]['Level'] || 0;
                 if (taskLevel > cap) {
@@ -7833,34 +7872,65 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
     }
 
     // Build per-task rule info: which active rules applied to each surviving task
+    // Each entry is an array of {label, detail} objects
     let taskRuleInfo = {};
     let allSkills = [...skillNames, 'Nonskill', 'Quest', 'Diary', 'Extra'];
     allSkills.forEach((skill) => {
         if (!valids[skill] || Object.keys(valids[skill]).length === 0) return;
         taskRuleInfo[skill] = {};
         Object.keys(valids[skill]).forEach((name) => {
-            let rulesTags = [];
+            let rules_arr = [];
             let isSkillTask = skillNames.includes(skill);
+            let taskLevel = (chunkInfo['challenges'][skill][name] && chunkInfo['challenges'][skill][name]['Level']) || 0;
             if (isSkillTask) {
                 if (toolGatingCaps[skill]) {
-                    rulesTags.push('Tool Gating ≤' + toolGatingCaps[skill]);
+                    let toolName = toolGatingToolNames[skill] || '?';
+                    rules_arr.push({
+                        label: 'Tool Gating',
+                        detail: 'Best tool: ' + toolName + ' → cap lv' + toolGatingCaps[skill] + '; task needs lv' + taskLevel
+                    });
                 }
                 if (methodBasedCaps[skill]) {
-                    rulesTags.push('Method Cap ≤' + methodBasedCaps[skill]);
+                    let highLv = methodBasedHighestLevel[skill] || '?';
+                    rules_arr.push({
+                        label: 'Method Cap',
+                        detail: 'Highest primary method lv' + highLv + ' → cap lv' + methodBasedCaps[skill] + '; task needs lv' + taskLevel
+                    });
                 }
                 if (skillTaskCapValues[skill]) {
                     let capLabel = skillTaskCap === 'quest' ? 'Quest' : skillTaskCap === 'diary' ? 'Diary' : 'Custom';
-                    rulesTags.push(capLabel + ' Cap ≤' + skillTaskCapValues[skill]);
+                    rules_arr.push({
+                        label: capLabel + ' Cap',
+                        detail: capLabel + ' cap for ' + skill + ': lv' + skillTaskCapValues[skill] + '; task needs lv' + taskLevel
+                    });
                 }
             }
+            // Look up gate details for items this task requires
+            let taskItems = (chunkInfo['challenges'][skill][name] && chunkInfo['challenges'][skill][name]['Items']) || [];
             if (monsterGateActive) {
-                rulesTags.push('Monster Gate');
+                let gateDetails = [];
+                taskItems.forEach((item) => {
+                    let cleanItem = item.replace(/\*/g, '');
+                    if (monsterGateDetails[cleanItem]) gateDetails.push(monsterGateDetails[cleanItem]);
+                });
+                rules_arr.push({
+                    label: 'Monster Gate',
+                    detail: gateDetails.length > 0 ? gateDetails.join('; ') : 'Active (est. ATK/STR lv' + gatePlayerAtkLevel + ', threshold ' + bisMonsterGateHours + 'h)'
+                });
             }
             if (shopCostGateActive) {
-                rulesTags.push('Shop Gate');
+                let gateDetails = [];
+                taskItems.forEach((item) => {
+                    let cleanItem = item.replace(/\*/g, '');
+                    if (shopGateDetails[cleanItem]) gateDetails.push(shopGateDetails[cleanItem]);
+                });
+                rules_arr.push({
+                    label: 'Shop Gate',
+                    detail: gateDetails.length > 0 ? gateDetails.join('; ') : 'Active (best coins/hr ' + bestCoinsPerHour.toFixed(1) + (bestCoinsMonsterName ? ' from ' + bestCoinsMonsterName : '') + ', threshold ' + shopCostGateHours + 'h)'
+                });
             }
-            if (rulesTags.length > 0) {
-                taskRuleInfo[skill][name] = rulesTags;
+            if (rules_arr.length > 0) {
+                taskRuleInfo[skill][name] = rules_arr;
             }
         });
     });

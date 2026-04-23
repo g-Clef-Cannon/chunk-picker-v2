@@ -7103,11 +7103,17 @@ input#searchChunks {
     font-size: 13px;
 }
 
-.rule-tags-row {
+.rule-tags-container {
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-bottom: 6px;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.rule-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .rule-tag {
@@ -7118,6 +7124,16 @@ input#searchChunks {
     border-radius: 4px;
     padding: 2px 7px;
     font-size: 12px;
+    width: fit-content;
+}
+
+.rule-tag-detail {
+    font-size: 11px;
+    font-style: italic;
+    color: var(--colorText, #ccc);
+    opacity: 0.8;
+    padding-left: 4px;
+    word-break: break-word;
 }
 
 .addEquipment {
