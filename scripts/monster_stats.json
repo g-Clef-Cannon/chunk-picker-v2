@@ -1,58 +1,102 @@
 {
   "A Doubt": {
+    "abonus": 18,
+    "aspeed": 6,
+    "att": 72,
     "def": 85,
     "def_bonus": 0,
-    "hp": 59
+    "hp": 59,
+    "maxhit": 8
   },
   "Abyssal guardian": {
+    "abonus": 15,
+    "aspeed": 4,
+    "att": 30,
     "def": 30,
     "def_bonus": 70,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 11
   },
   "Abyssal leech": {
+    "abonus": 100,
+    "aspeed": 2,
+    "att": 95,
     "def": 25,
     "def_bonus": 67,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 2
   },
   "Abyssal walker": {
+    "abonus": 5,
+    "aspeed": 5,
+    "att": 5,
     "def": 95,
     "def_bonus": 53,
-    "hp": 95
+    "hp": 95,
+    "maxhit": 13
   },
   "Adamant dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 280,
     "def": 272,
     "def_bonus": 72,
-    "hp": 295
+    "hp": 295,
+    "maxhit": 29
   },
   "Afflicted": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 24,
     "def": 20,
     "def_bonus": 0,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 3
   },
   "Agrith Naar": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 83,
     "def": 82,
     "def_bonus": 0,
-    "hp": 95
+    "hp": 95,
+    "maxhit": 10
   },
   "Agrith-Na-Na": {
+    "abonus": 100,
+    "aspeed": 4,
+    "att": 83,
     "def": 82,
     "def_bonus": 87,
-    "hp": 200
+    "hp": 200,
+    "maxhit": 16
   },
   "Ahrim the Blighted": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 1,
     "def": 100,
     "def_bonus": 102,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 20
   },
   "Air elemental": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 30,
     "def_bonus": 0,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 3
   },
   "Air wizard": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 5,
     "def": 10,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 1
   },
   "Al-Kharid warrior": {
     "def": 7,
@@ -60,104 +104,183 @@
     "hp": 19
   },
   "Albatross": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 100,
     "def": 60,
     "def_bonus": 0,
-    "hp": 135
+    "hp": 135,
+    "maxhit": 10
   },
   "Albino bat": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 57,
     "def": 30,
     "def_bonus": 0,
-    "hp": 33
+    "hp": 33,
+    "maxhit": 7
   },
   "Alexis": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Alomone": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 4,
     "def_bonus": 6,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 2
   },
   "Ammonite Crab": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": 0,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 1
   },
   "Ancient Wizard": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 50,
     "def": 20,
     "def_bonus": 0,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 18
   },
   "Angry barbarian spirit": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 150,
     "def": 100,
     "def_bonus": 2,
-    "hp": 190
+    "hp": 190,
+    "maxhit": 18
   },
   "Angry giant rat": {
+    "aspeed": 4,
+    "att": 37,
     "def": 5,
     "def_bonus": 0,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 5
   },
   "Animated Adamant Armour": {
+    "abonus": 4,
+    "aspeed": 4,
+    "att": 99,
     "def": 99,
     "def_bonus": 31,
-    "hp": 99
+    "hp": 99,
+    "maxhit": 12
   },
   "Animated Black Armour": {
+    "abonus": 4,
+    "aspeed": 4,
+    "att": 60,
     "def": 60,
     "def_bonus": 31,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 7
   },
   "Animated Bronze Armour": {
+    "abonus": 4,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": 31,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 2
   },
   "Animated Iron Armour": {
+    "abonus": 4,
+    "aspeed": 4,
+    "att": 20,
     "def": 20,
     "def_bonus": 31,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 3
   },
   "Animated Mithril Armour": {
+    "abonus": 4,
+    "aspeed": 4,
+    "att": 80,
     "def": 80,
     "def_bonus": 31,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 10
   },
   "Animated Rune Armour": {
+    "abonus": 4,
+    "aspeed": 4,
+    "att": 120,
     "def": 120,
     "def_bonus": 31,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 14
   },
   "Animated Steel Armour": {
+    "abonus": 4,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 31,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 5
   },
   "Animated spade": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 10,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 6
   },
   "Animated steel armour (Tarn's Lair)": {
+    "abonus": 4,
+    "aspeed": 4,
+    "att": 50,
     "def": 2,
     "def_bonus": 33,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 5
   },
   "Anja": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -21,
-    "hp": 7
+    "hp": 7,
+    "maxhit": 1
   },
   "Ankou": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 70,
     "def": 60,
     "def_bonus": 0,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 8
   },
   "Ankou#Wilderness Slayer Cave": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 70,
     "def": 60,
     "def_bonus": 0,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 8
   },
   "Apmeken (monster)": {
     "def": 100,
@@ -165,289 +288,517 @@
     "hp": 150
   },
   "Archer (Ardougne)": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 20,
     "def": 20,
     "def_bonus": 23,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 6
   },
   "Archer (Burthorpe)": {
+    "abonus": 34,
+    "aspeed": 6,
+    "att": 0,
     "def": 40,
     "def_bonus": 46,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 6
   },
   "Armadylean guard": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 82,
     "def_bonus": 0,
-    "hp": 132
+    "hp": 132,
+    "maxhit": 10
   },
   "Armoured kraken": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 1,
     "def": 150,
     "def_bonus": 0,
-    "hp": 231
+    "hp": 231,
+    "maxhit": 18
   },
   "Armoured zombie (Zemouregal's Base)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 73,
     "def": 68,
     "def_bonus": 13,
-    "hp": 75
+    "hp": 75,
+    "maxhit": 8
   },
   "Armoured zombie (Zemouregal's Fort)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 106,
     "def": 68,
     "def_bonus": 13,
-    "hp": 95
+    "hp": 95,
+    "maxhit": 10
   },
   "Arrg": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 70,
     "def": 40,
     "def_bonus": 43,
-    "hp": 140
+    "hp": 140,
+    "maxhit": 38
   },
   "Artio": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 250,
     "def": 150,
     "def_bonus": 115,
-    "hp": 450
+    "hp": 450,
+    "maxhit": 35
   },
   "Asyn Shade": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 102,
     "def": 70,
     "def_bonus": 0,
-    "hp": 90
+    "hp": 90,
+    "maxhit": 9
   },
   "Asyn shadow (Temple Trekking)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 110,
     "def": 80,
     "def_bonus": 0,
-    "hp": 94
+    "hp": 94,
+    "maxhit": 11
   },
   "Aviansie": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 60,
     "def_bonus": 10,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 8
   },
   "Baby Roc": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 70,
     "def": 70,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 8
   },
   "Baby black dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 70,
     "def": 70,
     "def_bonus": 33,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 11
   },
   "Baby blue dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 33,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 5
   },
   "Baby green dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 33,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 5
   },
   "Baby red dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 33,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 5
   },
   "Baby tanglefoot": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 0,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 5
   },
   "Balfrug Kreeyath": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 115,
     "def": 153,
     "def_bonus": 0,
-    "hp": 161
+    "hp": 161,
+    "maxhit": 16
   },
   "Bandit (Bandit Camp)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 50,
     "def": 15,
     "def_bonus": 0,
-    "hp": 28
+    "hp": 28,
+    "maxhit": 6
   },
   "Bandit (Pollnivneach)#Bearded": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 40,
     "def": 20,
     "def_bonus": 6,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 7
   },
   "Bandit (Pollnivneach)#No beard": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 59,
     "def": 30,
     "def_bonus": 6,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 9
   },
   "Bandit (Shayzien)": {
+    "abonus": 11,
+    "aspeed": 4,
+    "att": 17,
     "def": 17,
     "def_bonus": 6,
-    "hp": 27
+    "hp": 27,
+    "maxhit": 3
   },
   "Bandit (Varlamore)": {
+    "abonus": 11,
+    "aspeed": 4,
+    "att": 17,
     "def": 17,
     "def_bonus": 6,
-    "hp": 27
+    "hp": 27,
+    "maxhit": 4
   },
   "Bandit champion": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 59,
     "def": 50,
     "def_bonus": 9,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 10
   },
   "Bandit#Level 130": {
+    "abonus": 57,
+    "aspeed": 4,
+    "att": 57,
     "def": 57,
     "def_bonus": 15,
-    "hp": 155
+    "hp": 155,
+    "maxhit": 12
   },
   "Bandit#Level 22": {
+    "abonus": 11,
+    "aspeed": 4,
+    "att": 17,
     "def": 17,
     "def_bonus": 2,
-    "hp": 27
+    "hp": 27,
+    "maxhit": 3
   },
   "Bandosian guard": {
+    "abonus": 19,
+    "aspeed": 5,
+    "att": 110,
     "def": 80,
     "def_bonus": 13,
-    "hp": 130
+    "hp": 130,
+    "maxhit": 13
   },
   "Barbarian (Barbarian Camp)#Higher level": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 6,
     "def": 3,
     "def_bonus": 7,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 2
   },
   "Barbarian (Barbarian Camp)#Lower level": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 6,
     "def": 3,
     "def_bonus": 7,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 2
   },
   "Barbarian#Higher level": {
+    "abonus": 8,
+    "aspeed": 6,
+    "att": 6,
     "def": 5,
     "def_bonus": 1,
-    "hp": 14
+    "hp": 14,
+    "maxhit": 2
   },
   "Barbarian#Lower level": {
+    "abonus": 8,
+    "aspeed": 6,
+    "att": 6,
     "def": 5,
     "def_bonus": 1,
-    "hp": 14
+    "hp": 14,
+    "maxhit": 2
   },
   "Bark Blamish Snail": {
+    "abonus": 10,
+    "aspeed": 6,
+    "att": 0,
     "def": 20,
     "def_bonus": 13,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 2
   },
   "Basilisk Youngling": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 25,
     "def": 70,
     "def_bonus": 13,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 5
   },
   "Bat": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 5,
     "def": 5,
     "def_bonus": 3,
-    "hp": 8
+    "hp": 8,
+    "maxhit": 1
   },
   "Battle mage": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": 0,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 20
   },
   "Bear Cub": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": 0,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 2
   },
   "Bedabin Nomad Fighter": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 40,
     "def": 60,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 7
   },
   "Berry": {
+    "abonus": 20,
+    "aspeed": 6,
+    "att": 40,
     "def": 25,
     "def_bonus": 3,
-    "hp": 90
+    "hp": 90,
+    "maxhit": 13
   },
   "Berserk barbarian spirit": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 150,
     "def": 100,
     "def_bonus": 2,
-    "hp": 190
+    "hp": 190,
+    "maxhit": 18
   },
   "Big Snake": {
+    "abonus": 66,
+    "aspeed": 6,
+    "att": 60,
     "def": 60,
     "def_bonus": 0,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 14
   },
   "Big Wolf": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 60,
     "def": 62,
     "def_bonus": 0,
-    "hp": 74
+    "hp": 74,
+    "maxhit": 7
   },
   "Big frog#Level 10": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 8,
     "def": 4,
     "def_bonus": 0,
-    "hp": 18
+    "hp": 18,
+    "maxhit": 2
   },
   "Big frog#Level 24": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 25,
     "def": 15,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 3
   },
   "Billy Goat": {
+    "abonus": 30,
+    "aspeed": 4,
+    "att": 31,
     "def": 29,
     "def_bonus": 7,
-    "hp": 28
+    "hp": 28,
+    "maxhit": 6
   },
   "Bird": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 5,
     "def": 1,
     "def_bonus": -42,
-    "hp": 1
+    "hp": 1,
+    "maxhit": 1
   },
   "Black Guard Berserker": {
+    "abonus": 55,
+    "aspeed": 3,
+    "att": 60,
     "def": 60,
     "def_bonus": 60,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 13
   },
   "Black Guard#Level 25": {
+    "abonus": 5,
+    "aspeed": 4,
+    "att": 20,
     "def": 20,
     "def_bonus": 4,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 3
   },
   "Black Guard#Level 48": {
+    "abonus": 5,
+    "aspeed": 4,
+    "att": 20,
     "def": 20,
     "def_bonus": 4,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 3
   },
   "Black Heather": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 32,
     "def": 27,
     "def_bonus": 9,
-    "hp": 37
+    "hp": 37,
+    "maxhit": 4
   },
   "Black Knight": {
+    "abonus": 18,
+    "aspeed": 5,
+    "att": 25,
     "def": 25,
     "def_bonus": 73,
-    "hp": 42
+    "hp": 42,
+    "maxhit": 4
   },
   "Black Knight Titan": {
+    "abonus": 27,
+    "aspeed": 7,
+    "att": 91,
     "def": 91,
     "def_bonus": 21,
-    "hp": 142
+    "hp": 142,
+    "maxhit": 15
   },
   "Black bear": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 15,
     "def": 13,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 3
   },
   "Black demon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 145,
     "def": 152,
     "def_bonus": 0,
-    "hp": 157
+    "hp": 157,
+    "maxhit": 16
   },
   "Black demon#Wilderness Slayer Cave": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 145,
     "def": 152,
     "def_bonus": 0,
-    "hp": 157
+    "hp": 157,
+    "maxhit": 16
   },
   "Black dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 200,
     "def": 200,
     "def_bonus": 47,
-    "hp": 190
+    "hp": 190,
+    "maxhit": 21
   },
   "Black dragon#Wilderness Slayer Cave": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 200,
     "def": 200,
     "def_bonus": 47,
-    "hp": 190
+    "hp": 190,
+    "maxhit": 21
   },
   "Black jaguar": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 55,
     "def": 55,
     "def_bonus": 0,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 6
   },
   "Black knight (Port Sarim Jail)": {
     "def": 18,
@@ -455,612 +806,1097 @@
     "hp": 29
   },
   "Black unicorn": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 21,
     "def": 23,
     "def_bonus": 0,
-    "hp": 29
+    "hp": 29,
+    "maxhit": 3
   },
   "Black unicorn Foal": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 18,
     "def": 18,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 3
   },
   "Blessed giant rat": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 5,
     "def": 1,
     "def_bonus": -24,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 1
   },
   "Blood Blamish Snail#Pointed": {
+    "abonus": 10,
+    "aspeed": 6,
+    "att": 0,
     "def": 30,
     "def_bonus": 13,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 3
   },
   "Blood Blamish Snail#Rounded": {
+    "abonus": 10,
+    "aspeed": 6,
+    "att": 0,
     "def": 45,
     "def_bonus": 13,
-    "hp": 13
+    "hp": 13,
+    "maxhit": 2
   },
   "Blood Reaver": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 1,
     "def": 20,
     "def_bonus": 0,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 20
   },
   "Bloodworm": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 80,
     "def": 35,
     "def_bonus": 0,
-    "hp": 45
+    "hp": 45,
+    "maxhit": 3
   },
   "Blue dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 95,
     "def": 95,
     "def_bonus": 47,
-    "hp": 105
+    "hp": 105,
+    "maxhit": 10
   },
   "Boar": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 5,
     "def": 5,
     "def_bonus": 0,
-    "hp": 12
+    "hp": 12,
+    "maxhit": 1
   },
   "Body Golem": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 33,
     "def": 45,
     "def_bonus": 3,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 7
   },
   "Boris": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Borrokar": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 6
   },
   "Bouncer": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 120,
     "def": 120,
     "def_bonus": 0,
-    "hp": 116
+    "hp": 116,
+    "maxhit": 13
   },
   "Branda the Fire Queen": {
+    "abonus": 150,
+    "aspeed": 7,
+    "att": 300,
     "def": 100,
     "def_bonus": 8,
-    "hp": 600
+    "hp": 600,
+    "maxhit": 26
   },
   "Brassican Mage": {
+    "abonus": 0,
+    "aspeed": 3,
+    "att": 80,
     "def": 80,
     "def_bonus": 0,
-    "hp": 150
+    "hp": 150,
+    "maxhit": 16
   },
   "Bree": {
+    "abonus": 10,
+    "aspeed": 5,
+    "att": 110,
     "def": 130,
     "def_bonus": 13,
-    "hp": 162
+    "hp": 162,
+    "maxhit": 16
   },
   "Breoca": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 3,
     "def": 3,
     "def_bonus": -12,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 1
   },
   "Broddi": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 3,
     "def": 3,
     "def_bonus": -12,
-    "hp": 1
+    "hp": 1,
+    "maxhit": 1
   },
   "Bronze dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 112,
     "def": 112,
     "def_bonus": 47,
-    "hp": 122
+    "hp": 122,
+    "maxhit": 12
   },
   "Broodoo victim": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 0,
     "def": 26,
     "def_bonus": 20,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 7
   },
   "Bruise Blamish Snail#Pointed": {
+    "abonus": 10,
+    "aspeed": 6,
+    "att": 0,
     "def": 27,
     "def_bonus": 13,
-    "hp": 15
+    "hp": 15,
+    "maxhit": 3
   },
   "Bruise Blamish Snail#Rounded": {
+    "abonus": 10,
+    "aspeed": 6,
+    "att": 0,
     "def": 40,
     "def_bonus": 13,
-    "hp": 12
+    "hp": 12,
+    "maxhit": 2
   },
   "Brutal blue dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 298,
     "def": 198,
     "def_bonus": 47,
-    "hp": 245
+    "hp": 245,
+    "maxhit": 21
   },
   "Brutal green dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 268,
     "def": 168,
     "def_bonus": 47,
-    "hp": 175
+    "hp": 175,
+    "maxhit": 18
   },
   "Brutal red dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 310,
     "def": 198,
     "def_bonus": 47,
-    "hp": 285
+    "hp": 285,
+    "maxhit": 22
   },
   "Brutus": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 12,
     "def": 10,
     "def_bonus": -7,
-    "hp": 58
+    "hp": 58,
+    "maxhit": 3
   },
   "Bryophyta": {
+    "abonus": 33,
+    "aspeed": 6,
+    "att": 130,
     "def": 100,
     "def_bonus": 0,
-    "hp": 115
+    "hp": 115,
+    "maxhit": 16
   },
   "Buffalo": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 6,
     "def": 1,
     "def_bonus": -21,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 2
   },
   "Bull shark": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 80,
     "def": 20,
     "def_bonus": 0,
-    "hp": 81
+    "hp": 81,
+    "maxhit": 5
   },
   "Bunny": {
+    "abonus": -47,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -42,
-    "hp": 5
+    "hp": 5,
+    "maxhit": 0
   },
   "Bush snake": {
+    "abonus": 0,
+    "aspeed": 3,
+    "att": 25,
     "def": 50,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 3
   },
   "Butterfly ray": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 100,
     "def": 15,
     "def_bonus": 0,
-    "hp": 83
+    "hp": 83,
+    "maxhit": 4
   },
   "Callisto": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 350,
     "def": 225,
     "def_bonus": 135,
-    "hp": 1000
+    "hp": 1000,
+    "maxhit": 55
   },
   "Calvar'ion": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 250,
     "def": 225,
     "def_bonus": 83,
-    "hp": 150
+    "hp": 150,
+    "maxhit": 26
   },
   "Camp dweller": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 20,
     "def": 5,
     "def_bonus": 0,
-    "hp": 15
+    "hp": 15,
+    "maxhit": 3
   },
   "Catablepon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 45,
     "def": 35,
     "def_bonus": 0,
-    "hp": 64
+    "hp": 64,
+    "maxhit": 6
   },
   "Cave goblin (monster)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": 0,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 1
   },
   "Cave goblin guard": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 22,
     "def_bonus": 19,
-    "hp": 26
+    "hp": 26,
+    "maxhit": 3
   },
   "Cave goblin miner": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 7,
     "def_bonus": 0,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 2
   },
   "Cave lizard": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 38,
     "def": 35,
     "def_bonus": 12,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 5
   },
   "Ceolburg": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 3,
     "def": 3,
     "def_bonus": -12,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 1
   },
   "Chaos Elemental": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 270,
     "def": 270,
     "def_bonus": 70,
-    "hp": 250
+    "hp": 250,
+    "maxhit": 28
   },
   "Chaos Fanatic": {
+    "abonus": 0,
+    "aspeed": 2,
+    "att": 1,
     "def": 220,
     "def_bonus": 257,
-    "hp": 225
+    "hp": 225,
+    "maxhit": 31
   },
   "Chaos Golem": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 45,
     "def": 59,
     "def_bonus": 3,
-    "hp": 94
+    "hp": 94,
+    "maxhit": 10
   },
   "Chaos druid": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 8,
     "def": 12,
     "def_bonus": 0,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 2
   },
   "Chaos druid warrior": {
+    "abonus": 9,
+    "aspeed": 5,
+    "att": 32,
     "def": 25,
     "def_bonus": 15,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 5
   },
   "Chaos dwarf": {
+    "abonus": 13,
+    "aspeed": 4,
+    "att": 38,
     "def": 28,
     "def_bonus": 33,
-    "hp": 61
+    "hp": 61,
+    "maxhit": 6
   },
   "Chaotic death spawn": {
+    "abonus": 0,
+    "aspeed": 3,
+    "att": 380,
     "def": 70,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 7
   },
   "Chicken": {
+    "abonus": -47,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -42,
-    "hp": 3
+    "hp": 3,
+    "maxhit": 0
   },
   "Chicken (Tutorial Island)": {
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
-    "hp": 3
+    "hp": 3,
+    "maxhit": 0
   },
   "Chompy bird": {
+    "abonus": 0,
+    "att": 5,
     "def": 3,
     "def_bonus": 0,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 0
   },
   "Chronozon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 173,
     "def": 173,
     "def_bonus": 0,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 18
   },
   "Clivet": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 4,
     "def_bonus": 6,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 2
   },
   "Colonel Radick": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 25,
     "def": 25,
     "def_bonus": 35,
-    "hp": 65
+    "hp": 65,
+    "maxhit": 4
   },
   "Colossal Chocco Chicken": {
+    "aspeed": 4,
+    "att": 40,
     "def": 20,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 1
   },
   "Commander Zilyana": {
+    "abonus": 195,
+    "aspeed": 2,
+    "att": 280,
     "def": 300,
     "def_bonus": 100,
-    "hp": 255
+    "hp": 255,
+    "maxhit": 27
   },
   "Confused barbarian": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 115,
     "def": 110,
     "def_bonus": 2,
-    "hp": 124
+    "hp": 124,
+    "maxhit": 15
   },
   "Corporeal Beast": {
+    "abonus": 50,
+    "aspeed": 4,
+    "att": 320,
     "def": 310,
     "def_bonus": 108,
-    "hp": 2000
+    "hp": 2000,
+    "maxhit": 33
   },
   "Corrupt Lizardman": {
+    "abonus": 22,
+    "aspeed": 4,
+    "att": 38,
     "def": 38,
     "def_bonus": 5,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 6
   },
   "Corrupted Bat": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 36,
     "def": 2,
     "def_bonus": 0,
-    "hp": 14
+    "hp": 14,
+    "maxhit": 11
   },
   "Corrupted Bear": {
+    "abonus": 81,
+    "aspeed": 4,
+    "att": 147,
     "def": 98,
     "def_bonus": 0,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 48
   },
   "Corrupted Dark Beast": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 147,
     "def": 98,
     "def_bonus": 0,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 48
   },
   "Corrupted Dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 147,
     "def": 98,
     "def_bonus": 0,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 48
   },
   "Corrupted Rat": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 42,
     "def": 6,
     "def_bonus": 0,
-    "hp": 14
+    "hp": 14,
+    "maxhit": 14
   },
   "Corrupted Scorpion": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 72,
     "def": 18,
     "def_bonus": 0,
-    "hp": 38
+    "hp": 38,
+    "maxhit": 17
   },
   "Corrupted Spider": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 48,
     "def": 4,
     "def_bonus": 0,
-    "hp": 12
+    "hp": 12,
+    "maxhit": 5
   },
   "Corrupted Unicorn": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 75,
     "def": 24,
     "def_bonus": 0,
-    "hp": 44
+    "hp": 44,
+    "maxhit": 17
   },
   "Corrupted Wolf": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 159,
     "def": 22,
     "def_bonus": 0,
-    "hp": 52
+    "hp": 52,
+    "maxhit": 19
   },
   "Cow": {
+    "abonus": -15,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -21,
-    "hp": 8
+    "hp": 8,
+    "maxhit": 1
   },
   "Cow calf": {
+    "abonus": -20,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -26,
-    "hp": 6
+    "hp": 6,
+    "maxhit": 1
   },
   "Crab#Level 21": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 17,
     "def": 22,
     "def_bonus": 0,
-    "hp": 18
+    "hp": 18,
+    "maxhit": 3
   },
   "Crab#Level 23": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 19,
     "def": 26,
     "def_bonus": 0,
-    "hp": 19
+    "hp": 19,
+    "maxhit": 3
   },
   "Crazy archaeologist": {
+    "abonus": 250,
+    "aspeed": 3,
+    "att": 160,
     "def": 240,
     "def_bonus": 13,
-    "hp": 225
+    "hp": 225,
+    "maxhit": 14
   },
   "Crocodile": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 53,
     "def": 54,
     "def_bonus": 18,
-    "hp": 62
+    "hp": 62,
+    "maxhit": 6
   },
   "Cruor": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 1,
     "def": 200,
     "def_bonus": 75,
-    "hp": 500
+    "hp": 500,
+    "maxhit": 29
   },
   "Crypt rat": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 70,
     "def": 20,
     "def_bonus": 0,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 3
   },
   "Crystalline Bat": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 24,
     "def": 2,
     "def_bonus": 0,
-    "hp": 14
+    "hp": 14,
+    "maxhit": 8
   },
   "Crystalline Bear": {
+    "abonus": 54,
+    "aspeed": 4,
+    "att": 98,
     "def": 98,
     "def_bonus": 0,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 28
   },
   "Crystalline Dark Beast": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 98,
     "def": 98,
     "def_bonus": 0,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 28
   },
   "Crystalline Dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 98,
     "def": 98,
     "def_bonus": 0,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 28
   },
   "Crystalline Rat": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 28,
     "def": 6,
     "def_bonus": 0,
-    "hp": 14
+    "hp": 14,
+    "maxhit": 4
   },
   "Crystalline Scorpion": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 48,
     "def": 18,
     "def_bonus": 0,
-    "hp": 38
+    "hp": 38,
+    "maxhit": 11
   },
   "Crystalline Spider": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 32,
     "def": 4,
     "def_bonus": 0,
-    "hp": 12
+    "hp": 12,
+    "maxhit": 4
   },
   "Crystalline Unicorn": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 50,
     "def": 24,
     "def_bonus": 0,
-    "hp": 44
+    "hp": 44,
+    "maxhit": 6
   },
   "Crystalline Wolf": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 106,
     "def": 22,
     "def_bonus": 0,
-    "hp": 52
+    "hp": 52,
+    "maxhit": 8
   },
   "Cuffs": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 3,
     "def_bonus": 5,
-    "hp": 7
+    "hp": 7,
+    "maxhit": 1
   },
   "Culinaromancer": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -10,
-    "hp": 150
+    "hp": 150,
+    "maxhit": 25
   },
   "Cyclops": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 47,
     "def": 40,
     "def_bonus": 0,
-    "hp": 56
+    "hp": 56,
+    "maxhit": 6
   },
   "Cyclops (Ardougne Zoo)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 47,
     "def": 46,
     "def_bonus": 0,
-    "hp": 55
+    "hp": 55,
+    "maxhit": 6
   },
   "Cyclops (Catacombs of Kourend)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 47,
     "def": 40,
     "def_bonus": 0,
-    "hp": 56
+    "hp": 56,
+    "maxhit": 6
   },
   "Cyclops (God Wars Dungeon)": {
+    "abonus": 22,
+    "aspeed": 6,
+    "att": 60,
     "def": 48,
     "def_bonus": 0,
-    "hp": 110
+    "hp": 110,
+    "maxhit": 12
   },
   "Cyclops#Warriors' Guild Basement": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 47,
     "def": 40,
     "def_bonus": 0,
-    "hp": 56
+    "hp": 56,
+    "maxhit": 6
   },
   "Dad": {
+    "abonus": 40,
+    "aspeed": 8,
+    "att": 60,
     "def": 50,
     "def_bonus": 30,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 27
   },
   "Dagannoth": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 68,
     "def": 20,
     "def_bonus": 0,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 8
   },
   "Dagannoth (Waterbirth Island)#Level 88": {
+    "abonus": 0,
+    "aspeed": 3,
+    "att": 10,
     "def": 75,
     "def_bonus": 37,
-    "hp": 85
+    "hp": 85,
+    "maxhit": 20
   },
   "Dagannoth (Waterbirth Island)#Level 90": {
+    "abonus": 50,
+    "aspeed": 4,
+    "att": 76,
     "def": 65,
     "def_bonus": 50,
-    "hp": 95
+    "hp": 95,
+    "maxhit": 15
   },
   "Dagannoth Prime": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 255,
     "def": 255,
     "def_bonus": 255,
-    "hp": 255
+    "hp": 255,
+    "maxhit": 50
   },
   "Dagannoth Rex": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 255,
     "def": 255,
     "def_bonus": 255,
-    "hp": 255
+    "hp": 255,
+    "maxhit": 26
   },
   "Dagannoth Supreme": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 255,
     "def": 128,
     "def_bonus": 10,
-    "hp": 255
+    "hp": 255,
+    "maxhit": 30
   },
   "Dagannoth fledgeling": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 50,
     "def": 50,
     "def_bonus": 0,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 6
   },
   "Dagannoth mother": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 78,
     "def": 81,
     "def_bonus": 150,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 9
   },
   "Dagannoth spawn": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 50,
     "def": 25,
     "def_bonus": 0,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 4
   },
   "Damis": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 90,
     "def": 80,
     "def_bonus": 0,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 22
   },
   "Dark energy core": {
+    "abonus": 0,
+    "aspeed": 2,
+    "att": 1,
     "def": 20,
     "def_bonus": 10,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 13
   },
   "Dark warrior#Level 145": {
+    "abonus": 80,
+    "aspeed": 4,
+    "att": 75,
     "def": 55,
     "def_bonus": 118,
-    "hp": 165
+    "hp": 165,
+    "maxhit": 18
   },
   "Dark warrior#Level 8": {
+    "abonus": 20,
+    "aspeed": 4,
+    "att": 5,
     "def": 5,
     "def_bonus": 78,
-    "hp": 17
+    "hp": 17,
+    "maxhit": 2
   },
   "Dark warrior#Zeah": {
+    "abonus": 20,
+    "aspeed": 4,
+    "att": 5,
     "def": 8,
     "def_bonus": 0,
-    "hp": 15
+    "hp": 15,
+    "maxhit": 2
   },
   "Dark wizard#Higher level": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 5,
     "def": 12,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 2
   },
   "Dark wizard#Lower level": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 5,
     "def": 5,
     "def_bonus": 0,
-    "hp": 12
+    "hp": 12,
+    "maxhit": 2
   },
   "Deadly red spider": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 30,
     "def": 30,
     "def_bonus": 13,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 3
   },
   "Death spawn": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 67,
     "def": 30,
     "def_bonus": 20,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Death wing": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 70,
     "def": 70,
     "def_bonus": 0,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 8
   },
   "Deathly mage": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 155,
     "def_bonus": 0,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 22
   },
   "Deathly ranger": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 155,
     "def_bonus": 0,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 70
   },
   "Demon of Balance": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 150,
     "def": 100,
     "def_bonus": 200,
-    "hp": 320
+    "hp": 320,
+    "maxhit": 43
   },
   "Demon of Darkness": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 150,
     "def": 100,
     "def_bonus": 200,
-    "hp": 320
+    "hp": 320,
+    "maxhit": 43
   },
   "Demon of Light": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 150,
     "def": 100,
     "def_bonus": 200,
-    "hp": 320
+    "hp": 320,
+    "maxhit": 43
   },
   "Demonic Brutus": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 380,
     "def": 200,
     "def_bonus": 154,
-    "hp": 750
+    "hp": 750,
+    "maxhit": 43
   },
   "Demonic gorilla": {
+    "abonus": 43,
+    "aspeed": 5,
+    "att": 205,
     "def": 200,
     "def_bonus": 0,
-    "hp": 380
+    "hp": 380,
+    "maxhit": 31
   },
   "Deranged archaeologist": {
+    "abonus": 280,
+    "aspeed": 3,
+    "att": 280,
     "def": 280,
     "def_bonus": 30,
-    "hp": 200
+    "hp": 200,
+    "maxhit": 25
   },
   "Derwen": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 250,
     "def": 100,
     "def_bonus": 200,
-    "hp": 320
+    "hp": 320,
+    "maxhit": 43
   },
   "Desert Wolf": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 20,
     "def": 22,
     "def_bonus": 0,
-    "hp": 34
+    "hp": 34,
+    "maxhit": 3
   },
   "Desert snake": {
     "def": 1,
@@ -1068,64 +1904,112 @@
     "hp": 1
   },
   "Dessourt": {
+    "abonus": 50,
+    "aspeed": 3,
+    "att": 99,
     "def": 99,
     "def_bonus": 103,
-    "hp": 130
+    "hp": 130,
+    "maxhit": 19
   },
   "Dessous": {
+    "abonus": 50,
+    "aspeed": 3,
+    "att": 99,
     "def": 99,
     "def_bonus": 103,
-    "hp": 200
+    "hp": 200,
+    "maxhit": 19
   },
   "Dharok the Wretched": {
+    "abonus": 0,
+    "aspeed": 7,
+    "att": 100,
     "def": 100,
     "def_bonus": 249,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 29
   },
   "Dire Wolf": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 75,
     "def": 75,
     "def_bonus": 0,
-    "hp": 85
+    "hp": 85,
+    "maxhit": 8
   },
   "Disciple of Iban": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 8,
     "def": 12,
     "def_bonus": 0,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 2
   },
   "Dolphin": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 25,
     "def": 0,
     "def_bonus": 0,
-    "hp": 45
+    "hp": 45,
+    "maxhit": 2
   },
   "Donny the lad": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 32,
     "def": 27,
     "def_bonus": 9,
-    "hp": 37
+    "hp": 37,
+    "maxhit": 4
   },
   "Doom of Mokhaiotl": {
+    "abonus": 210,
+    "aspeed": 6,
+    "att": 300,
     "def": 90,
     "def_bonus": 220,
-    "hp": 525
+    "hp": 525,
+    "maxhit": 47
   },
   "Doomion": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 76,
     "def": 77,
     "def_bonus": 0,
-    "hp": 87
+    "hp": 87,
+    "maxhit": 9
   },
   "Double agent": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 80,
     "def": 24,
     "def_bonus": 3,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 5
   },
   "Druid": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 28,
     "def": 32,
     "def_bonus": 0,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 4
   },
   "Drunken man": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -21,
-    "hp": 7
+    "hp": 7,
+    "maxhit": 1
   },
   "Duke": {
     "def": 150,
@@ -1133,249 +2017,445 @@
     "hp": 200
   },
   "Duke Sucellus": {
+    "abonus": 200,
+    "aspeed": 5,
+    "att": 300,
     "def": 275,
     "def_bonus": 163,
-    "hp": 485
+    "hp": 485,
+    "maxhit": 56
   },
   "Dungeon rat#Full tail": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": 0,
-    "hp": 12
+    "hp": 12,
+    "maxhit": 2
   },
   "Dungeon rat#Short tail": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": 0,
-    "hp": 12
+    "hp": 12,
+    "maxhit": 2
   },
   "Durial321": {
+    "abonus": 95,
+    "aspeed": 4,
+    "att": 95,
     "def": 88,
     "def_bonus": 148,
-    "hp": 9500
+    "hp": 9500,
+    "maxhit": 34
   },
   "Dwarf": {
+    "abonus": 5,
+    "aspeed": 4,
+    "att": 8,
     "def": 8,
     "def_bonus": 0,
-    "hp": 16
+    "hp": 16,
+    "maxhit": 2
   },
   "Dwarf gang member": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 40,
     "def": 35,
     "def_bonus": 5,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 5
   },
   "Dwarf#White Wolf Mountain tunnel": {
+    "abonus": 5,
+    "aspeed": 4,
+    "att": 8,
     "def": 8,
     "def_bonus": 0,
-    "hp": 16
+    "hp": 16,
+    "maxhit": 2
   },
   "Eadburg": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 3,
     "def": 3,
     "def_bonus": -12,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 1
   },
   "Eagle ray": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 70,
     "def": 0,
     "def_bonus": 0,
-    "hp": 55
+    "hp": 55,
+    "maxhit": 3
   },
   "Earth elemental#Normal variant": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 20,
     "def": 35,
     "def_bonus": 0,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 4
   },
   "Earth elemental#Ore variant": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 20,
     "def": 35,
     "def_bonus": 0,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 4
   },
   "Earth warrior": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 42,
     "def": 42,
     "def_bonus": 30,
-    "hp": 54
+    "hp": 54,
+    "maxhit": 5
   },
   "Earth wizard": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 5,
     "def": 10,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 6
   },
   "Eduard": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Einar": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": 0,
-    "hp": 1
+    "hp": 1,
+    "maxhit": 1
   },
   "Elder Chaos druid": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 98,
     "def": 65,
     "def_bonus": 0,
-    "hp": 150
+    "hp": 150,
+    "maxhit": 17
   },
   "Eldric the Ice King": {
+    "abonus": 150,
+    "aspeed": 7,
+    "att": 300,
     "def": 100,
     "def_bonus": 8,
-    "hp": 600
+    "hp": 600,
+    "maxhit": 26
   },
   "Elf Archer": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 80,
     "def_bonus": 50,
-    "hp": 105
+    "hp": 105,
+    "maxhit": 11
   },
   "Elf Warrior": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 95,
     "def": 80,
     "def_bonus": 63,
-    "hp": 105
+    "hp": 105,
+    "maxhit": 10
   },
   "Elite Black Knight": {
+    "abonus": 85,
+    "aspeed": 6,
+    "att": 90,
     "def": 90,
     "def_bonus": 93,
-    "hp": 90
+    "hp": 90,
+    "maxhit": 13
   },
   "Elite Dark Mage": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 25,
     "def": 80,
     "def_bonus": 10,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 16
   },
   "Elite Dark Ranger": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 25,
     "def": 80,
     "def_bonus": 8,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 9
   },
   "Elite Dark Warrior": {
+    "abonus": 80,
+    "aspeed": 5,
+    "att": 80,
     "def": 80,
     "def_bonus": 15,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 9
   },
   "Elvarg": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 70,
     "def": 70,
     "def_bonus": 33,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 8
   },
   "Emissary Acolyte": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 30,
     "def": 30,
     "def_bonus": 23,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 4
   },
   "Emissary Chosen": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 80,
     "def": 60,
     "def_bonus": 30,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 8
   },
   "Enclave guard": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 70,
     "def": 70,
     "def_bonus": 19,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 10
   },
   "Enraged Boar": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 7,
     "def": 5,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 2
   },
   "Enraged barbarian spirit": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 150,
     "def": 100,
     "def_bonus": 2,
-    "hp": 190
+    "hp": 190,
+    "maxhit": 18
   },
   "Ent": {
+    "abonus": 35,
+    "aspeed": 4,
+    "att": 75,
     "def": 75,
     "def_bonus": 63,
-    "hp": 75
+    "hp": 75,
+    "maxhit": 17
   },
   "Entrana firebird": {
+    "abonus": -31,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -26,
-    "hp": 5
+    "hp": 5,
+    "maxhit": 1
   },
   "Evil Chicken": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 126,
     "def_bonus": 0,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 21
   },
   "Evil Chicken (Recipe for Disaster)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 126,
     "def_bonus": 0,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 21
   },
   "Evil spirit": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 170,
     "def": 100,
     "def_bonus": 0,
-    "hp": 90
+    "hp": 90,
+    "maxhit": 28
   },
   "Experiment": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 50,
     "def_bonus": 0,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 6
   },
   "Experiment No.2": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 104,
     "def": 90,
     "def_bonus": 58,
-    "hp": 95
+    "hp": 95,
+    "maxhit": 11
   },
   "Fareed": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 190,
     "def": 135,
     "def_bonus": 100,
-    "hp": 130
+    "hp": 130,
+    "maxhit": 37
   },
   "Farmer": {
+    "abonus": 5,
+    "aspeed": 6,
+    "att": 3,
     "def": 8,
     "def_bonus": 0,
-    "hp": 12
+    "hp": 12,
+    "maxhit": 1
   },
   "Feral Vampyre": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 55,
     "def": 55,
     "def_bonus": 0,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 7
   },
   "Ferocious barbarian spirit": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 150,
     "def": 100,
     "def_bonus": 48,
-    "hp": 190
+    "hp": 190,
+    "maxhit": 18
   },
   "Fire elemental": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 35,
     "def": 20,
     "def_bonus": 0,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 4
   },
   "Fire giant": {
+    "abonus": 29,
+    "aspeed": 5,
+    "att": 65,
     "def": 65,
     "def_bonus": 2,
-    "hp": 111
+    "hp": 111,
+    "maxhit": 11
   },
   "Fire wizard": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 5,
     "def": 10,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 4
   },
   "Fiyr Shade": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 120,
     "def": 85,
     "def_bonus": 0,
-    "hp": 110
+    "hp": 110,
+    "maxhit": 11
   },
   "Flawed Golem": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 7,
     "def": 6,
     "def_bonus": 3,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 3
   },
   "Flesh Crawler": {
+    "abonus": 0,
+    "aspeed": 3,
+    "att": 60,
     "def": 10,
     "def_bonus": 15,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 1
   },
   "Flight Kilisa": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 124,
     "def": 175,
     "def_bonus": 0,
-    "hp": 133
+    "hp": 133,
+    "maxhit": 15
   },
   "Flockleader Geerin": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 80,
     "def": 175,
     "def_bonus": 0,
-    "hp": 132
+    "hp": 132,
+    "maxhit": 25
   },
   "Foreman": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 20,
     "def": 20,
     "def_bonus": 1,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 3
   },
   "Forester": {
     "def": 10,
@@ -1383,44 +2463,76 @@
     "hp": 20
   },
   "Forgotten Soul": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 8,
     "def": 12,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 2
   },
   "Forgotten Soul (Soul Wars)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 50,
     "def": 20,
     "def_bonus": 10,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 5
   },
   "Fortress Guard": {
+    "abonus": 5,
+    "aspeed": 6,
+    "att": 18,
     "def": 15,
     "def_bonus": 15,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 3
   },
   "Fox": {
+    "abonus": 30,
+    "aspeed": 4,
+    "att": 1,
     "def": 20,
     "def_bonus": 30,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 4
   },
   "Freidir": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 6
   },
   "Frigatebird": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 80,
     "def": 40,
     "def_bonus": 0,
-    "hp": 79
+    "hp": 79,
+    "maxhit": 8
   },
   "Frog": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 5,
     "def": 3,
     "def_bonus": 0,
-    "hp": 8
+    "hp": 8,
+    "maxhit": 1
   },
   "Frogeel": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 91,
     "def": 90,
     "def_bonus": 0,
-    "hp": 90
+    "hp": 90,
+    "maxhit": 10
   },
   "Frost crab": {
     "def": 5,
@@ -1428,128 +2540,228 @@
     "hp": 15
   },
   "Frost dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 180,
     "def": 150,
     "def_bonus": 43,
-    "hp": 230
+    "hp": 230,
+    "maxhit": 16
   },
   "Fumus": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 1,
     "def": 200,
     "def_bonus": 75,
-    "hp": 500
+    "hp": 500,
+    "maxhit": 29
   },
   "Galina": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Gang boss": {
+    "abonus": 0,
+    "aspeed": 3,
+    "att": 1,
     "def": 70,
     "def_bonus": 3,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 13
   },
   "Gangster": {
+    "abonus": 25,
+    "aspeed": 4,
+    "att": 40,
     "def": 50,
     "def_bonus": 3,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 5
   },
   "Gardener": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 2,
     "def_bonus": 0,
-    "hp": 7
+    "hp": 7,
+    "maxhit": 1
   },
   "General Graardor": {
+    "abonus": 120,
+    "aspeed": 6,
+    "att": 280,
     "def": 250,
     "def_bonus": 90,
-    "hp": 255
+    "hp": 255,
+    "maxhit": 60
   },
   "Georgy": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Ghast": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 22,
     "def": 18,
     "def_bonus": 0,
-    "hp": 45
+    "hp": 45,
+    "maxhit": 3
   },
   "Ghost": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 13,
     "def": 18,
     "def_bonus": 5,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 2
   },
   "Ghost (Melzar's Maze)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 13,
     "def": 18,
     "def_bonus": 5,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 2
   },
   "Ghoul": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 30,
     "def": 30,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 5
   },
   "Giant Champion": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 36,
     "def": 52,
     "def_bonus": 0,
-    "hp": 70
+    "hp": 70,
+    "maxhit": 5
   },
   "Giant Mole": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 200,
     "def": 200,
     "def_bonus": 80,
-    "hp": 200
+    "hp": 200,
+    "maxhit": 21
   },
   "Giant Roc": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 130,
     "def": 100,
     "def_bonus": 0,
-    "hp": 250
+    "hp": 250,
+    "maxhit": 14
   },
   "Giant Rock Crab": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 50,
     "def": 200,
     "def_bonus": 200,
-    "hp": 180
+    "hp": 180,
+    "maxhit": 9
   },
   "Giant Sea Snake": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 170,
     "def": 160,
     "def_bonus": 0,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 14
   },
   "Giant bat": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 22,
     "def": 22,
     "def_bonus": 11,
-    "hp": 32
+    "hp": 32,
+    "maxhit": 3
   },
   "Giant bat#Plain": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 22,
     "def": 22,
     "def_bonus": 11,
-    "hp": 32
+    "hp": 32,
+    "maxhit": 3
   },
   "Giant crypt rat": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 80,
     "def": 65,
     "def_bonus": 0,
-    "hp": 70
+    "hp": 70,
+    "maxhit": 6
   },
   "Giant frog#Level 13": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 6,
     "def_bonus": 0,
-    "hp": 23
+    "hp": 23,
+    "maxhit": 2
   },
   "Giant frog#Level 99": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 100,
     "def": 65,
     "def_bonus": 0,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 9
   },
   "Giant lobster": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 25,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 4
   },
   "Giant rat": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 2,
     "def": 2,
     "def_bonus": 0,
-    "hp": 5
+    "hp": 5,
+    "maxhit": 1
   },
   "Giant rat#Stronghold of Security": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 2,
     "def": 2,
     "def_bonus": 0,
-    "hp": 5
+    "hp": 5,
+    "maxhit": 1
   },
   "Giant scarab": {
     "def": 80,
@@ -1557,112 +2769,200 @@
     "hp": 120
   },
   "Giant skeleton (Shadow Dungeon)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 70,
     "def": 70,
     "def_bonus": 0,
-    "hp": 70
+    "hp": 70,
+    "maxhit": 8
   },
   "Giant skeleton (Tarn's Lair)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 84,
     "def": 80,
     "def_bonus": 30,
-    "hp": 110
+    "hp": 110,
+    "maxhit": 11
   },
   "Giant snail": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 30,
     "def": 60,
     "def_bonus": 0,
-    "hp": 125
+    "hp": 125,
+    "maxhit": 8
   },
   "Giant spider": {
+    "abonus": -10,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -10,
-    "hp": 5
+    "hp": 5,
+    "maxhit": 1
   },
   "Glacies": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 1,
     "def": 200,
     "def_bonus": 75,
-    "hp": 500
+    "hp": 500,
+    "maxhit": 29
   },
   "Glod": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 115,
     "def": 110,
     "def_bonus": 115,
-    "hp": 160
+    "hp": 160,
+    "maxhit": 25
   },
   "Gnome": {
+    "abonus": -42,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -42,
-    "hp": 3
+    "hp": 3,
+    "maxhit": 1
   },
   "Gnome Archer": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 1,
     "def": 1,
     "def_bonus": -30,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 2
   },
   "Gnome Driver": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 3,
     "def": 3,
     "def_bonus": -30,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 1
   },
   "Gnome Mage": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 3,
     "def": 1,
     "def_bonus": -30,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 1
   },
   "Gnome child": {
+    "abonus": -42,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -42,
-    "hp": 2
+    "hp": 2,
+    "maxhit": 0
   },
   "Gnome guard": {
-    "hp": 31
+    "abonus": 8,
+    "aspeed": 6,
+    "att": 17,
+    "hp": 31,
+    "maxhit": 3
   },
   "Gnome troop": {
+    "abonus": 2,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": 4,
-    "hp": 3
+    "hp": 3,
+    "maxhit": 1
   },
   "Gnome woman": {
+    "abonus": -42,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -42,
-    "hp": 2
+    "hp": 2,
+    "maxhit": 1
   },
   "Goat": {
+    "abonus": 10,
+    "aspeed": 4,
+    "att": 20,
     "def": 20,
     "def_bonus": 7,
-    "hp": 21
+    "hp": 21,
+    "maxhit": 4
   },
   "Goblin (Goblin Village)#Green": {
+    "abonus": 12,
+    "aspeed": 6,
+    "att": 3,
     "def": 4,
     "def_bonus": 0,
-    "hp": 12
+    "hp": 12,
+    "maxhit": 1
   },
   "Goblin (Goblin Village)#Red": {
+    "abonus": 12,
+    "aspeed": 6,
+    "att": 3,
     "def": 4,
     "def_bonus": 0,
-    "hp": 12
+    "hp": 12,
+    "maxhit": 1
   },
   "Goblin (God Wars Dungeon)": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 15,
     "def": 19,
     "def_bonus": 0,
-    "hp": 3
+    "hp": 3,
+    "maxhit": 2
   },
   "Goblin (Vault of War)": {
+    "abonus": 12,
+    "aspeed": 6,
+    "att": 7,
     "def": 4,
     "def_bonus": 0,
-    "hp": 5
+    "hp": 5,
+    "maxhit": 1
   },
   "Goblin guard": {
+    "abonus": 8,
+    "aspeed": 4,
+    "att": 32,
     "def": 37,
     "def_bonus": 5,
-    "hp": 43
+    "hp": 43,
+    "maxhit": 5
   },
   "Goblin#Drop table 1": {
+    "abonus": -21,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -15,
-    "hp": 5
+    "hp": 5,
+    "maxhit": 1
   },
   "Goblin#Drop table 2": {
+    "abonus": -21,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -15,
-    "hp": 5
+    "hp": 5,
+    "maxhit": 1
   },
   "Golem": {
     "def": 5,
@@ -1670,167 +2970,299 @@
     "hp": 12
   },
   "Gorad": {
+    "abonus": 8,
+    "aspeed": 4,
+    "att": 54,
     "def": 54,
     "def_bonus": 21,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 7
   },
   "Gorak": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 130,
     "def": 131,
     "def_bonus": 0,
-    "hp": 112
+    "hp": 112,
+    "maxhit": 14
   },
   "Gorak#Gorak Plane": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 130,
     "def": 131,
     "def_bonus": 0,
-    "hp": 112
+    "hp": 112,
+    "maxhit": 14
   },
   "Grave scorpion": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 11,
     "def": 14,
     "def_bonus": 2,
-    "hp": 7
+    "hp": 7,
+    "maxhit": 2
   },
   "Great white shark": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 155,
     "def": 70,
     "def_bonus": 0,
-    "hp": 243
+    "hp": 243,
+    "maxhit": 15
   },
   "Greater Skeleton Hellhound (Calvar'ion)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 150,
     "def": 110,
     "def_bonus": 70,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 18
   },
   "Greater Skeleton Hellhound (Vet'ion)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 228,
     "def": 180,
     "def_bonus": 111,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 32
   },
   "Greater demon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 76,
     "def": 81,
     "def_bonus": 0,
-    "hp": 87
+    "hp": 87,
+    "maxhit": 9
   },
   "Greater demon#Wilderness Slayer Cave": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 76,
     "def": 81,
     "def_bonus": 0,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 10
   },
   "Green dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 68,
     "def": 68,
     "def_bonus": 27,
-    "hp": 75
+    "hp": 75,
+    "maxhit": 8
   },
   "Green dragon#Wilderness Slayer Cave": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 68,
     "def": 68,
     "def_bonus": 27,
-    "hp": 75
+    "hp": 75,
+    "maxhit": 8
   },
   "Grizzly bear": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 17,
     "def": 15,
     "def_bonus": 0,
-    "hp": 27
+    "hp": 27,
+    "maxhit": 3
   },
   "Grizzly bear (Escape Caves)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 72,
     "def": 72,
     "def_bonus": 0,
-    "hp": 75
+    "hp": 75,
+    "maxhit": 8
   },
   "Grizzly bear cub": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 30,
     "def_bonus": 0,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 4
   },
   "Growler": {
+    "abonus": 10,
+    "aspeed": 5,
+    "att": 100,
     "def": 120,
     "def_bonus": 13,
-    "hp": 146
+    "hp": 146,
+    "maxhit": 16
   },
   "Guard": {
+    "abonus": 4,
+    "aspeed": 4,
+    "att": 19,
     "def": 14,
     "def_bonus": 21,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 3
   },
   "Guard (Burthorpe)": {
+    "abonus": 18,
+    "aspeed": 6,
+    "att": 30,
     "def": 30,
     "def_bonus": 45,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 5
   },
   "Guard (Cave goblin)": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 25,
     "def_bonus": 19,
-    "hp": 26
+    "hp": 26,
+    "maxhit": 3
   },
   "Guard (Desert Mining Camp)": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 32,
     "def": 39,
     "def_bonus": 17,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 5
   },
   "Guard (Hosidius)": {
+    "abonus": 6,
+    "aspeed": 6,
+    "att": 15,
     "def": 16,
     "def_bonus": 5,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 4
   },
   "Guard (Prifddinas)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 95,
     "def": 80,
     "def_bonus": 63,
-    "hp": 105
+    "hp": 105,
+    "maxhit": 10
   },
   "Guard (Ranging Guild)": {
+    "abonus": 19,
+    "aspeed": 6,
+    "att": 20,
     "def": 20,
     "def_bonus": 23,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 4
   },
   "Guard (Shayzien)": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 19,
     "def": 14,
     "def_bonus": 19,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 3
   },
   "Guard (dwarf)": {
+    "abonus": 5,
+    "aspeed": 4,
+    "att": 8,
     "def": 9,
     "def_bonus": 4,
-    "hp": 16
+    "hp": 16,
+    "maxhit": 2
   },
   "Guard Bandit": {
+    "abonus": 11,
+    "aspeed": 4,
+    "att": 17,
     "def": 17,
     "def_bonus": 6,
-    "hp": 27
+    "hp": 27,
+    "maxhit": 3
   },
   "Guard dog": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 35,
     "def": 37,
     "def_bonus": 0,
-    "hp": 49
+    "hp": 49,
+    "maxhit": 5
   },
   "Guardian (Chambers of Xeric)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 140,
     "def": 100,
     "def_bonus": 83,
-    "hp": 250
+    "hp": 250,
+    "maxhit": 20
   },
   "Guardian of Armadyl": {
+    "abonus": 14,
+    "aspeed": 5,
+    "att": 37,
     "def": 37,
     "def_bonus": 49,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 6
   },
   "Gunthor the brave": {
+    "abonus": 8,
+    "aspeed": 6,
+    "att": 22,
     "def": 25,
     "def_bonus": 12,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 4
   },
   "Guthan the Infested": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 100,
     "def": 100,
     "def_bonus": 252,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 24
   },
   "H.A.M. Guard": {
+    "abonus": 0,
+    "aspeed": 7,
+    "att": 8,
     "def": 8,
     "def_bonus": 3,
-    "hp": 15
+    "hp": 15,
+    "maxhit": 2
   },
   "Halla (Miscellania)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": 0,
-    "hp": 1
+    "hp": 1,
+    "maxhit": 1
   },
   "Hammerhead shark": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 80,
     "def": 50,
     "def_bonus": 0,
-    "hp": 125
+    "hp": 125,
+    "maxhit": 7
   },
   "Hazeel Cultist": {
     "def": 10,
@@ -1838,54 +3270,94 @@
     "hp": 20
   },
   "Head Guard": {
+    "abonus": 17,
+    "aspeed": 4,
+    "att": 75,
     "def": 61,
     "def_bonus": 17,
-    "hp": 86
+    "hp": 86,
+    "maxhit": 10
   },
   "Head Thief": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 24,
     "def": 16,
     "def_bonus": 12,
-    "hp": 37
+    "hp": 37,
+    "maxhit": 3
   },
   "Headless Beast": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 60,
     "def": 42,
     "def_bonus": 18,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 10
   },
   "Hellhound": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 105,
     "def": 102,
     "def_bonus": 0,
-    "hp": 116
+    "hp": 116,
+    "maxhit": 11
   },
   "Hellhound#God Wars Dungeon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 105,
     "def": 102,
     "def_bonus": 0,
-    "hp": 116
+    "hp": 116,
+    "maxhit": 11
   },
   "Hellhound#Wilderness Slayer Cave": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 105,
     "def": 102,
     "def_bonus": 0,
-    "hp": 116
+    "hp": 116,
+    "maxhit": 11
   },
   "Hengel": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -21,
-    "hp": 7
+    "hp": 7,
+    "maxhit": 1
   },
   "Hermit crab": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -17,
-    "hp": 75
+    "hp": 75,
+    "maxhit": 1
   },
   "Hero": {
+    "abonus": 20,
+    "aspeed": 5,
+    "att": 54,
     "def": 54,
     "def_bonus": 82,
-    "hp": 82
+    "hp": 82,
+    "maxhit": 9
   },
   "Hespori": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 1,
     "def": 120,
     "def_bonus": 47,
-    "hp": 300
+    "hp": 300,
+    "maxhit": 8
   },
   "Het (monster)": {
     "def": 100,
@@ -1893,249 +3365,444 @@
     "hp": 150
   },
   "Highwayman#Hood": {
+    "abonus": 6,
+    "aspeed": 4,
+    "att": 2,
     "def": 2,
     "def_bonus": 2,
-    "hp": 13
+    "hp": 13,
+    "maxhit": 1
   },
   "Highwayman#No hood": {
+    "abonus": 6,
+    "aspeed": 4,
+    "att": 2,
     "def": 2,
     "def_bonus": 2,
-    "hp": 13
+    "hp": 13,
+    "maxhit": 1
   },
   "Hill Giant": {
+    "abonus": 18,
+    "aspeed": 6,
+    "att": 18,
     "def": 26,
     "def_bonus": 0,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 4
   },
   "Hill Giant#Kourend": {
+    "abonus": 18,
+    "aspeed": 6,
+    "att": 18,
     "def": 26,
     "def_bonus": 0,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 4
   },
   "Hill Giant#Plateau": {
+    "abonus": 18,
+    "aspeed": 6,
+    "att": 18,
     "def": 26,
     "def_bonus": 0,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 4
   },
   "Hill Giant#Varlamore": {
+    "abonus": 18,
+    "aspeed": 6,
+    "att": 18,
     "def": 26,
     "def_bonus": 0,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 4
   },
   "Hobgoblin#Armed": {
+    "abonus": 8,
+    "aspeed": 6,
+    "att": 33,
     "def": 36,
     "def_bonus": 1,
-    "hp": 49
+    "hp": 49,
+    "maxhit": 5
   },
   "Hobgoblin#Unarmed": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 22,
     "def": 24,
     "def_bonus": 0,
-    "hp": 29
+    "hp": 29,
+    "maxhit": 3
   },
   "Holthion": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 76,
     "def": 77,
     "def_bonus": 0,
-    "hp": 87
+    "hp": 87,
+    "maxhit": 9
   },
   "Hoop Snake": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 15,
     "def": 20,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 2
   },
   "Hygd": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 3,
     "def": 3,
     "def_bonus": -12,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 1
   },
   "Ice Queen": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 95,
     "def": 95,
     "def_bonus": 30,
-    "hp": 104
+    "hp": 104,
+    "maxhit": 10
   },
   "Ice demon": {
+    "abonus": 0,
+    "aspeed": 3,
+    "att": 1,
     "def": 160,
     "def_bonus": 83,
     "hp": 140
   },
   "Ice giant": {
+    "abonus": 29,
+    "aspeed": 5,
+    "att": 40,
     "def": 40,
     "def_bonus": 2,
-    "hp": 70
+    "hp": 70,
+    "maxhit": 7
   },
   "Ice giant#Wilderness Slayer Cave": {
+    "abonus": 29,
+    "aspeed": 5,
+    "att": 40,
     "def": 40,
     "def_bonus": 2,
-    "hp": 70
+    "hp": 70,
+    "maxhit": 7
   },
   "Ice spider": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 50,
     "def": 43,
     "def_bonus": 16,
-    "hp": 65
+    "hp": 65,
+    "maxhit": 6
   },
   "Ice troll": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 100,
     "def": 120,
     "def_bonus": 40,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 21
   },
   "Ice troll female#Variant 1": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 80,
     "def": 40,
     "def_bonus": 40,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 17
   },
   "Ice troll female#Variant 2": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 80,
     "def": 40,
     "def_bonus": 40,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 17
   },
   "Ice troll female#Variant 3": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 80,
     "def": 40,
     "def_bonus": 40,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 17
   },
   "Ice troll grunt": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 100,
     "def": 60,
     "def_bonus": 40,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 21
   },
   "Ice troll grunt#Quest area": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 100,
     "def": 60,
     "def_bonus": 40,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 21
   },
   "Ice troll male#Variant 1": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 80,
     "def": 40,
     "def_bonus": 40,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 17
   },
   "Ice troll male#Variant 2": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 80,
     "def": 40,
     "def_bonus": 40,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 17
   },
   "Ice troll male#Variant 3": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 80,
     "def": 40,
     "def_bonus": 40,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 17
   },
   "Ice troll runt#Variant 1": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 60,
     "def": 70,
     "def_bonus": 40,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 15
   },
   "Ice troll runt#Variant 2": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 60,
     "def": 70,
     "def_bonus": 40,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 17
   },
   "Ice troll runt#Variant 3": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 60,
     "def": 70,
     "def_bonus": 40,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 15
   },
   "Ice warrior": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 47,
     "def": 47,
     "def_bonus": 30,
-    "hp": 59
+    "hp": 59,
+    "maxhit": 6
   },
   "Ice wolf": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 100,
     "def": 70,
     "def_bonus": 0,
-    "hp": 70
+    "hp": 70,
+    "maxhit": 10
   },
   "Icefiend": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 12,
     "def_bonus": 0,
-    "hp": 15
+    "hp": 15,
+    "maxhit": 2
   },
   "Icelord": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 0,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 5
   },
   "Imp": {
+    "abonus": -42,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -42,
-    "hp": 8
+    "hp": 8,
+    "maxhit": 0
   },
   "Imre": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Invrigar the Necromancer": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 17,
     "def": 14,
     "def_bonus": 0,
-    "hp": 24
+    "hp": 24,
+    "maxhit": 3
   },
   "Iorwerth Archer": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 80,
     "def_bonus": 50,
-    "hp": 105
+    "hp": 105,
+    "maxhit": 11
   },
   "Iorwerth Warrior#Iorwerth Camp": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 95,
     "def": 80,
     "def_bonus": 63,
-    "hp": 105
+    "hp": 105,
+    "maxhit": 10
   },
   "Iorwerth Warrior#Iorwerth Dungeon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 95,
     "def": 80,
     "def_bonus": 63,
-    "hp": 105
+    "hp": 105,
+    "maxhit": 10
   },
   "Irina": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Iron dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 165,
     "def": 165,
     "def_bonus": 47,
-    "hp": 165
+    "hp": 165,
+    "maxhit": 17
   },
   "Jackal": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 17,
     "def": 15,
     "def_bonus": 0,
-    "hp": 27
+    "hp": 27,
+    "maxhit": 3
   },
   "Jaguar": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 55,
     "def": 55,
     "def_bonus": 0,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 6
   },
   "Jaguar cub": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 25,
     "def": 25,
     "def_bonus": 0,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 3
   },
   "Jail guard": {
+    "abonus": 9,
+    "aspeed": 5,
+    "att": 19,
     "def": 21,
     "def_bonus": 9,
-    "hp": 32
+    "hp": 32,
+    "maxhit": 3
   },
   "Jailer": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 63,
-    "hp": 47
+    "hp": 47,
+    "maxhit": 5
   },
   "Jake": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 27,
     "def": 25,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 4
   },
   "Jeff": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -10,
-    "hp": 7
+    "hp": 7,
+    "maxhit": 1
   },
   "Jennella": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 6
   },
   "Jogre": {
+    "abonus": 22,
+    "aspeed": 6,
+    "att": 43,
     "def": 43,
     "def_bonus": 0,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 7
   },
   "Jonny the beard": {
     "def": 5,
@@ -2143,88 +3810,155 @@
     "hp": 10
   },
   "Joseph": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Jubbly bird": {
+    "abonus": 0,
+    "att": 5,
     "def": 6,
     "def_bonus": 0,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 0
   },
   "Jubster": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 82,
     "def": 81,
     "def_bonus": 0,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 9
   },
   "Jungle Demon": {
+    "abonus": 50,
+    "aspeed": 6,
+    "att": 170,
     "def": 170,
     "def_bonus": 17,
-    "hp": 170
+    "hp": 170,
+    "maxhit": 32
   },
   "Jungle Wolf": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 50,
     "def": 52,
     "def_bonus": 0,
-    "hp": 69
+    "hp": 69,
+    "maxhit": 6
   },
   "Jungle horror": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 70,
     "def": 55,
     "def_bonus": 0,
-    "hp": 45
+    "hp": 45,
+    "maxhit": 8
   },
   "Jungle spider": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 35,
     "def": 35,
     "def_bonus": 17,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 6
   },
   "Jungle spider (Ape Atoll)": {
+    "abonus": 100,
+    "aspeed": 4,
+    "att": 50,
     "def": 10,
     "def_bonus": 0,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 10
   },
   "Justiciar Zachariah": {
+    "abonus": 200,
+    "aspeed": 6,
+    "att": 500,
     "def": 100,
     "def_bonus": 200,
-    "hp": 320
+    "hp": 320,
+    "maxhit": 43
   },
   "K'ril Tsutsaroth": {
+    "abonus": 160,
+    "aspeed": 6,
+    "att": 340,
     "def": 270,
     "def_bonus": 77,
-    "hp": 255
+    "hp": 255,
+    "maxhit": 30
   },
   "Kalphite Guardian": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 110,
     "def": 110,
     "def_bonus": 18,
-    "hp": 170
+    "hp": 170,
+    "maxhit": 12
   },
   "Kalphite Queen": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 300,
     "def": 300,
-    "hp": 255
+    "hp": 255,
+    "maxhit": 31
   },
   "Kalphite Soldier": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 70,
     "def": 70,
     "def_bonus": 18,
-    "hp": 90
+    "hp": 90,
+    "maxhit": 8
   },
   "Kalphite Worker": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 20,
     "def": 20,
     "def_bonus": 4,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 3
   },
   "Kamil": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 190,
     "def": 135,
     "def_bonus": 43,
-    "hp": 130
+    "hp": 130,
+    "maxhit": 23
   },
   "Karamel": {
+    "abonus": 0,
+    "aspeed": 3,
+    "att": 1,
     "def": 100,
     "def_bonus": 150,
-    "hp": 250
+    "hp": 250,
+    "maxhit": 7
   },
   "Karil the Tainted": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 100,
     "def_bonus": 80,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 20
   },
   "Kebbit": {
     "def": 1,
@@ -2232,313 +3966,561 @@
     "hp": 5
   },
   "Khazard Guard": {
+    "abonus": 10,
+    "aspeed": 4,
+    "att": 20,
     "def": 20,
     "def_bonus": 28,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 3
   },
   "Khazard commander": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 50,
     "def": 50,
     "def_bonus": 0,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 5
   },
   "Khazard trooper": {
+    "abonus": 9,
+    "aspeed": 5,
+    "att": 17,
     "def": 12,
     "def_bonus": 32,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 3
   },
   "Khazard warlord": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 75,
     "def": 80,
     "def_bonus": 0,
-    "hp": 170
+    "hp": 170,
+    "maxhit": 10
   },
   "King Black Dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 240,
     "def": 240,
     "def_bonus": 73,
-    "hp": 240
+    "hp": 240,
+    "maxhit": 25
   },
   "King Roald": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 35,
     "def": 30,
     "def_bonus": 0,
-    "hp": 75
+    "hp": 75,
+    "maxhit": 3
   },
   "King Sand Crab": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 50,
     "def": 100,
     "def_bonus": 0,
-    "hp": 200
+    "hp": 200,
+    "maxhit": 6
   },
   "King Scorpion": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 30,
     "def": 23,
     "def_bonus": 12,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 4
   },
   "Knight of Ardougne": {
+    "abonus": 8,
+    "aspeed": 5,
+    "att": 38,
     "def": 31,
     "def_bonus": 38,
-    "hp": 52
+    "hp": 52,
+    "maxhit": 6
   },
   "Knight of Saradomin": {
+    "abonus": 13,
+    "aspeed": 6,
+    "att": 75,
     "def": 82,
     "def_bonus": 13,
-    "hp": 108
+    "hp": 108,
+    "maxhit": 12
   },
   "Knight of Varlamore": {
+    "abonus": 8,
+    "aspeed": 5,
+    "att": 38,
     "def": 31,
     "def_bonus": 38,
-    "hp": 52
+    "hp": 52,
+    "maxhit": 8
   },
   "Kraka": {
+    "abonus": 40,
+    "aspeed": 6,
+    "att": 50,
     "def": 50,
     "def_bonus": 30,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 23
   },
   "Kree'arra": {
+    "abonus": 136,
+    "aspeed": 3,
+    "att": 300,
     "def": 260,
     "def_bonus": 180,
-    "hp": 255
+    "hp": 255,
+    "maxhit": 69
   },
   "Ksenia": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Lanzig": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 6
   },
   "Large mosquito": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 5,
     "def": 45,
     "def_bonus": 3,
-    "hp": 3
+    "hp": 3,
+    "maxhit": 1
   },
   "Lava dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 240,
     "def": 220,
     "def_bonus": 67,
-    "hp": 230
+    "hp": 230,
+    "maxhit": 23
   },
   "Lensa": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 6
   },
   "Lesser demon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 68,
     "def": 71,
     "def_bonus": 0,
-    "hp": 79
+    "hp": 79,
+    "maxhit": 8
   },
   "Lesser demon (Melzar's Maze)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 68,
     "def": 71,
     "def_bonus": 0,
-    "hp": 79
+    "hp": 79,
+    "maxhit": 8
   },
   "Lesser demon#Wilderness Slayer Cave": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 68,
     "def": 71,
     "def_bonus": 0,
-    "hp": 110
+    "hp": 110,
+    "maxhit": 9
   },
   "Lev": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Liliya": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Lizardman brute": {
+    "abonus": 34,
+    "aspeed": 4,
+    "att": 65,
     "def": 65,
     "def_bonus": 7,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 11
   },
   "Lizardman shaman": {
+    "abonus": 45,
+    "aspeed": 4,
+    "att": 120,
     "def": 140,
     "def_bonus": 17,
-    "hp": 150
+    "hp": 150,
+    "maxhit": 31
   },
   "Lizardman shaman (Chambers of Xeric)": {
+    "abonus": 58,
+    "aspeed": 4,
+    "att": 130,
     "def": 210,
     "def_bonus": 137,
-    "hp": 190
+    "hp": 190,
+    "maxhit": 65
   },
   "Lizardman#Level 53": {
+    "abonus": 22,
+    "aspeed": 4,
+    "att": 43,
     "def": 43,
     "def_bonus": 2,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 7
   },
   "Lizardman#Level 62": {
+    "abonus": 28,
+    "aspeed": 4,
+    "att": 53,
     "def": 52,
     "def_bonus": 2,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 9
   },
   "Loar Shade": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 45,
     "def": 26,
     "def_bonus": 0,
-    "hp": 38
+    "hp": 38,
+    "maxhit": 4
   },
   "Lobstrosity": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 60,
     "def": 40,
     "def_bonus": 32,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 9
   },
   "Locust": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 17,
     "def": 1,
     "def_bonus": 0,
-    "hp": 27
+    "hp": 27,
+    "maxhit": 3
   },
   "Locust rider": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 105,
     "def_bonus": 90,
-    "hp": 90
+    "hp": 90,
+    "maxhit": 22
   },
   "Lost barbarian": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 115,
     "def": 110,
     "def_bonus": 0,
-    "hp": 124
+    "hp": 124,
+    "maxhit": 12
   },
   "Lynx": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 18,
     "def": 18,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 3
   },
   "Lynx Tamer": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 19,
     "def": 14,
     "def_bonus": 19,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 3
   },
   "Magic axe": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 38,
     "def": 29,
     "def_bonus": 10,
-    "hp": 44
+    "hp": 44,
+    "maxhit": 5
   },
   "Magic axe#Catacombs": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 38,
     "def": 29,
     "def_bonus": 10,
-    "hp": 44
+    "hp": 44,
+    "maxhit": 5
   },
   "Mammoth": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 55,
     "def": 50,
     "def_bonus": 0,
-    "hp": 130
+    "hp": 130,
+    "maxhit": 7
   },
   "Man": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -21,
-    "hp": 7
+    "hp": 7,
+    "maxhit": 1
   },
   "Man (East Ardougne)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -21,
-    "hp": 7
+    "hp": 7,
+    "maxhit": 1
   },
   "Man (level 4)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 2,
     "def": 1,
     "def_bonus": 1,
-    "hp": 13
+    "hp": 13,
+    "maxhit": 1
   },
   "Maniacal Monkey Archer": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 120,
     "def": 80,
     "def_bonus": 0,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 24
   },
   "Maniacal monkey": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 200,
     "def": 10,
     "def_bonus": 0,
-    "hp": 65
+    "hp": 65,
+    "maxhit": 18
   },
   "Manta ray (monster)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 155,
     "def": 40,
     "def_bonus": 0,
-    "hp": 194
+    "hp": 194,
+    "maxhit": 8
   },
   "Market Guard": {
+    "abonus": 40,
+    "aspeed": 3,
+    "att": 40,
     "def": 40,
     "def_bonus": 50,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 8
   },
   "Market Guard (Draynor)": {
+    "abonus": 9,
+    "aspeed": 5,
+    "att": 17,
     "def": 13,
     "def_bonus": 19,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 3
   },
   "Me": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 75,
     "def": 30,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 9
   },
   "Menaphite Thug": {
+    "abonus": 4,
+    "aspeed": 4,
+    "att": 60,
     "def": 20,
     "def_bonus": 9,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 7
   },
   "Mercenary Captain": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 32,
     "def": 32,
     "def_bonus": 17,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 5
   },
   "Milla": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Mind Golem": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 14,
     "def": 25,
     "def_bonus": 3,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 5
   },
   "Minotaur": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 12,
     "def": 5,
     "def_bonus": 0,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 2
   },
   "Mithril dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 268,
     "def": 268,
     "def_bonus": 57,
-    "hp": 254
+    "hp": 254,
+    "maxhit": 28
   },
   "Monk": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 2,
     "def": 7,
     "def_bonus": 0,
-    "hp": 15
+    "hp": 15,
+    "maxhit": 1
   },
   "Monk of Zamorak": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 8,
     "def": 24,
     "def_bonus": 0,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 5
   },
   "Monkey (monster)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 2,
     "def": 2,
     "def_bonus": 0,
-    "hp": 6
+    "hp": 6,
+    "maxhit": 1
   },
   "Monkey Archer": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 80,
     "def": 80,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 20
   },
   "Monkey Guard": {
+    "abonus": 50,
+    "aspeed": 4,
+    "att": 130,
     "def": 200,
     "def_bonus": 0,
-    "hp": 130
+    "hp": 130,
+    "maxhit": 14
   },
   "Monkey Zombie": {
+    "abonus": 15,
+    "aspeed": 4,
+    "att": 100,
     "def": 30,
     "def_bonus": 0,
-    "hp": 55
+    "hp": 55,
+    "maxhit": 7
   },
   "Mosquito swarm": {
+    "abonus": 0,
+    "aspeed": 2,
+    "att": 10,
     "def": 1,
     "def_bonus": 0,
-    "hp": 6
+    "hp": 6,
+    "maxhit": 1
   },
   "Moss Guardian": {
+    "abonus": 66,
+    "aspeed": 6,
+    "att": 60,
     "def": 60,
     "def_bonus": 0,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 14
   },
   "Moss giant": {
+    "abonus": 33,
+    "aspeed": 6,
+    "att": 30,
     "def": 30,
     "def_bonus": 0,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 6
   },
   "Moss giant (Iorwerth Dungeon)": {
     "def": 30,
@@ -2546,42 +4528,74 @@
     "hp": 60
   },
   "Mountain troll": {
+    "abonus": 20,
+    "aspeed": 6,
+    "att": 40,
     "def_bonus": 3,
-    "hp": 90
+    "hp": 90,
+    "maxhit": 11
   },
   "Mounted terrorbird gnome": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 25,
     "def": 10,
     "def_bonus": 0,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 3
   },
   "Mourner#Level 108": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 95,
     "def": 80,
     "def_bonus": 63,
-    "hp": 105
+    "hp": 105,
+    "maxhit": 10
   },
   "Mourner#Level 11": {
+    "abonus": 6,
+    "aspeed": 4,
+    "att": 8,
     "def": 8,
     "def_bonus": 7,
-    "hp": 19
+    "hp": 19,
+    "maxhit": 2
   },
   "Mouse": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 95,
     "def": 86,
     "def_bonus": 50,
-    "hp": 70
+    "hp": 70,
+    "maxhit": 9
   },
   "Mudskipper": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 29,
     "def_bonus": 0,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 4
   },
   "Mugger": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 5,
     "def": 5,
     "def_bonus": 0,
-    "hp": 8
+    "hp": 8,
+    "maxhit": 1
   },
   "Mugger#Plain": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 5,
     "def": 5,
     "def_bonus": 0,
-    "hp": 8
+    "hp": 8,
+    "maxhit": 1
   },
   "Mummy#Level 103": {
     "def": 75,
@@ -2599,248 +4613,440 @@
     "hp": 95
   },
   "Muttadile": {
+    "abonus": 71,
+    "aspeed": 4,
+    "att": 150,
     "def": 200,
     "def_bonus": 70,
-    "hp": 400
+    "hp": 400,
+    "maxhit": 28
   },
   "Myre Blamish Snail#Pointed": {
+    "abonus": 10,
+    "aspeed": 4,
+    "att": 0,
     "def": 12,
     "def_bonus": 13,
-    "hp": 13
+    "hp": 13,
+    "maxhit": 2
   },
   "Myre Blamish Snail#Rounded": {
+    "abonus": 10,
+    "aspeed": 4,
+    "att": 0,
     "def": 22,
     "def_bonus": 13,
-    "hp": 8
+    "hp": 8,
+    "maxhit": 2
   },
   "Nail beast": {
+    "abonus": 0,
+    "aspeed": 8,
+    "att": 150,
     "def": 56,
     "def_bonus": 0,
-    "hp": 69
+    "hp": 69,
+    "maxhit": 2
   },
   "Narf": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -5,
-    "hp": 7
+    "hp": 7,
+    "maxhit": 1
   },
   "Narwhal": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 95,
     "def": 50,
     "def_bonus": 0,
-    "hp": 187
+    "hp": 187,
+    "maxhit": 7
   },
   "Nazastarool": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 85,
     "def": 50,
     "def_bonus": 0,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 9
   },
   "Necromancer": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 18,
     "def": 18,
     "def_bonus": 0,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 3
   },
   "Necromancer (Great Kourend)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 56,
     "def": 50,
     "def_bonus": 8,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 7
   },
   "Newtroost": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 18,
     "def": 17,
     "def_bonus": 0,
-    "hp": 18
+    "hp": 18,
+    "maxhit": 3
   },
   "Nex": {
+    "abonus": 200,
+    "aspeed": 4,
+    "att": 315,
     "def": 260,
     "def_bonus": 80,
-    "hp": 3400
+    "hp": 3400,
+    "maxhit": 33
   },
   "Nikita": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Nikolai": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Nylocas Vasilias": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 160,
     "def": 50,
     "def_bonus": 0,
-    "hp": 2500
+    "hp": 2500,
+    "maxhit": 24
   },
   "Obor": {
+    "abonus": 100,
+    "aspeed": 6,
+    "att": 90,
     "def": 60,
     "def_bonus": 40,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 22
   },
   "Ocelot": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 30,
     "def": 30,
     "def_bonus": 0,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 3
   },
   "Ocga": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 3,
     "def": 3,
     "def_bonus": -12,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 1
   },
   "Ochre Blamish Snail#Pointed": {
+    "abonus": 10,
+    "aspeed": 6,
+    "att": 0,
     "def": 25,
     "def_bonus": 13,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 2
   },
   "Ochre Blamish Snail#Rounded": {
+    "abonus": 10,
+    "aspeed": 6,
+    "att": 0,
     "def": 18,
     "def_bonus": 13,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 2
   },
   "Ogre": {
+    "abonus": 22,
+    "aspeed": 6,
+    "att": 43,
     "def": 30,
     "def_bonus": 0,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 7
   },
   "Ogre chieftain": {
+    "abonus": 5,
+    "aspeed": 4,
+    "att": 75,
     "def": 75,
     "def_bonus": 16,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 9
   },
   "Ogress Shaman": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 68,
     "def": 82,
     "def_bonus": 13,
-    "hp": 82
+    "hp": 82,
+    "maxhit": 8
   },
   "Ogress Warrior": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 68,
     "def": 82,
     "def_bonus": 11,
-    "hp": 82
+    "hp": 82,
+    "maxhit": 8
   },
   "Oipuis": {
+    "abonus": 50,
+    "aspeed": 4,
+    "att": 130,
     "def": 130,
     "def_bonus": 0,
-    "hp": 130
+    "hp": 130,
+    "maxhit": 14
   },
   "Oomlie bird": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 0,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 5
   },
   "Orca": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 165,
     "def": 75,
     "def_bonus": 0,
-    "hp": 370
+    "hp": 370,
+    "maxhit": 13
   },
   "Ork": {
+    "abonus": 19,
+    "aspeed": 5,
+    "att": 100,
     "def": 60,
     "def_bonus": 13,
-    "hp": 110
+    "hp": 110,
+    "maxhit": 12
   },
   "Oryx": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 11,
     "def": 13,
     "def_bonus": 0,
-    "hp": 19
+    "hp": 19,
+    "maxhit": 2
   },
   "Osprey": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 60,
     "def": 40,
     "def_bonus": 0,
-    "hp": 72
+    "hp": 72,
+    "maxhit": 6
   },
   "Othainian": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 76,
     "def": 77,
     "def_bonus": 0,
-    "hp": 87
+    "hp": 87,
+    "maxhit": 9
   },
   "Otherworldly being": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 56,
     "def": 46,
     "def_bonus": 15,
-    "hp": 66
+    "hp": 66,
+    "maxhit": 7
   },
   "Ouhai": {
+    "abonus": 50,
+    "aspeed": 4,
+    "att": 130,
     "def": 130,
     "def_bonus": 0,
-    "hp": 130
+    "hp": 130,
+    "maxhit": 14
   },
   "Outlaw": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 35,
     "def": 25,
     "def_bonus": 0,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 3
   },
   "Padulah": {
+    "abonus": 50,
+    "aspeed": 4,
+    "att": 130,
     "def": 130,
     "def_bonus": 0,
-    "hp": 130
+    "hp": 130,
+    "maxhit": 20
   },
   "Paladin": {
+    "abonus": 20,
+    "aspeed": 5,
+    "att": 54,
     "def": 54,
     "def_bonus": 82,
-    "hp": 57
+    "hp": 57,
+    "maxhit": 8
   },
   "Palmer": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 27,
     "def": 25,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 4
   },
   "Pee Hat": {
+    "abonus": 40,
+    "aspeed": 6,
+    "att": 50,
     "def": 50,
     "def_bonus": 30,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 23
   },
   "Penance Fighter": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 26,
     "def": 20,
     "def_bonus": 0,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 4
   },
   "Penance Healer": {
+    "att": 9,
     "def": 15,
     "def_bonus": 0,
-    "hp": 27
+    "hp": 27,
+    "maxhit": 0
   },
   "Penance Ranger": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 22,
     "def": 20,
     "def_bonus": 0,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 3
   },
   "Penance Runner": {
+    "att": 1,
     "def": 1,
-    "hp": 5
+    "hp": 5,
+    "maxhit": 0
   },
   "Penda": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 3,
     "def": 3,
     "def_bonus": -12,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 1
   },
   "Penguin (monster)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 2,
     "def_bonus": 0,
-    "hp": 4
+    "hp": 4,
+    "maxhit": 1
   },
   "Pestilent Bloat": {
+    "abonus": 60,
+    "aspeed": 1,
+    "att": 100,
     "def": 100,
     "def_bonus": 100,
-    "hp": 1500
+    "hp": 1500,
+    "maxhit": 8
   },
   "Phantom Muspah": {
+    "abonus": 393,
+    "aspeed": 6,
+    "att": 280,
     "def": 180,
     "def_bonus": 30,
-    "hp": 400
+    "hp": 400,
+    "maxhit": 61
   },
   "Pheasant": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 3,
     "def": 3,
     "def_bonus": 0,
-    "hp": 5
+    "hp": 5,
+    "maxhit": 1
   },
   "Phosani's Nightmare": {
+    "abonus": 220,
+    "aspeed": 6,
+    "att": 150,
     "def": 150,
     "def_bonus": 113,
-    "hp": 3200
+    "hp": 3200,
+    "maxhit": 73
   },
   "Phrin Shade": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 64,
     "def": 42,
     "def_bonus": 0,
-    "hp": 56
+    "hp": 56,
+    "maxhit": 6
   },
   "Pirate": {
+    "abonus": 8,
+    "aspeed": 5,
+    "att": 21,
     "def": 12,
     "def_bonus": 0,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 3
   },
   "Pirate (Theiving)": {
     "def": 12,
@@ -2848,189 +5054,337 @@
     "hp": 20
   },
   "Pirate Guard": {
+    "abonus": 20,
+    "aspeed": 4,
+    "att": 18,
     "def": 10,
     "def_bonus": 33,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 3
   },
   "Pirate#Plain": {
+    "abonus": 8,
+    "aspeed": 5,
+    "att": 21,
     "def": 12,
     "def_bonus": 0,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 3
   },
   "Pit Scorpion": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 23,
     "def": 23,
     "def_bonus": 3,
-    "hp": 32
+    "hp": 32,
+    "maxhit": 3
   },
   "Poison Scorpion": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 16,
     "def": 15,
     "def_bonus": 12,
-    "hp": 23
+    "hp": 23,
+    "maxhit": 3
   },
   "Poison spider": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 28,
     "def": 5,
     "def_bonus": 0,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 4
   },
   "Poltenip": {
+    "abonus": 4,
+    "aspeed": 4,
+    "att": 19,
     "def": 14,
     "def_bonus": 21,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 3
   },
   "Porazdir": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 250,
     "def": 100,
     "def_bonus": 200,
-    "hp": 320
+    "hp": 320,
+    "maxhit": 43
   },
   "Porcupine": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 4,
     "def": 2,
     "def_bonus": 0,
-    "hp": 5
+    "hp": 5,
+    "maxhit": 1
   },
   "Possessed pickaxe#Catacombs of Kourend": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 10,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 6
   },
   "Possessed pickaxe#Haunted Mine": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 10,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 6
   },
   "Pygmy kraken": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 1,
     "def": 50,
     "def_bonus": 0,
-    "hp": 150
+    "hp": 150,
+    "maxhit": 10
   },
   "Rabbit": {
+    "abonus": -47,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -42,
-    "hp": 5
+    "hp": 5,
+    "maxhit": 1
   },
   "Rabbit (Prifddinas)": {
+    "abonus": 80,
+    "aspeed": 3,
+    "att": 600,
     "def": 450,
     "def_bonus": 150,
-    "hp": 2000
+    "hp": 2000,
+    "maxhit": 40
   },
   "Radat": {
+    "abonus": 4,
+    "aspeed": 4,
+    "att": 19,
     "def": 14,
     "def_bonus": 21,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 3
   },
   "Ragnvald": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 3,
     "def": 3,
     "def_bonus": -12,
-    "hp": 1
+    "hp": 1,
+    "maxhit": 1
   },
   "Ram": {
+    "abonus": -15,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -21,
-    "hp": 8
+    "hp": 8,
+    "maxhit": 1
   },
   "Rannveig": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 3,
     "def": 3,
     "def_bonus": -12,
-    "hp": 1
+    "hp": 1,
+    "maxhit": 1
   },
   "Rat": {
+    "abonus": -47,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -42,
-    "hp": 2
+    "hp": 2,
+    "maxhit": 0
   },
   "Red dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 130,
     "def": 130,
     "def_bonus": 47,
-    "hp": 140
+    "hp": 140,
+    "maxhit": 14
   },
   "Renegade knight": {
+    "abonus": 20,
+    "aspeed": 4,
+    "att": 28,
     "def": 28,
     "def_bonus": 81,
-    "hp": 48
+    "hp": 48,
+    "maxhit": 5
   },
   "Revenant cyclops": {
+    "abonus": 53,
+    "aspeed": 6,
+    "att": 60,
     "def": 49,
     "def_bonus": 125,
-    "hp": 110
+    "hp": 110,
+    "maxhit": 16
   },
   "Revenant dark beast": {
+    "abonus": 65,
+    "aspeed": 5,
+    "att": 93,
     "def": 80,
     "def_bonus": 140,
-    "hp": 140
+    "hp": 140,
+    "maxhit": 23
   },
   "Revenant demon": {
+    "abonus": 30,
+    "aspeed": 5,
+    "att": 83,
     "def": 80,
     "def_bonus": 124,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 15
   },
   "Revenant dragon": {
+    "abonus": 72,
+    "aspeed": 5,
+    "att": 106,
     "def": 87,
     "def_bonus": 179,
-    "hp": 155
+    "hp": 155,
+    "maxhit": 30
   },
   "Revenant goblin": {
+    "abonus": 6,
+    "aspeed": 5,
+    "att": 13,
     "def": 14,
     "def_bonus": 28,
-    "hp": 14
+    "hp": 14,
+    "maxhit": 3
   },
   "Revenant hellhound": {
+    "abonus": 38,
+    "aspeed": 5,
+    "att": 76,
     "def": 80,
     "def_bonus": 127,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 14
   },
   "Revenant hobgoblin": {
+    "abonus": 20,
+    "aspeed": 4,
+    "att": 50,
     "def": 41,
     "def_bonus": 64,
-    "hp": 72
+    "hp": 72,
+    "maxhit": 8
   },
   "Revenant imp": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 5,
     "def": 4,
     "def_bonus": 0,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 2
   },
   "Revenant knight": {
+    "abonus": 69,
+    "aspeed": 5,
+    "att": 100,
     "def": 80,
     "def_bonus": 175,
-    "hp": 143
+    "hp": 143,
+    "maxhit": 27
   },
   "Revenant maledictus": {
+    "abonus": 72,
+    "aspeed": 5,
+    "att": 106,
     "def": 90,
     "def_bonus": 198,
-    "hp": 1250
+    "hp": 1250,
+    "maxhit": 30
   },
   "Revenant ork": {
+    "abonus": 60,
+    "aspeed": 5,
+    "att": 99,
     "def": 60,
     "def_bonus": 138,
-    "hp": 105
+    "hp": 105,
+    "maxhit": 20
   },
   "Revenant pyrefiend": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 60,
     "def": 33,
     "def_bonus": 45,
-    "hp": 48
+    "hp": 48,
+    "maxhit": 5
   },
   "River troll": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 9,
     "def": 39,
     "def_bonus": 0,
-    "hp": 66
+    "hp": 66,
+    "maxhit": 2
   },
   "Riyl Shade": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 88,
     "def": 60,
     "def_bonus": 0,
-    "hp": 76
+    "hp": 76,
+    "maxhit": 6
   },
   "Riyl shadow (Temple Trekking)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 87,
     "def": 60,
     "def_bonus": 0,
-    "hp": 76
+    "hp": 76,
+    "maxhit": 7
   },
   "Rock (Troll)": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 70,
     "def": 70,
     "def_bonus": 43,
-    "hp": 140
+    "hp": 140,
+    "maxhit": 30
   },
   "Rock Crab": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 1
   },
   "Rock golem (monster)": {
     "def": 100,
@@ -3038,64 +5392,112 @@
     "hp": 159
   },
   "Rock lobster": {
+    "abonus": 0,
+    "aspeed": 2,
+    "att": 100,
     "def": 100,
     "def_bonus": 83,
-    "hp": 150
+    "hp": 150,
+    "maxhit": 11
   },
   "Rogue#Level 135": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 140,
     "def": 150,
     "def_bonus": 0,
-    "hp": 125
+    "hp": 125,
+    "maxhit": 15
   },
   "Rogue#Level 15": {
+    "abonus": 5,
+    "aspeed": 4,
+    "att": 13,
     "def": 13,
     "def_bonus": 9,
-    "hp": 17
+    "hp": 17,
+    "maxhit": 2
   },
   "Rooster": {
+    "abonus": -47,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -42,
-    "hp": 3
+    "hp": 3,
+    "maxhit": 0
   },
   "Rowdy slave": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 7,
     "def": 7,
     "def_bonus": 0,
-    "hp": 16
+    "hp": 16,
+    "maxhit": 2
   },
   "Rune dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 284,
     "def": 276,
     "def_bonus": 75,
-    "hp": 330
+    "hp": 330,
+    "maxhit": 29
   },
   "Rusty": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -15,
-    "hp": 7
+    "hp": 7,
+    "maxhit": 1
   },
   "Salarin the twisted": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 58,
     "def": 62,
     "def_bonus": 0,
-    "hp": 70
+    "hp": 70,
+    "maxhit": 7
   },
   "Sand Crab": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": 0,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 1
   },
   "Sarachnis": {
+    "abonus": 30,
+    "aspeed": 4,
+    "att": 200,
     "def": 150,
     "def_bonus": 37,
-    "hp": 400
+    "hp": 400,
+    "maxhit": 31
   },
   "Saradomin priest": {
+    "abonus": 9,
+    "aspeed": 5,
+    "att": 120,
     "def": 120,
     "def_bonus": 13,
-    "hp": 89
+    "hp": 89,
+    "maxhit": 20
   },
   "Saradomin wizard": {
+    "abonus": 40,
+    "aspeed": 4,
+    "att": 100,
     "def": 80,
     "def_bonus": 0,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 14
   },
   "Scabaras (monster)": {
     "def": 100,
@@ -3113,34 +5515,57 @@
     "hp": 10
   },
   "Scavenger beast": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 120,
     "def": 1,
     "def_bonus": 0,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 13
   },
   "Scion": {
+    "abonus": 30,
+    "aspeed": 4,
+    "att": 120,
     "def": 50,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 16
   },
   "Scorpia": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 250,
     "def": 180,
     "def_bonus": 271,
-    "hp": 200
+    "hp": 200,
+    "maxhit": 16
   },
   "Scorpia's guardian": {
+    "abonus": 0,
+    "att": 1,
     "def": 60,
     "def_bonus": 0,
-    "hp": 70
+    "hp": 70,
+    "maxhit": 4
   },
   "Scorpia's offspring (monster)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": 0,
-    "hp": 2
+    "hp": 2,
+    "maxhit": 2
   },
   "Scorpion": {
+    "abonus": -35,
+    "aspeed": 4,
+    "att": 1,
     "def": 10,
     "def_bonus": 0,
-    "hp": 17
+    "hp": 17,
+    "maxhit": 0
   },
   "Scorpion (Sailing)": {
     "def": 10,
@@ -3148,293 +5573,523 @@
     "hp": 17
   },
   "Scurrius": {
+    "abonus": 150,
+    "aspeed": 4,
+    "att": 300,
     "def": 60,
     "def_bonus": 0,
-    "hp": 200
+    "hp": 200,
+    "maxhit": 13
   },
   "Sea troll": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 50,
     "def": 40,
     "def_bonus": 0,
-    "hp": 65
+    "hp": 65,
+    "maxhit": 6
   },
   "Seagull": {
+    "abonus": -47,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -42,
-    "hp": 3
+    "hp": 3,
+    "maxhit": 0
   },
   "Seagull#Icyene Graveyard": {
+    "abonus": -47,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -42,
-    "hp": 3
+    "hp": 3,
+    "maxhit": 0
   },
   "Sergeant (Shayzien)": {
+    "abonus": 17,
+    "aspeed": 4,
+    "att": 75,
     "def": 61,
     "def_bonus": 17,
-    "hp": 86
+    "hp": 86,
+    "maxhit": 10
   },
   "Sergeant Grimspike": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 80,
     "def": 132,
     "def_bonus": 0,
-    "hp": 146
+    "hp": 146,
+    "maxhit": 21
   },
   "Sergeant Steelwill": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 80,
     "def": 150,
     "def_bonus": 0,
-    "hp": 127
+    "hp": 127,
+    "maxhit": 15
   },
   "Sergeant Strongstack": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 124,
     "def": 125,
     "def_bonus": 0,
-    "hp": 128
+    "hp": 128,
+    "maxhit": 15
   },
   "Servant (Burthorpe)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 3,
     "def": 3,
     "def_bonus": -12,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 1
   },
   "Shade": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 130,
     "def": 14,
     "def_bonus": 0,
-    "hp": 29
+    "hp": 29,
+    "maxhit": 14
   },
   "Shade (Temple Trekking)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 130,
     "def": 100,
     "def_bonus": 0,
-    "hp": 115
+    "hp": 115,
+    "maxhit": 15
   },
   "Shadow Hound": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 53,
     "def": 54,
     "def_bonus": 0,
-    "hp": 62
+    "hp": 62,
+    "maxhit": 6
   },
   "Shadow spider": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 44,
     "def": 44,
     "def_bonus": 15,
-    "hp": 55
+    "hp": 55,
+    "maxhit": 5
   },
   "Shadow warrior": {
+    "abonus": 20,
+    "aspeed": 4,
+    "att": 36,
     "def": 36,
     "def_bonus": 31,
-    "hp": 67
+    "hp": 67,
+    "maxhit": 6
   },
   "Shaeded Beast": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 50,
     "def": 50,
     "def_bonus": 60,
-    "hp": 210
+    "hp": 210,
+    "maxhit": 30
   },
   "Shantay Guard": {
+    "abonus": 11,
+    "aspeed": 4,
+    "att": 17,
     "def": 16,
     "def_bonus": 15,
-    "hp": 32
+    "hp": 32,
+    "maxhit": 3
   },
   "Shipyard worker": {
+    "abonus": 6,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": 0,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 2
   },
   "Sir Carl": {
+    "abonus": 20,
+    "aspeed": 5,
+    "att": 54,
     "def": 54,
     "def_bonus": 82,
-    "hp": 57
+    "hp": 57,
+    "maxhit": 8
   },
   "Sir Harry": {
+    "abonus": 20,
+    "aspeed": 5,
+    "att": 54,
     "def": 54,
     "def_bonus": 82,
-    "hp": 57
+    "hp": 57,
+    "maxhit": 8
   },
   "Sir Jerro": {
+    "abonus": 20,
+    "aspeed": 5,
+    "att": 54,
     "def": 54,
     "def_bonus": 82,
-    "hp": 57
+    "hp": 57,
+    "maxhit": 8
   },
   "Sir Mordred": {
+    "abonus": 20,
+    "aspeed": 4,
+    "att": 33,
     "def": 33,
     "def_bonus": 75,
-    "hp": 38
+    "hp": 38,
+    "maxhit": 5
   },
   "Skeletal Mystic": {
+    "abonus": 85,
+    "aspeed": 4,
+    "att": 140,
     "def": 120,
     "def_bonus": 0,
     "hp": 200
   },
   "Skeletal miner": {
+    "abonus": 15,
+    "aspeed": 4,
+    "att": 35,
     "def": 38,
     "def_bonus": 6,
-    "hp": 39
+    "hp": 39,
+    "maxhit": 6
   },
   "Skeleton (Ape Atoll)": {
+    "abonus": 50,
+    "aspeed": 4,
+    "att": 180,
     "def": 110,
     "def_bonus": 0,
-    "hp": 77
+    "hp": 77,
+    "maxhit": 10
   },
   "Skeleton (Barrows)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 72,
     "def": 72,
     "def_bonus": 2,
-    "hp": 51
+    "hp": 51,
+    "maxhit": 10
   },
   "Skeleton (Catacombs of Kourend)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 15,
     "def": 17,
     "def_bonus": 2,
-    "hp": 29
+    "hp": 29,
+    "maxhit": 3
   },
   "Skeleton (Forthos Ruin)": {
+    "abonus": 15,
+    "aspeed": 4,
+    "att": 24,
     "def": 24,
     "def_bonus": 6,
-    "hp": 17
+    "hp": 17,
+    "maxhit": 4
   },
   "Skeleton (Lucien's camp)": {
+    "abonus": 30,
+    "aspeed": 5,
+    "att": 160,
     "def": 62,
     "def_bonus": 23,
-    "hp": 54
+    "hp": 54,
+    "maxhit": 19
   },
   "Skeleton (Melzar's Maze)": {
+    "abonus": 15,
+    "aspeed": 4,
+    "att": 15,
     "def": 17,
     "def_bonus": 6,
-    "hp": 29
+    "hp": 29,
+    "maxhit": 3
   },
   "Skeleton (Shayzien Crypts)": {
+    "abonus": 30,
+    "aspeed": 5,
+    "att": 160,
     "def": 62,
-    "hp": 54
+    "hp": 54,
+    "maxhit": 19
   },
   "Skeleton (Tarn's Lair)#High level": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 33,
     "def": 50,
     "def_bonus": 0,
-    "hp": 75
+    "hp": 75,
+    "maxhit": 4
   },
   "Skeleton (Tarn's Lair)#Low level": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 33,
     "def": 12,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 4
   },
   "Skeleton (Tarn's Lair)#Mid level": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 33,
     "def": 30,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 4
   },
   "Skeleton (The Restless Ghost)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 7,
     "def_bonus": 2,
-    "hp": 18
+    "hp": 18,
+    "maxhit": 2
   },
   "Skeleton (Wilderness Agility Course)": {
+    "abonus": 15,
+    "aspeed": 4,
+    "att": 24,
     "def": 24,
     "def_bonus": 6,
-    "hp": 17
+    "hp": 17,
+    "maxhit": 1
   },
   "Skeleton (mage)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 70,
     "def": 80,
     "def_bonus": 30,
-    "hp": 85
+    "hp": 85,
+    "maxhit": 12
   },
   "Skeleton Hellhound (Calvar'ion)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 110,
     "def": 95,
     "def_bonus": 53,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 16
   },
   "Skeleton Hellhound (Vet'ion)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 210,
     "def": 150,
     "def_bonus": 71,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 26
   },
   "Skeleton Mage#Level 16": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 14,
     "def": 14,
     "def_bonus": 0,
-    "hp": 17
+    "hp": 17,
+    "maxhit": 3
   },
   "Skeleton Mage#Level 83": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 60,
     "def_bonus": 0,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 11
   },
   "Skeleton brute": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 115,
     "def": 110,
     "def_bonus": 2,
-    "hp": 124
+    "hp": 124,
+    "maxhit": 15
   },
   "Skeleton fremennik": {
+    "abonus": 8,
+    "aspeed": 6,
+    "att": 53,
     "def": 12,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 5
   },
   "Skeleton heavy": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 115,
     "def": 110,
     "def_bonus": 2,
-    "hp": 114
+    "hp": 114,
+    "maxhit": 15
   },
   "Skeleton hero": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 145,
     "def": 110,
     "def_bonus": 2,
-    "hp": 114
+    "hp": 114,
+    "maxhit": 18
   },
   "Skeleton thug": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 115,
     "def": 110,
     "def_bonus": 2,
-    "hp": 114
+    "hp": 114,
+    "maxhit": 15
   },
   "Skeleton warlord": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 115,
     "def": 110,
     "def_bonus": 2,
-    "hp": 124
+    "hp": 124,
+    "maxhit": 15
   },
   "Skeleton#Armed": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 17,
     "def": 17,
     "def_bonus": 2,
-    "hp": 24
+    "hp": 24,
+    "maxhit": 3
   },
   "Skeleton#Plain": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 17,
     "def": 17,
     "def_bonus": 2,
-    "hp": 24
+    "hp": 24,
+    "maxhit": 3
   },
   "Skeleton#Unarmed": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 17,
     "def": 17,
     "def_bonus": 2,
-    "hp": 24
+    "hp": 24,
+    "maxhit": 3
   },
   "Skogre": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 20,
     "def": 35,
     "def_bonus": 0,
-    "hp": 71
+    "hp": 71,
+    "maxhit": 5
   },
   "Skotizo": {
+    "abonus": 160,
+    "att": 240,
     "def": 200,
     "def_bonus": 80,
-    "hp": 450
+    "hp": 450,
+    "maxhit": 38
   },
   "Skraeling (Etceteria)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 3,
     "def": 3,
     "def_bonus": -12,
-    "hp": 1
+    "hp": 1,
+    "maxhit": 1
   },
   "Skraeling (Miscellania)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 3,
     "def": 3,
     "def_bonus": -12,
-    "hp": 1
+    "hp": 1,
+    "maxhit": 1
   },
   "Slagilith": {
+    "abonus": 10,
+    "aspeed": 4,
+    "att": 60,
     "def": 75,
     "def_bonus": 35,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 13
   },
   "Slash Bash": {
+    "abonus": 22,
+    "aspeed": 6,
+    "att": 100,
     "def": 60,
     "def_bonus": 30,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 13
   },
   "Snake": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 4,
     "def": 3,
     "def_bonus": 0,
-    "hp": 6
+    "hp": 6,
+    "maxhit": 1
   },
   "Snake (Ape Atoll)": {
+    "abonus": 100,
+    "aspeed": 4,
+    "att": 15,
     "def": 10,
     "def_bonus": 0,
-    "hp": 36
+    "hp": 36,
+    "maxhit": 10
   },
   "Snake (Mos Le'Harmless)": {
+    "abonus": 0,
+    "aspeed": 3,
+    "att": 25,
     "def": 50,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 3
   },
   "Snake (Varlamore)": {
     "def": 5,
@@ -3442,879 +6097,1579 @@
     "hp": 10
   },
   "Sofiya": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Soldier (Burthorpe)": {
+    "abonus": 11,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 20,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 6
   },
   "Soldier (Shayzien)": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 19,
     "def": 14,
     "def_bonus": 19,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 3
   },
   "Soldier (Yanille)": {
+    "abonus": 8,
+    "aspeed": 5,
+    "att": 26,
     "def": 26,
     "def_bonus": 19,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 4
   },
   "Soldier (tier 1)": {
+    "abonus": 12,
+    "aspeed": 7,
+    "att": 30,
     "def": 30,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 5
   },
   "Soldier (tier 2)": {
+    "abonus": 25,
+    "aspeed": 4,
+    "att": 40,
     "def": 40,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 7
   },
   "Soldier (tier 3)": {
+    "abonus": 20,
+    "aspeed": 5,
+    "att": 50,
     "def": 50,
     "def_bonus": 0,
-    "hp": 55
+    "hp": 55,
+    "maxhit": 7
   },
   "Soldier (tier 4)": {
+    "abonus": 10,
+    "aspeed": 5,
+    "att": 60,
     "def": 60,
     "def_bonus": 1,
-    "hp": 65
+    "hp": 65,
+    "maxhit": 8
   },
   "Soldier (tier 5)": {
+    "abonus": 5,
+    "aspeed": 4,
+    "att": 85,
     "def": 86,
     "def_bonus": 0,
-    "hp": 90
+    "hp": 90,
+    "maxhit": 10
   },
   "Sorebones": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 49,
     "def": 50,
     "def_bonus": 0,
-    "hp": 52
+    "hp": 52,
+    "maxhit": 6
   },
   "Sotetseg": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 180,
     "def": 200,
     "def_bonus": 100,
-    "hp": 4000
+    "hp": 4000,
+    "maxhit": 20
   },
   "Soulless": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 13,
     "def": 18,
     "def_bonus": 0,
-    "hp": 24
+    "hp": 24,
+    "maxhit": 2
   },
   "Sourhog": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 35,
     "def": 25,
     "def_bonus": 13,
-    "hp": 40
+    "hp": 40,
+    "maxhit": 6
   },
   "Spawn": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 120,
     "def": 10,
     "def_bonus": 0,
-    "hp": 15
+    "hp": 15,
+    "maxhit": 9
   },
   "Speedy Keith": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 32,
     "def": 27,
     "def_bonus": 9,
-    "hp": 37
+    "hp": 37,
+    "maxhit": 4
   },
   "Spider": {
+    "abonus": -35,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -42,
-    "hp": 1
+    "hp": 1,
+    "maxhit": 0
   },
   "Spider (Ape Atoll)": {
+    "abonus": 1,
+    "aspeed": 6,
+    "att": 1,
     "def": 1,
     "def_bonus": 0,
-    "hp": 2
+    "hp": 2,
+    "maxhit": 1
   },
   "Spider (Ungael)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 45,
     "def": 20,
     "def_bonus": 17,
-    "hp": 4
+    "hp": 4,
+    "maxhit": 6
   },
   "Spidine": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 37,
     "def": 36,
     "def_bonus": 0,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 5
   },
   "Spindel": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 200,
     "def": 225,
     "def_bonus": 50,
-    "hp": 515
+    "hp": 515,
+    "maxhit": 14
   },
   "Spined kraken": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 1,
     "def": 75,
     "def_bonus": 0,
-    "hp": 177
+    "hp": 177,
+    "maxhit": 14
   },
   "Spinolyp": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 10
   },
   "Stag": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 11,
     "def": 13,
     "def_bonus": 0,
-    "hp": 19
+    "hp": 19,
+    "maxhit": 2
   },
   "Starlight": {
+    "abonus": 60,
+    "aspeed": 5,
+    "att": 120,
     "def": 120,
     "def_bonus": 13,
-    "hp": 160
+    "hp": 160,
+    "maxhit": 15
   },
   "Steel dragon": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 215,
     "def": 215,
     "def_bonus": 70,
-    "hp": 210
+    "hp": 210,
+    "maxhit": 22
   },
   "Stick": {
+    "abonus": 50,
+    "aspeed": 6,
+    "att": 60,
     "def": 60,
     "def_bonus": 37,
-    "hp": 135
+    "hp": 135,
+    "maxhit": 27
   },
   "Stingray": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 130,
     "def": 25,
     "def_bonus": 0,
-    "hp": 106
+    "hp": 106,
+    "maxhit": 6
   },
   "Summoned Zombie": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 8,
     "def": 10,
     "def_bonus": 0,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 2
   },
   "Suqah": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 95,
     "def": 95,
     "def_bonus": 63,
-    "hp": 105
+    "hp": 105,
+    "maxhit": 10
   },
   "Svetlana": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Swamp Crab": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 50,
     "def_bonus": 100,
-    "hp": 75
+    "hp": 75,
+    "maxhit": 1
   },
   "Swamp snake": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 50,
     "def": 5,
     "def_bonus": 0,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 6
   },
   "Swordchick": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 41,
     "def": 45,
     "def_bonus": 0,
-    "hp": 35
+    "hp": 35,
+    "maxhit": 5
   },
   "Tanglefoot": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 97,
     "def": 91,
     "def_bonus": 0,
-    "hp": 102
+    "hp": 102,
+    "maxhit": 11
   },
   "Tar Monster": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 120,
     "def": 70,
     "def_bonus": 0,
-    "hp": 200
+    "hp": 200,
+    "maxhit": 9
   },
   "Tarik (Nardah)": {
+    "abonus": 4,
+    "aspeed": 4,
+    "att": 19,
     "def": 14,
     "def_bonus": 21,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 3
   },
   "Tekton": {
+    "abonus": 64,
+    "aspeed": 3,
+    "att": 390,
     "def": 205,
     "def_bonus": 120,
-    "hp": 600
+    "hp": 600,
+    "maxhit": 52
   },
   "Temple Spider": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 120,
     "def": 10,
     "def_bonus": 20,
-    "hp": 70
+    "hp": 70,
+    "maxhit": 6
   },
   "Tern": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 25,
     "def": 0,
     "def_bonus": 0,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 3
   },
   "Terrorbird": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 23,
     "def": 19,
     "def_bonus": 0,
-    "hp": 34
+    "hp": 34,
+    "maxhit": 3
   },
   "The Hueycoatl": {
+    "abonus": 100,
+    "att": 150,
     "def": 125,
     "def_bonus": 67,
-    "hp": 2500
+    "hp": 2500,
+    "maxhit": 14
   },
   "The Kendal": {
+    "abonus": 5,
+    "aspeed": 4,
+    "att": 65,
     "def": 60,
     "def_bonus": 10,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 9
   },
   "The Leviathan": {
+    "abonus": 200,
+    "att": 300,
     "def": 200,
     "def_bonus": 40,
-    "hp": 800
+    "hp": 800,
+    "maxhit": 50
   },
   "The Maiden of Sugadinti": {
+    "abonus": 0,
+    "aspeed": 10,
+    "att": 140,
     "def": 200,
     "def_bonus": 0,
-    "hp": 3500
+    "hp": 3500,
+    "maxhit": 18
   },
   "The Mimic": {
+    "abonus": 135,
+    "aspeed": 3,
+    "att": 185,
     "def": 120,
     "def_bonus": 158,
-    "hp": 230
+    "hp": 230,
+    "maxhit": 23
   },
   "The Nightmare": {
+    "abonus": 140,
+    "aspeed": 6,
+    "att": 150,
     "def": 150,
     "def_bonus": 113,
-    "hp": 2400
+    "hp": 2400,
+    "maxhit": 50
   },
   "The Shaikahan": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 80,
     "def": 25,
     "def_bonus": 0,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 9
   },
   "The Whisperer": {
+    "abonus": 140,
+    "aspeed": 10,
+    "att": 280,
     "def": 220,
     "def_bonus": 80,
-    "hp": 700
+    "hp": 700,
+    "maxhit": 42
   },
   "Thief": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 14,
     "def": 8,
     "def_bonus": 0,
-    "hp": 19
+    "hp": 19,
+    "maxhit": 2
   },
   "Thief (Varlamore)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 14,
     "def": 12,
     "def_bonus": 0,
-    "hp": 17
+    "hp": 17,
+    "maxhit": 2
   },
   "Thief#Plain": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 14,
     "def": 8,
     "def_bonus": 0,
-    "hp": 19
+    "hp": 19,
+    "maxhit": 2
   },
   "Thora (Miscellania)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 3,
     "def": 3,
     "def_bonus": -12,
-    "hp": 1
+    "hp": 1,
+    "maxhit": 1
   },
   "Thorhild": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": 0,
-    "hp": 1
+    "hp": 1,
+    "maxhit": 1
   },
   "Thrower Troll": {
+    "abonus": 0,
+    "aspeed": 7,
+    "att": 30,
     "def": 30,
     "def_bonus": 0,
-    "hp": 95
+    "hp": 95,
+    "maxhit": 10
   },
   "Thrower troll (Trollheim)": {
+    "abonus": 0,
+    "aspeed": 7,
+    "att": 30,
     "def": 15,
     "def_bonus": 0,
-    "hp": 95
+    "hp": 95,
+    "maxhit": 10
   },
   "Thug": {
+    "abonus": 5,
+    "aspeed": 4,
+    "att": 7,
     "def": 9,
     "def_bonus": 3,
-    "hp": 18
+    "hp": 18,
+    "maxhit": 2
   },
   "Tiger shark": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 120,
     "def": 60,
     "def_bonus": 0,
-    "hp": 174
+    "hp": 174,
+    "maxhit": 9
   },
   "Torag the Corrupted": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 100,
     "def": 100,
     "def_bonus": 226,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 23
   },
   "Tormented Demon": {
+    "abonus": 400,
+    "aspeed": 6,
+    "att": 255,
     "def": 150,
     "def_bonus": 106,
     "hp": 600
   },
   "Tormented Warrior": {
+    "abonus": 8,
+    "aspeed": 4,
+    "att": 76,
     "def": 76,
     "def_bonus": 0,
-    "hp": 90
+    "hp": 90,
+    "maxhit": 10
   },
   "Tortoise#With riders": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 30,
     "def": 80,
     "def_bonus": 0,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 11
   },
   "Tortoise#Without riders": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 15,
     "def": 60,
     "def_bonus": 30,
-    "hp": 79
+    "hp": 79,
+    "maxhit": 10
   },
   "Tortured gorilla": {
+    "abonus": 22,
+    "aspeed": 5,
+    "att": 105,
     "def": 70,
     "def_bonus": 0,
-    "hp": 113
+    "hp": 113,
+    "maxhit": 13
   },
   "Tortured soul": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 52,
     "def": 38,
     "def_bonus": 0,
-    "hp": 51
+    "hp": 51,
+    "maxhit": 7
   },
   "Tough Guy": {
+    "abonus": 9,
+    "aspeed": 4,
+    "att": 85,
     "def": 50,
     "def_bonus": 9,
-    "hp": 75
+    "hp": 75,
+    "maxhit": 7
   },
   "Tower guard": {
+    "abonus": 8,
+    "aspeed": 4,
+    "att": 26,
     "def": 26,
     "def_bonus": 29,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 4
   },
   "Tree spirit": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 9,
     "def": 35,
     "def_bonus": 0,
-    "hp": 54
+    "hp": 54,
+    "maxhit": 2
   },
   "Treus Dayth": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 70,
     "def": 100,
     "def_bonus": 5,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 15
   },
   "Tribesman": {
+    "abonus": 8,
+    "aspeed": 4,
+    "att": 23,
     "def": 26,
     "def_bonus": 5,
-    "hp": 39
+    "hp": 39,
+    "maxhit": 4
   },
   "Tribeswoman": {
+    "abonus": 8,
+    "aspeed": 4,
+    "att": 23,
     "def": 26,
     "def_bonus": 5,
-    "hp": 39
+    "hp": 39,
+    "maxhit": 4
   },
   "Troll general": {
+    "abonus": 60,
+    "aspeed": 4,
+    "att": 70,
     "def": 40,
     "def_bonus": 43,
-    "hp": 140
+    "hp": 140,
+    "maxhit": 38
   },
   "Troll spectator": {
+    "abonus": 20,
+    "aspeed": 6,
+    "att": 40,
     "def": 25,
     "def_bonus": 3,
-    "hp": 90
+    "hp": 90,
+    "maxhit": 13
   },
   "Tstanon Karlak": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 124,
     "def": 125,
     "def_bonus": 0,
-    "hp": 142
+    "hp": 142,
+    "maxhit": 15
   },
   "Twig": {
+    "abonus": 20,
+    "aspeed": 6,
+    "att": 40,
     "def": 25,
     "def_bonus": 3,
-    "hp": 90
+    "hp": 90,
+    "maxhit": 13
   },
   "Tyras guard": {
+    "abonus": 20,
+    "aspeed": 5,
+    "att": 85,
     "def": 100,
     "def_bonus": 82,
-    "hp": 110
+    "hp": 110,
+    "maxhit": 15
   },
   "TzHaar-Hur": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 60,
     "def": 60,
     "def_bonus": 0,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 7
   },
   "TzHaar-Ket#Level 149": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 120,
     "def": 120,
     "def_bonus": 0,
-    "hp": 140
+    "hp": 140,
+    "maxhit": 15
   },
   "TzHaar-Ket#Level 221": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 200,
     "def": 190,
     "def_bonus": 0,
-    "hp": 200
+    "hp": 200,
+    "maxhit": 19
   },
   "TzHaar-Mej": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 80,
     "def": 80,
     "def_bonus": 0,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 13
   },
   "TzHaar-Xil": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 140,
     "def": 100,
     "def_bonus": 0,
-    "hp": 120
+    "hp": 120,
+    "maxhit": 11
   },
   "TzKal-Zuk": {
+    "abonus": 0,
+    "aspeed": 10,
+    "att": 350,
     "def": 260,
     "def_bonus": 0,
-    "hp": 1200
+    "hp": 1200,
+    "maxhit": 148
   },
   "TzTok-Jad": {
+    "abonus": 0,
+    "aspeed": 8,
+    "att": 640,
     "def": 480,
     "def_bonus": 0,
-    "hp": 250
+    "hp": 250,
+    "maxhit": 97
   },
   "Ugthanki": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 35,
     "def": 35,
     "def_bonus": 0,
-    "hp": 45
+    "hp": 45,
+    "maxhit": 4
   },
   "Ulfric": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 100,
     "def": 82,
     "def_bonus": 0,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 11
   },
   "Umbra": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 1,
     "def": 200,
     "def_bonus": 100,
-    "hp": 500
+    "hp": 500,
+    "maxhit": 29
   },
   "Undead Druid": {
+    "abonus": 50,
+    "aspeed": 4,
+    "att": 60,
     "def": 60,
     "def_bonus": 50,
-    "hp": 140
+    "hp": 140,
+    "maxhit": 22
   },
   "Undead Lumberjack": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 73,
     "def": 5,
     "def_bonus": 0,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 2
   },
   "Undead Zealot": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 28,
     "def": 38,
     "def_bonus": 13,
-    "hp": 28
+    "hp": 28,
+    "maxhit": 4
   },
   "Undead chicken": {
+    "abonus": -47,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -42,
-    "hp": 3
+    "hp": 3,
+    "maxhit": 0
   },
   "Undead cow": {
+    "abonus": -15,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -21,
-    "hp": 8
+    "hp": 8,
+    "maxhit": 1
   },
   "Undead one#Skeleton": {
+    "abonus": 7,
+    "aspeed": 4,
+    "att": 55,
     "def": 15,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 7
   },
   "Undead one#Zombie": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 63,
     "def": 63,
     "def_bonus": 0,
-    "hp": 47
+    "hp": 47,
+    "maxhit": 7
   },
   "Unicorn": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 11,
     "def": 13,
     "def_bonus": 0,
-    "hp": 19
+    "hp": 19,
+    "maxhit": 2
   },
   "Unicorn Foal": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": 0,
-    "hp": 15
+    "hp": 15,
+    "maxhit": 2
   },
   "Unicow": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 18,
     "def": 22,
     "def_bonus": 0,
-    "hp": 24
+    "hp": 24,
+    "maxhit": 4
   },
   "Uodai": {
+    "abonus": 50,
+    "aspeed": 4,
+    "att": 130,
     "def": 130,
     "def_bonus": 0,
-    "hp": 130
+    "hp": 130,
+    "maxhit": 14
   },
   "Urium Shade": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 138,
     "def": 100,
     "def_bonus": 0,
-    "hp": 130
+    "hp": 130,
+    "maxhit": 13
   },
   "Uyoro": {
+    "abonus": 50,
+    "aspeed": 4,
+    "att": 130,
     "def": 130,
     "def_bonus": 0,
-    "hp": 130
+    "hp": 130,
+    "maxhit": 14
   },
   "Valgerd": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 3,
     "def": 3,
     "def_bonus": -12,
-    "hp": 1
+    "hp": 1,
+    "maxhit": 1
   },
   "Vampyre Juvenile": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 30,
     "def_bonus": 0,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 4
   },
   "Vampyre kraken": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 1,
     "def": 115,
     "def_bonus": 0,
-    "hp": 311
+    "hp": 311,
+    "maxhit": 22
   },
   "Vanguard": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 150,
     "def": 150,
     "def_bonus": 50,
-    "hp": 300
+    "hp": 300,
+    "maxhit": 22
   },
   "Vardorvis": {
+    "abonus": 190,
+    "aspeed": 5,
+    "att": 280,
     "def": 215,
     "def_bonus": 60,
-    "hp": 700
+    "hp": 700,
+    "maxhit": 32
   },
   "Vasa Nistirio": {
+    "abonus": 0,
+    "aspeed": 3,
+    "att": 1,
     "def": 175,
     "def_bonus": 50,
     "hp": 600
   },
   "Veiled kraken": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 200,
     "def": 115,
     "def_bonus": 0,
-    "hp": 225
+    "hp": 225,
+    "maxhit": 19
   },
   "Venenatis": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 300,
     "def": 321,
     "def_bonus": 70,
-    "hp": 850
+    "hp": 850,
+    "maxhit": 21
   },
   "Vera": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Verac the Defiled": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 100,
     "def": 100,
     "def_bonus": 226,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 23
   },
   "Verzik Vitur": {
+    "abonus": 0,
+    "aspeed": 14,
+    "att": 180,
     "def": 200,
     "def_bonus": 60,
-    "hp": 6525
+    "hp": 6525,
+    "maxhit": 60
   },
   "Vespula": {
+    "abonus": 0,
+    "aspeed": 3,
+    "att": 150,
     "def": 150,
     "def_bonus": 0,
-    "hp": 200
+    "hp": 200,
+    "maxhit": 14
   },
   "Vet'ion": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 430,
     "def": 395,
     "def_bonus": 130,
-    "hp": 255
+    "hp": 255,
+    "maxhit": 44
   },
   "Vorkath": {
+    "abonus": 16,
+    "aspeed": 5,
+    "att": 560,
     "def": 214,
     "def_bonus": 26,
-    "hp": 750
+    "hp": 750,
+    "maxhit": 30
   },
   "Vulture": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 40,
     "def": 10,
     "def_bonus": 0,
-    "hp": 10
+    "hp": 10,
+    "maxhit": 5
   },
   "Vyrewatch": {
+    "abonus": 0,
+    "aspeed": 8,
+    "att": 80,
     "def": 75,
     "def_bonus": 0,
-    "hp": 125
+    "hp": 125,
+    "maxhit": 8
   },
   "Vyrewatch Sentinel": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 120,
     "def": 180,
     "def_bonus": 0,
-    "hp": 150
+    "hp": 150,
+    "maxhit": 17
   },
   "Wallasalki": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 1,
     "def": 40,
     "def_bonus": 0,
-    "hp": 65
+    "hp": 65,
+    "maxhit": 30
   },
   "Warrior (Rellekka)": {
+    "abonus": 40,
+    "aspeed": 3,
+    "att": 40,
     "def": 40,
     "def_bonus": 50,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 8
   },
   "Warrior (Thieving)": {
+    "abonus": 6,
+    "aspeed": 4,
+    "att": 22,
     "def": 22,
     "def_bonus": 39,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 3
   },
   "Watchman": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 31,
     "def": 31,
     "def_bonus": 19,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 4
   },
   "Water elemental": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 30,
     "def": 30,
     "def_bonus": 0,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 4
   },
   "Water wizard": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 5,
     "def": 10,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 2
   },
   "Waterfiend": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 0,
     "def": 128,
     "def_bonus": 70,
-    "hp": 128
+    "hp": 128,
+    "maxhit": 16
   },
   "Weaponsmaster": {
+    "abonus": 8,
+    "aspeed": 5,
+    "att": 21,
     "def": 21,
     "def_bonus": 22,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 3
   },
   "Werewolf": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 70,
     "def": 70,
     "def_bonus": 0,
-    "hp": 100
+    "hp": 100,
+    "maxhit": 8
   },
   "White Knight (Burthorpe)": {
+    "abonus": 30,
+    "aspeed": 7,
+    "att": 27,
     "def": 21,
     "def_bonus": 76,
-    "hp": 52
+    "hp": 52,
+    "maxhit": 6
   },
   "White Knight#Level 36": {
+    "abonus": 30,
+    "aspeed": 7,
+    "att": 27,
     "def": 21,
     "def_bonus": 76,
-    "hp": 52
+    "hp": 52,
+    "maxhit": 6
   },
   "White Knight#Level 38": {
+    "abonus": 30,
+    "aspeed": 7,
+    "att": 27,
     "def": 21,
     "def_bonus": 76,
-    "hp": 52
+    "hp": 52,
+    "maxhit": 6
   },
   "White Knight#Level 39": {
+    "abonus": 30,
+    "aspeed": 7,
+    "att": 27,
     "def": 21,
     "def_bonus": 76,
-    "hp": 52
+    "hp": 52,
+    "maxhit": 6
   },
   "White Knight#Level 42": {
+    "abonus": 30,
+    "aspeed": 7,
+    "att": 27,
     "def": 21,
     "def_bonus": 76,
-    "hp": 52
+    "hp": 52,
+    "maxhit": 6
   },
   "White jaguar": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 55,
     "def": 55,
     "def_bonus": 0,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 6
   },
   "White wolf": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 20,
     "def": 14,
     "def_bonus": 0,
-    "hp": 28
+    "hp": 28,
+    "maxhit": 3
   },
   "Wild dog": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 53,
     "def": 54,
     "def_bonus": 0,
-    "hp": 62
+    "hp": 62,
+    "maxhit": 6
   },
   "Wilson": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 27,
     "def": 25,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 4
   },
   "Wingman Skree": {
+    "abonus": 45,
+    "aspeed": 5,
+    "att": 80,
     "def": 160,
     "def_bonus": 0,
-    "hp": 121
+    "hp": 121,
+    "maxhit": 16
   },
   "Wizard": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 8,
     "def": 5,
     "def_bonus": 0,
-    "hp": 14
+    "hp": 14,
+    "maxhit": 4
   },
   "Wolf": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 9,
     "def_bonus": 0,
-    "hp": 15
+    "hp": 15,
+    "maxhit": 2
   },
   "Wolf (Soul Wars)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 85,
     "def": 30,
     "def_bonus": 10,
-    "hp": 80
+    "hp": 80,
+    "maxhit": 8
   },
   "Woman": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -21,
-    "hp": 7
+    "hp": 7,
+    "maxhit": 1
   },
   "Woman (East Ardougne)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": -21,
-    "hp": 7
+    "hp": 7,
+    "maxhit": 1
   },
   "Woman (West Ardougne)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 2,
     "def": 7,
     "def_bonus": 0,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 1
   },
   "Wormbrain": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 1,
     "def_bonus": 0,
-    "hp": 5
+    "hp": 5,
+    "maxhit": 1
   },
   "Xarpus": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 1,
     "def": 100,
     "def_bonus": 0,
-    "hp": 3400
+    "hp": 3400,
+    "maxhit": 6
   },
   "Yadviga": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Yak": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 20,
     "def": 1,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 2
   },
   "Yama": {
+    "abonus": 50,
+    "aspeed": 8,
+    "att": 320,
     "def": 225,
-    "hp": 2500
+    "hp": 2500,
+    "maxhit": 46
   },
   "Yuri": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Zakl'n Gritch": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 83,
     "def": 127,
     "def_bonus": 0,
-    "hp": 150
+    "hp": 150,
+    "maxhit": 21
   },
   "Zalcano": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 1,
     "def": 200,
     "def_bonus": 0,
-    "hp": 600
+    "hp": 600,
+    "maxhit": 53
   },
   "Zamorak crafter": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 15,
     "def": 12,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 2
   },
   "Zamorak mage": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 75,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 9
   },
   "Zamorak ranger": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 75,
     "def": 80,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 9
   },
   "Zamorak warrior": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 85,
     "def": 90,
     "def_bonus": 0,
-    "hp": 45
+    "hp": 45,
+    "maxhit": 8
   },
   "Zamorak wizard": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 24,
     "def": 24,
     "def_bonus": 0,
-    "hp": 76
+    "hp": 76,
+    "maxhit": 20
   },
   "Zogre": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 20,
     "def": 35,
     "def_bonus": 0,
-    "hp": 71
+    "hp": 71,
+    "maxhit": 5
   },
   "Zoja": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 10,
     "def": 10,
     "def_bonus": -21,
-    "hp": 60
+    "hp": 60,
+    "maxhit": 2
   },
   "Zombie (Entrana Dungeon)": {
+    "abonus": 5,
+    "aspeed": 4,
+    "att": 19,
     "def": 21,
     "def_bonus": 10,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 3
   },
   "Zombie (Kourend)": {
+    "abonus": 5,
+    "aspeed": 5,
+    "att": 50,
     "def": 15,
     "def_bonus": 0,
-    "hp": 28
+    "hp": 28,
+    "maxhit": 7
   },
   "Zombie (Melzar's Maze)": {
+    "abonus": 5,
+    "aspeed": 5,
+    "att": 19,
     "def": 16,
     "def_bonus": 10,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 3
   },
   "Zombie (Sepulchre of Death)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 130,
     "def": 130,
     "def_bonus": 0,
-    "hp": 170
+    "hp": 170,
+    "maxhit": 14
   },
   "Zombie (Shayzien Crypts)": {
+    "abonus": 30,
+    "aspeed": 5,
+    "att": 160,
     "def": 62,
-    "hp": 54
+    "hp": 54,
+    "maxhit": 19
   },
   "Zombie (Stronghold of Security)": {
+    "abonus": 5,
+    "aspeed": 5,
+    "att": 25,
     "def": 20,
     "def_bonus": 0,
-    "hp": 30
+    "hp": 30,
+    "maxhit": 4
   },
   "Zombie (Tarn's Lair)#High level": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 36,
     "def": 50,
     "def_bonus": 0,
-    "hp": 75
+    "hp": 75,
+    "maxhit": 5
   },
   "Zombie (Tarn's Lair)#Low level": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 36,
     "def": 12,
     "def_bonus": 0,
-    "hp": 25
+    "hp": 25,
+    "maxhit": 5
   },
   "Zombie (Tarn's Lair)#Mid level": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 36,
     "def": 30,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 5
   },
   "Zombie (Temple Trekking)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 20,
     "def": 20,
     "def_bonus": 0,
-    "hp": 20
+    "hp": 20,
+    "maxhit": 3
   },
   "Zombie (Wilderness)": {
+    "abonus": 5,
+    "aspeed": 5,
+    "att": 13,
     "def": 18,
     "def_bonus": 0,
-    "hp": 24
+    "hp": 24,
+    "maxhit": 2
   },
   "Zombie (Zogre Flesh Eaters)": {
+    "abonus": 0,
+    "aspeed": 6,
+    "att": 30,
     "def": 30,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 4
   },
   "Zombie pirate": {
+    "abonus": 0,
+    "aspeed": 5,
+    "att": 20,
     "def": 30,
     "def_bonus": 0,
-    "hp": 55
+    "hp": 55,
+    "maxhit": 2
   },
   "Zombie pirate (Braindeath Island)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 49,
     "def": 50,
     "def_bonus": 0,
-    "hp": 52
+    "hp": 52,
+    "maxhit": 6
   },
   "Zombie pirate (Harmony Island)": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 49,
     "def": 50,
     "def_bonus": 0,
-    "hp": 52
+    "hp": 52,
+    "maxhit": 6
   },
   "Zombie rat": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 2,
     "def": 2,
     "def_bonus": 0,
-    "hp": 5
+    "hp": 5,
+    "maxhit": 1
   },
   "Zombie swab": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 45,
     "def": 50,
     "def_bonus": 0,
-    "hp": 50
+    "hp": 50,
+    "maxhit": 6
   },
   "Zombie#Level 13": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 8,
     "def": 10,
     "def_bonus": 0,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 3
   },
   "Zombie#Level 18": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 8,
     "def": 10,
     "def_bonus": 0,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 3
   },
   "Zombie#Level 24": {
+    "abonus": 0,
+    "aspeed": 4,
+    "att": 8,
     "def": 10,
     "def_bonus": 0,
-    "hp": 22
+    "hp": 22,
+    "maxhit": 3
   },
   "Zulrah": {
+    "abonus": 0,
+    "aspeed": 3,
+    "att": 1,
     "def": 300,
     "def_bonus": 0,
-    "hp": 500
+    "hp": 500,
+    "maxhit": 41
   }
 }

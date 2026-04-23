@@ -7065,6 +7065,11 @@ input#searchChunks {
     pointer-events: all;
 }
 
+.shop-cost-gate-input {
+    width: 65px;
+    pointer-events: all;
+}
+
 .skill-task-cap-radios {
     display: flex;
     flex-direction: column;
