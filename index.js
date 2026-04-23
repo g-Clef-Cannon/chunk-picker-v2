@@ -1395,6 +1395,7 @@ let bisUpgrades = {};
 let bankMemoryFormat = '';
 let globalValidsBoosts = {};
 let globalEveryDropAltMap = {};
+let globalTaskRuleInfo = {};
 let oldChallengeArr = {};
 let futureChunkData = {};
 let futureUnlockedSections = {};
@@ -4108,7 +4109,8 @@ let workerOnMessage = function(e) {
                 bisUpgrades,
                 bankMemoryFormat,
                 globalValidsBoosts,
-                globalEveryDropAltMap
+                globalEveryDropAltMap,
+                globalTaskRuleInfo
             } = e.data);
             if (settings['newTasks'] && chunkJustRolled) {
                 openNewTasksModal(calcFutureChallenges2(globalValids, baseChunkData, highestOverall)[1].replaceAll(", 'future'", ", ''"));
@@ -10945,7 +10947,11 @@ let showDetails = function(challenge, skill, dataType, isNested) {
         }
         $('#details-title').html(`<b class="noscroll">${challengeLabelLine}${challenge.split('~').length > 1 ? `${challenge.split('~')[0]}<a class='link noscroll' href="${"https://oldschool.runescape.wiki/w/" + encodeForUrl((challenge.split('|')[1]))}" target="_blank">${challenge.split('~')[1].split('|').join('')}</a>${challenge.split('~')[2]}` : `${challenge.replaceAll(/\|/g, '').replaceAll(/~/g, '').replaceAll(/\*/g, '')}`}${chunkInfo['challenges'][skill][challenge].hasOwnProperty('InfoLink') ? ` (<a class='link external-info-link noscroll' href="${"https://oldschool.runescape.wiki/w/" + encodeForUrl(chunkInfo['challenges'][skill][challenge]['InfoLink'])}" target="_blank">Wiki <i class="fa-solid fa-external-link-alt"></i></a>)` : ''}</b>`);
         chunkInfo['challenges'][skill][challenge].hasOwnProperty('Description') && $('#details-data').append(`<span class="details-subtitle details-description noscroll"><i class="noscroll">${chunkInfo['challenges'][skill][challenge]['Description']}</i></span><br />`);
-        detailsKeys.forEach((key) => {
+        // Show which rules passed for this task
+        if (globalTaskRuleInfo && globalTaskRuleInfo[skill] && globalTaskRuleInfo[skill][challenge]) {
+            let ruleTags = globalTaskRuleInfo[skill][challenge].map(r => `<span class="noscroll rule-tag">${r}</span>`).join(' ');
+            $('#details-data').append(`<span class="details-subtitle noscroll"><u class="noscroll"><b class="noscroll">active rules</b></u></span><br /><span class="noscroll rule-tags-row">${ruleTags}</span><br />`);
+        }        detailsKeys.forEach((key) => {
             if (key === 'Skill RequirementsDetails' && skill !== 'Quest' && skill !== 'Diary') {
                 return;
             }

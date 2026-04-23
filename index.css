@@ -7103,6 +7103,23 @@ input#searchChunks {
     font-size: 13px;
 }
 
+.rule-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
+.rule-tag {
+    display: inline-block;
+    background: var(--colorBoxLight, #2a2a2a);
+    color: var(--colorLink, #6ca0dc);
+    border: 1px solid var(--colorLink, #6ca0dc);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 12px;
+}
+
 .addEquipment {
     cursor: pointer;
     -webkit-transition-duration: 0.4s;

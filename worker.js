@@ -2585,6 +2585,7 @@ const FLINCH_CYCLE_TICKS = 14; // measured corner-flinch cycle in game ticks
 // Shop Cost Gate: module-level state
 let shopCostGateActive = false;
 let bestCoinsPerHour = 0;
+let globalTaskRuleInfo = {};
 
 // Estimate coins per hour from the best monster source in player's chunks
 const calcBestCoinsPerHour = function(atkLevel, strLevel, weaponAtk, weaponStr, weaponSpeed) {
@@ -3089,6 +3090,19 @@ onmessage = function(e) {
         //console.log(nonValids);
         //console.log(baseChunkData);
 
+        // Annotate BiS tasks with active rule tags
+        if (globalValids['BiS'] && Object.keys(globalValids['BiS']).length > 0) {
+            if (!globalTaskRuleInfo['BiS']) globalTaskRuleInfo['BiS'] = {};
+            Object.keys(globalValids['BiS']).forEach((name) => {
+                let tags = [];
+                if (monsterGateActive) tags.push('Monster Gate');
+                if (shopCostGateActive) tags.push('Shop Gate');
+                if (rules['BiS Respect Skill Caps'] && (rules['Strict Tool Gating'] || rules['Method-Based Cap'] || (skillTaskCap && skillTaskCap !== 'none'))) {
+                    tags.push('BiS Skill Cap');
+                }
+                if (tags.length > 0) globalTaskRuleInfo['BiS'][name] = tags;
+            });
+        }
         postMessage({
             type,
             globalValids,
@@ -3111,7 +3125,8 @@ onmessage = function(e) {
             bisUpgrades: bisUpgradesOutput,
             bankMemoryFormat,
             globalValidsBoosts,
-            globalEveryDropAltMap
+            globalEveryDropAltMap,
+            globalTaskRuleInfo
         });
     } catch (err) {
         postMessage({ type: 'error', err });
@@ -3849,7 +3864,7 @@ let calcChallenges = function(chunks, baseChunkData) {
             });
         });
         valids = newValids;
-        [newValids, tempItemSkill, tempMultiStepSkill] = calcChallengesWork(chunks, baseChunkData, tempItemSkill);
+        [newValids, tempItemSkill, tempMultiStepSkill, globalTaskRuleInfo] = calcChallengesWork(chunks, baseChunkData, tempItemSkill);
         !!manualTasks && Object.keys(manualTasks).forEach((skill) => {
             skill !== 'BiS' && Object.keys(manualTasks[skill]).filter(challenge => !!chunkInfo['challenges'][skill] && !!chunkInfo['challenges'][skill][challenge]).forEach((challenge) => {
                 if (!valids[skill]) {
@@ -7327,6 +7342,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
     });
 
     // Strict Tool Gating: cap gathering skill tasks by best available tool tier
+    let toolGatingCaps = {}; // saved for task rule info
     if (rules['Strict Tool Gating'] && !!chunkInfo['toolLevels']) {
         let toolSkillMap = { 'Woodcutting': 'Axe[+]', 'Mining': 'Pickaxe[+]' };
         Object.keys(toolSkillMap).forEach((skill) => {
@@ -7352,6 +7368,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             // Cap tasks at best tool level + buffer
             if (bestToolLevel > 0) {
                 let cap = calcLevelCap(bestToolLevel);
+                toolGatingCaps[skill] = cap;
                 Object.keys(valids[skill]).forEach((name) => {
                     let taskLevel = chunkInfo['challenges'][skill][name]['Level'] || 0;
                     if (taskLevel > cap) {
@@ -7363,6 +7380,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
     }
 
     // Method-Based Cap: cap all skill tasks at highest available primary method level + buffer
+    let methodBasedCaps = {}; // saved for task rule info
     if (rules['Method-Based Cap']) {
         skillNames.forEach((skill) => {
             if (!valids[skill] || Object.keys(valids[skill]).length === 0) return;
@@ -7388,6 +7406,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             if (highestPrimaryLevel === 0) return;
 
             let cap = calcLevelCap(highestPrimaryLevel);
+            methodBasedCaps[skill] = cap;
             Object.keys(valids[skill]).forEach((name) => {
                 let taskLevel = chunkInfo['challenges'][skill][name]['Level'] || 0;
                 if (taskLevel > cap) {
@@ -7398,6 +7417,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
     }
 
     // Skill Task Cap: cap skill tasks based on quest/diary requirements or custom level
+    let skillTaskCapValues = {}; // saved for task rule info
     if (skillTaskCap && skillTaskCap !== 'none') {
         let capPerSkill = {};
 
@@ -7425,6 +7445,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
         }
 
         // Apply caps to valids
+        skillTaskCapValues = Object.assign({}, capPerSkill);
         skillNames.forEach((skill) => {
             if (!valids[skill] || Object.keys(valids[skill]).length === 0) return;
             let cap = capPerSkill[skill];
@@ -7811,9 +7832,42 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
         });
     }
 
+    // Build per-task rule info: which active rules applied to each surviving task
+    let taskRuleInfo = {};
+    let allSkills = [...skillNames, 'Nonskill', 'Quest', 'Diary', 'Extra'];
+    allSkills.forEach((skill) => {
+        if (!valids[skill] || Object.keys(valids[skill]).length === 0) return;
+        taskRuleInfo[skill] = {};
+        Object.keys(valids[skill]).forEach((name) => {
+            let rulesTags = [];
+            let isSkillTask = skillNames.includes(skill);
+            if (isSkillTask) {
+                if (toolGatingCaps[skill]) {
+                    rulesTags.push('Tool Gating ≤' + toolGatingCaps[skill]);
+                }
+                if (methodBasedCaps[skill]) {
+                    rulesTags.push('Method Cap ≤' + methodBasedCaps[skill]);
+                }
+                if (skillTaskCapValues[skill]) {
+                    let capLabel = skillTaskCap === 'quest' ? 'Quest' : skillTaskCap === 'diary' ? 'Diary' : 'Custom';
+                    rulesTags.push(capLabel + ' Cap ≤' + skillTaskCapValues[skill]);
+                }
+            }
+            if (monsterGateActive) {
+                rulesTags.push('Monster Gate');
+            }
+            if (shopCostGateActive) {
+                rulesTags.push('Shop Gate');
+            }
+            if (rulesTags.length > 0) {
+                taskRuleInfo[skill][name] = rulesTags;
+            }
+        });
+    });
+
     //console.log(JSON.parse(JSON.stringify(tempItemSkill)));
     //console.log(JSON.parse(JSON.stringify(valids)));
-    return [valids, tempItemSkill, tempMultiStepSkill];
+    return [valids, tempItemSkill, tempMultiStepSkill, taskRuleInfo];
 }
 
 // Checks if skill has primary training
