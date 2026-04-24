@@ -3014,37 +3014,19 @@ onmessage = function(e) {
             if (!hasPrimaryRanged && !hasPrimaryMagic) {
                 monsterGateActive = true;
                 needRerun = true;
-                // Pass 1: determine ATK/STR levels from all available weapon requirements
+                // Step 1: determine ATK/STR levels from all available weapon requirements
                 let availableWeapons = Object.keys(chunkInfo['equipment']).filter(eq => !!baseChunkData['items'][eq] && (chunkInfo['equipment'][eq].slot === 'weapon' || chunkInfo['equipment'][eq].slot === '2h'));
                 availableWeapons.forEach((eq) => {
                     let reqs = chunkInfo['equipment'][eq].requirements || {};
                     if (reqs['Attack'] && reqs['Attack'] > gatePlayerAtkLevel) gatePlayerAtkLevel = reqs['Attack'];
                     if (reqs['Strength'] && reqs['Strength'] > gatePlayerStrLevel) gatePlayerStrLevel = reqs['Strength'];
                 });
-                // Pass 2: pick best weapon the player can wield (by melee_strength)
-                let bestWeaponStr = -1;
-                availableWeapons.forEach((eq) => {
-                    let reqs = chunkInfo['equipment'][eq].requirements || {};
-                    let reqAtk = reqs['Attack'] || 0;
-                    let reqStr = reqs['Strength'] || 0;
-                    if (reqAtk > gatePlayerAtkLevel || reqStr > gatePlayerStrLevel) return;
-                    let wpnStr = chunkInfo['equipment'][eq].melee_strength || 0;
-                    if (wpnStr > bestWeaponStr) {
-                        bestWeaponStr = wpnStr;
-                        gatePlayerWeaponStr = wpnStr;
-                        gatePlayerWeaponAtk = Math.max(chunkInfo['equipment'][eq].attack_stab || 0, chunkInfo['equipment'][eq].attack_slash || 0, chunkInfo['equipment'][eq].attack_crush || 0);
-                        gatePlayerWeaponSpeed = chunkInfo['equipment'][eq].attack_speed || 4;
-                        gatePlayerWeaponName = eq;
-                    }
-                });
-                // If no Strength requirement found from weapons, assume STR ≈ ATK
                 if (gatePlayerStrLevel <= 1 && gatePlayerAtkLevel > 1) {
                     gatePlayerStrLevel = gatePlayerAtkLevel;
                 }
-                // Estimate player HP and Def from Attack level
+                // Step 2: set up player HP/DEF/armour (needed for flinch checks during weapon selection)
                 gatePlayerHP = gatePlayerAtkLevel + 9;
                 gatePlayerDefLevel = gatePlayerAtkLevel;
-                // Scan best armour defence per slot from available equipment
                 let armourSlots = ['head', 'body', 'legs', 'shield', 'feet', 'hands', 'cape', 'neck', 'ring'];
                 let bestDefPerSlot = {};
                 Object.keys(chunkInfo['equipment']).filter(eq => !!baseChunkData['items'][eq]).forEach((eq) => {
@@ -3057,6 +3039,63 @@ onmessage = function(e) {
                     }
                 });
                 gatePlayerArmourDef = Math.round(Object.values(bestDefPerSlot).reduce((a, b) => a + b, 0));
+                // Step 3: iterative weapon upgrade — start unarmed, only upgrade to
+                // weapons that are actually obtainable with current gear
+                let sortedWeapons = availableWeapons
+                    .filter(eq => {
+                        let reqs = chunkInfo['equipment'][eq].requirements || {};
+                        return (reqs['Attack'] || 0) <= gatePlayerAtkLevel && (reqs['Strength'] || 0) <= gatePlayerStrLevel;
+                    })
+                    .map(eq => ({ name: eq, str: chunkInfo['equipment'][eq].melee_strength || 0 }))
+                    .sort((a, b) => a.str - b.str);
+                sortedWeapons.forEach(({ name: eq }) => {
+                    let wpnStr = chunkInfo['equipment'][eq].melee_strength || 0;
+                    if (wpnStr <= gatePlayerWeaponStr) return; // not an upgrade
+                    let wpnAtk = Math.max(chunkInfo['equipment'][eq].attack_stab || 0, chunkInfo['equipment'][eq].attack_slash || 0, chunkInfo['equipment'][eq].attack_crush || 0);
+                    let wpnSpeed = chunkInfo['equipment'][eq].attack_speed || 4;
+                    // Check if this weapon is obtainable with current gear
+                    let sources = baseChunkData['items'][eq];
+                    let obtainable = false;
+                    Object.keys(sources).forEach((source) => {
+                        if (obtainable) return;
+                        let sourceVal = sources[source];
+                        if (sourceVal === 'shop') {
+                            // Shop weapons: allow if price is reasonable (conservative check)
+                            let basePrice = shopPrices[eq] || 0;
+                            if (basePrice <= 0 || basePrice < 1000) { obtainable = true; return; }
+                            // Can't check coins/hr yet, so allow if price is moderate
+                            if (basePrice < 5000) obtainable = true;
+                        } else if (!sourceVal.includes('drop')) {
+                            obtainable = true; // skill source, spawn, etc.
+                        } else {
+                            // Monster drop: check if killable with CURRENT weapon
+                            let ms = monsterStats[source] || {hp: 10, def: 1, db: 0};
+                            let killTime = estimateEffectiveKillTime(
+                                gatePlayerAtkLevel, gatePlayerStrLevel,
+                                gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed,
+                                ms.hp || 10, ms.def || 1, ms.db || 0,
+                                ms.al || 0, ms.ab || 0, ms.mh || 0, ms.as || 4
+                            );
+                            let avgKills = 128;
+                            if (dropRatesGlobal[source] && dropRatesGlobal[source][eq]) {
+                                let rateStr = dropRatesGlobal[source][eq];
+                                if (rateStr === 'Always') { avgKills = 1; }
+                                else {
+                                    let parts = rateStr.split('/');
+                                    if (parts.length === 2) avgKills = Math.ceil(parseFloat(parts[1]) / parseFloat(parts[0]));
+                                }
+                            }
+                            let totalHours = (killTime * avgKills) / 3600;
+                            if (totalHours <= bisMonsterGateHours) obtainable = true;
+                        }
+                    });
+                    if (obtainable) {
+                        gatePlayerWeaponAtk = wpnAtk;
+                        gatePlayerWeaponStr = wpnStr;
+                        gatePlayerWeaponSpeed = wpnSpeed;
+                        gatePlayerWeaponName = eq;
+                    }
+                });
             }
         }
         // Set up Shop Cost Gate — uses same player combat estimates as monster gate
