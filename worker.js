@@ -2764,6 +2764,9 @@ const passesMonsterGate = function(itemName, itemSources, combatContext) {
             } else if (!bestDetail && killTime === Infinity) {
                 let breakdown = buildKillTimeBreakdown(source, mHp, mDef, mDb, mAl, mAb, mMh, mAs, ms.uf);
                 bestDetail = breakdown + '<br><b>Drop:</b> rate ' + rateStr + ' — <b>BLOCKED</b> (unkillable without protection prayers)';
+            } else if (!bestDetail) {
+                let breakdown = buildKillTimeBreakdown(source, mHp, mDef, mDb, mAl, mAb, mMh, mAs, ms.uf);
+                bestDetail = breakdown + '<br><b>Drop:</b> rate ' + rateStr + ', avg_kills=' + avgKills + ', total=' + Math.round(killTime) + 's×' + avgKills + '/3600=<b>' + totalHours.toFixed(1) + 'h</b> (threshold: ' + bisMonsterGateHours + 'h) ✗ BLOCKED';
             }
         }
     });
@@ -2813,6 +2816,13 @@ const passesShopCostGate = function(itemName, itemSources) {
         lines.push('Base price: ' + lowestBasePrice.toLocaleString() + 'gp × ' + lowestMarkup.toFixed(1) + ' markup = ' + lowestPrice.toLocaleString() + 'gp');
         lines.push('<b>Coin source:</b> best ' + bestCoinsPerHour.toFixed(1) + ' coins/hr from ' + (bestCoinsMonsterName || '?'));
         lines.push('Time to earn: ' + lowestPrice.toLocaleString() + '/' + bestCoinsPerHour.toFixed(1) + '=<b>' + hoursToFarm.toFixed(1) + 'h</b> (threshold: ' + shopCostGateHours + 'h) ✓');
+        shopGateDetails[itemName] = lines.join('<br>');
+    } else {
+        let lines = [];
+        lines.push('<b>Shop:</b> ' + itemName + ' from ' + lowestShopName);
+        lines.push('Base price: ' + lowestBasePrice.toLocaleString() + 'gp × ' + lowestMarkup.toFixed(1) + ' markup = ' + lowestPrice.toLocaleString() + 'gp');
+        lines.push('<b>Coin source:</b> best ' + bestCoinsPerHour.toFixed(1) + ' coins/hr from ' + (bestCoinsMonsterName || '?'));
+        lines.push('Time to earn: ' + lowestPrice.toLocaleString() + '/' + bestCoinsPerHour.toFixed(1) + '=<b>' + hoursToFarm.toFixed(1) + 'h</b> (threshold: ' + shopCostGateHours + 'h) ✗ BLOCKED');
         shopGateDetails[itemName] = lines.join('<br>');
     }
     return result;
@@ -6530,6 +6540,9 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
 
     let doneTempSkillItems = false;
 
+    // Track tasks removed by custom rules (for Rule-Skipped Tasks display)
+    let ruleSkippedTasks = {};
+
     !!chunkInfo['challenges'] && tempSkills.filter(skill => { return !passiveSkill || !passiveSkill.hasOwnProperty(skill) || passiveSkill[skill] > 0 }).forEach((skill) => {
         doneTempSkillItems = false;
         tempItemSkill[skill] = {};
@@ -6785,6 +6798,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             let staffItems = {};
             let processingSource = false;
             let hasProcessableItems = false;
+            let taskGateReasons = [];
             !!chunkInfo['challenges'][skill][name]['Items'] && chunkInfo['challenges'][skill][name]['Items'].some(item => {
                 let secondary = item.includes('*');
                 if (item.replaceAll(/\*/g, '').includes('[+]') && itemsPlus.hasOwnProperty(item.replaceAll(/\*/g, '').split('[+]x')[0].replaceAll('[+]', '') + '[+]')) {
@@ -6810,7 +6824,18 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                                     }
                                 });
                                 if (combatSkills.includes(skill) || (chunkInfo['challenges'][skill][name].hasOwnProperty('Category') && chunkInfo['challenges'][skill][name]['Category'].includes('BIS Skilling'))) {
-                                    (Object.keys(items[plusAdjusted]).filter((source) => { return !items[plusAdjusted][source].includes('-') || !processingSkill[items[plusAdjusted][source].split('-')[1]] || chunkInfo['challenges'][skill][name]['Not Equip'] || rules['Wield Crafted Items'] || items[plusAdjusted][source].split('-')[1] === 'Slayer' || skill === 'Magic' }).length > 0) && passesMonsterGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted], true) && passesShopCostGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted]) && (tempTempValid = true);
+                                    let sourceFilterPasses = Object.keys(items[plusAdjusted]).filter((source) => { return !items[plusAdjusted][source].includes('-') || !processingSkill[items[plusAdjusted][source].split('-')[1]] || chunkInfo['challenges'][skill][name]['Not Equip'] || rules['Wield Crafted Items'] || items[plusAdjusted][source].split('-')[1] === 'Slayer' || skill === 'Magic' }).length > 0;
+                                    if (sourceFilterPasses) {
+                                        let mGate = passesMonsterGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted], true);
+                                        let sGate = mGate && passesShopCostGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted]);
+                                        if (mGate && sGate) {
+                                            tempTempValid = true;
+                                        } else if (!tempTempValid) {
+                                            let cleanItem = plusAdjusted.replaceAll(/\*/g, '');
+                                            if (!mGate && monsterGateDetails[cleanItem]) taskGateReasons.push({ label: 'Monster Gate', detail: monsterGateDetails[cleanItem] });
+                                            else if (!sGate && shopGateDetails[cleanItem]) taskGateReasons.push({ label: 'Shop Gate', detail: shopGateDetails[cleanItem] });
+                                        }
+                                    }
                                 } else {
                                     tempTempValid = true;
                                 }
@@ -6878,7 +6903,18 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                                 }
                             });
                             if (combatSkills.includes(skill) || (chunkInfo['challenges'][skill][name].hasOwnProperty('Category') && chunkInfo['challenges'][skill][name]['Category'].includes('BIS Skilling'))) {
-                                (Object.keys(items[plusAdjusted]).filter((source) => { return !items[plusAdjusted][source].includes('-') || !processingSkill[items[plusAdjusted][source].split('-')[1]] || chunkInfo['challenges'][skill][name]['Not Equip'] || rules['Wield Crafted Items'] || items[plusAdjusted][source].split('-')[1] === 'Slayer' || skill === 'Magic' }).length > 0) && passesMonsterGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted], true) && passesShopCostGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted]) && (tempTempValid = true);
+                                let sourceFilterPasses = Object.keys(items[plusAdjusted]).filter((source) => { return !items[plusAdjusted][source].includes('-') || !processingSkill[items[plusAdjusted][source].split('-')[1]] || chunkInfo['challenges'][skill][name]['Not Equip'] || rules['Wield Crafted Items'] || items[plusAdjusted][source].split('-')[1] === 'Slayer' || skill === 'Magic' }).length > 0;
+                                if (sourceFilterPasses) {
+                                    let mGate = passesMonsterGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted], true);
+                                    let sGate = mGate && passesShopCostGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted]);
+                                    if (mGate && sGate) {
+                                        tempTempValid = true;
+                                    } else if (!tempTempValid) {
+                                        let cleanItem = plusAdjusted.replaceAll(/\*/g, '');
+                                        if (!mGate && monsterGateDetails[cleanItem]) taskGateReasons.push({ label: 'Monster Gate', detail: monsterGateDetails[cleanItem] });
+                                        else if (!sGate && shopGateDetails[cleanItem]) taskGateReasons.push({ label: 'Shop Gate', detail: shopGateDetails[cleanItem] });
+                                    }
+                                }
                             } else {
                                 tempTempValid = true;
                             }
@@ -6962,8 +6998,14 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                                     }
                                 }
                             });
+                            let preGateValid = tempTempValid;
                             tempTempValid && !passesMonsterGate(tempItem.replaceAll(/\*/g, ''), items[tempItem], true) && (tempTempValid = false);
                             tempTempValid && !passesShopCostGate(tempItem.replaceAll(/\*/g, ''), items[tempItem]) && (tempTempValid = false);
+                            if (preGateValid && !tempTempValid) {
+                                let cleanItem = tempItem.replaceAll(/\*/g, '');
+                                if (monsterGateDetails[cleanItem]) taskGateReasons.push({ label: 'Monster Gate', detail: monsterGateDetails[cleanItem] });
+                                if (shopGateDetails[cleanItem]) taskGateReasons.push({ label: 'Shop Gate', detail: shopGateDetails[cleanItem] });
+                            }
                             !tempTempValid && (validChallenge = false);
                             !tempTempValid && (wrongThings.push(item));
                             if (!tempTempValid) {
@@ -7290,6 +7332,18 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             });
             if (wrongThings.length > 0) {
                 nonValids[name] = wrongThings;
+                if (taskGateReasons.length > 0) {
+                    let taskLevel = chunkInfo['challenges'][skill][name]['Level'] || chunkInfo['challenges'][skill][name]['Label'] || '?';
+                    if (!ruleSkippedTasks[skill]) ruleSkippedTasks[skill] = {};
+                    if (!ruleSkippedTasks[skill][name]) ruleSkippedTasks[skill][name] = { level: taskLevel, reasons: [] };
+                    let seenLabels = new Set(ruleSkippedTasks[skill][name].reasons.map(r => r.label));
+                    taskGateReasons.forEach(r => {
+                        if (!seenLabels.has(r.label)) {
+                            ruleSkippedTasks[skill][name].reasons.push(r);
+                            seenLabels.add(r.label);
+                        }
+                    });
+                }
                 return;
             }
             chunkInfo['challenges'][skill][name]['Secondary'] = tempSecondary;
@@ -7575,9 +7629,6 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             valids[skill][name] = chunkInfo['challenges'][skill][name]['Level'] || chunkInfo['challenges'][skill][name]['Label'] || true;
         });
     });
-
-    // Track tasks removed by custom rules (for Rule-Skipped Tasks display)
-    let ruleSkippedTasks = {};
 
     // Strict Tool Gating: cap gathering skill tasks by best available tool tier
     let toolGatingCaps = {}; // saved for task rule info
