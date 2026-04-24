@@ -151,16 +151,16 @@ const calcLevelCap = function(level) {
 
 const monsterStats = {
     "A Doubt": {hp:59,def:85,al:72,ab:18,mh:8,as:6},
-    "Abyssal guardian": {hp:50,def:30,db:70,al:30,ab:15,mh:11},
+    "Abyssal guardian": {hp:50,def:30,db:70,al:30,ab:15,mh:11,uf:1},
     "Abyssal leech": {hp:10,def:25,db:67,al:95,ab:100,mh:2,as:2},
     "Abyssal walker": {hp:95,def:95,db:53,al:5,ab:5,mh:13,as:5},
-    "Adamant dragon": {hp:295,def:272,db:72,al:280,mh:29},
+    "Adamant dragon": {hp:295,def:272,db:72,al:280,mh:29,uf:1},
     "Afflicted": {hp:40,def:20,al:24,mh:3},
-    "Agrith Naar": {hp:95,def:82,al:83,mh:10},
-    "Agrith-Na-Na": {hp:200,def:82,db:87,al:83,ab:100,mh:16},
-    "Ahrim the Blighted": {hp:100,def:100,db:102,al:1,mh:20,as:6},
+    "Agrith Naar": {hp:95,def:82,al:83,mh:10,uf:1},
+    "Agrith-Na-Na": {hp:200,def:82,db:87,al:83,ab:100,mh:16,uf:1},
+    "Ahrim the Blighted": {hp:100,def:100,db:102,al:1,mh:20,as:6,uf:1},
     "Air elemental": {hp:30,def:30,al:40,mh:3},
-    "Air wizard": {hp:25,def:10,al:5,mh:1},
+    "Air wizard": {hp:25,def:10,al:5,mh:1,uf:1},
     "Al-Kharid warrior": {hp:19,def:7},
     "Albatross": {hp:135,def:60,al:100,mh:10},
     "Albino bat": {hp:33,def:30,al:57,mh:7},
@@ -183,24 +183,24 @@ const monsterStats = {
     "Ankou": {hp:60,def:60,al:70,mh:8},
     "Ankou#Wilderness Slayer Cave": {hp:60,def:60,al:70,mh:8},
     "Apmeken (monster)": {hp:150,def:100},
-    "Archer (Ardougne)": {hp:50,def:20,db:23,al:20,mh:6,as:6},
-    "Archer (Burthorpe)": {hp:50,def:40,db:46,al:0,ab:34,mh:6,as:6},
-    "Armadylean guard": {hp:132,def:82,al:1,mh:10},
-    "Armoured kraken": {hp:231,def:150,al:1,mh:18,as:5},
+    "Archer (Ardougne)": {hp:50,def:20,db:23,al:20,mh:6,as:6,uf:1},
+    "Archer (Burthorpe)": {hp:50,def:40,db:46,al:0,ab:34,mh:6,as:6,uf:1},
+    "Armadylean guard": {hp:132,def:82,al:1,mh:10,uf:1},
+    "Armoured kraken": {hp:231,def:150,al:1,mh:18,as:5,uf:1},
     "Armoured zombie (Zemouregal's Base)": {hp:75,def:68,db:13,al:73,mh:8},
     "Armoured zombie (Zemouregal's Fort)": {hp:95,def:68,db:13,al:106,mh:10},
-    "Arrg": {hp:140,def:40,db:43,al:70,ab:60,mh:38},
-    "Artio": {hp:450,def:150,db:115,al:250,mh:35,as:5},
+    "Arrg": {hp:140,def:40,db:43,al:70,ab:60,mh:38,uf:1},
+    "Artio": {hp:450,def:150,db:115,al:250,mh:35,as:5,uf:1},
     "Asyn Shade": {hp:90,def:70,al:102,mh:9},
     "Asyn shadow (Temple Trekking)": {hp:94,def:80,al:110,mh:11},
-    "Aviansie": {hp:80,def:60,db:10,al:1,mh:8},
+    "Aviansie": {hp:80,def:60,db:10,al:1,mh:8,uf:1},
     "Baby Roc": {hp:50,def:70,al:70,mh:8},
     "Baby black dragon": {hp:80,def:70,db:33,al:70,mh:11},
     "Baby blue dragon": {hp:50,def:40,db:33,al:40,mh:5},
     "Baby green dragon": {hp:50,def:40,db:33,al:40,mh:5},
     "Baby red dragon": {hp:50,def:40,db:33,al:40,mh:5},
     "Baby tanglefoot": {hp:40,def:40,al:40,mh:5},
-    "Balfrug Kreeyath": {hp:161,def:153,al:115,mh:16,as:5},
+    "Balfrug Kreeyath": {hp:161,def:153,al:115,mh:16,as:5,uf:1},
     "Bandit (Bandit Camp)": {hp:28,def:15,al:50,mh:6},
     "Bandit (Pollnivneach)#Bearded": {hp:30,def:20,db:6,al:40,ab:9,mh:7},
     "Bandit (Pollnivneach)#No beard": {hp:30,def:30,db:6,al:59,ab:9,mh:9},
@@ -214,10 +214,10 @@ const monsterStats = {
     "Barbarian (Barbarian Camp)#Lower level": {hp:20,def:3,db:7,al:6,ab:9,mh:2},
     "Barbarian#Higher level": {hp:14,def:5,db:1,al:6,ab:8,mh:2,as:6},
     "Barbarian#Lower level": {hp:14,def:5,db:1,al:6,ab:8,mh:2,as:6},
-    "Bark Blamish Snail": {hp:22,def:20,db:13,al:0,ab:10,mh:2,as:6},
+    "Bark Blamish Snail": {hp:22,def:20,db:13,al:0,ab:10,mh:2,as:6,uf:1},
     "Basilisk Youngling": {hp:60,def:70,db:13,al:25,mh:5},
     "Bat": {hp:8,def:5,db:3,al:5,mh:1},
-    "Battle mage": {hp:120,def:1,al:1,mh:20},
+    "Battle mage": {hp:120,def:1,al:1,mh:20,uf:1},
     "Bear Cub": {hp:20,def:10,al:10,mh:2},
     "Bedabin Nomad Fighter": {hp:50,def:60,al:40,ab:9,mh:7},
     "Berry": {hp:90,def:25,db:3,al:40,ab:20,mh:13,as:6},
@@ -244,9 +244,9 @@ const monsterStats = {
     "Black unicorn": {hp:29,def:23,al:21,mh:3},
     "Black unicorn Foal": {hp:25,def:18,al:18,mh:3},
     "Blessed giant rat": {hp:30,def:1,db:-24,al:5,mh:1},
-    "Blood Blamish Snail#Pointed": {hp:10,def:30,db:13,al:0,ab:10,mh:3,as:6},
-    "Blood Blamish Snail#Rounded": {hp:13,def:45,db:13,al:0,ab:10,mh:2,as:6},
-    "Blood Reaver": {hp:35,def:20,al:1,mh:20,as:5},
+    "Blood Blamish Snail#Pointed": {hp:10,def:30,db:13,al:0,ab:10,mh:3,as:6,uf:1},
+    "Blood Blamish Snail#Rounded": {hp:13,def:45,db:13,al:0,ab:10,mh:2,as:6,uf:1},
+    "Blood Reaver": {hp:35,def:20,al:1,mh:20,as:5,uf:1},
     "Bloodworm": {hp:45,def:35,al:80,mh:3},
     "Blue dragon": {hp:105,def:95,db:47,al:95,mh:10},
     "Boar": {hp:12,def:5,al:5,mh:1},
@@ -255,37 +255,37 @@ const monsterStats = {
     "Borrokar": {hp:50,def:40,al:40,mh:6},
     "Bouncer": {hp:116,def:120,al:120,mh:13},
     "Branda the Fire Queen": {hp:600,def:100,db:8,al:300,ab:150,mh:26,as:7},
-    "Brassican Mage": {hp:150,def:80,al:80,mh:16,as:3},
-    "Bree": {hp:162,def:130,db:13,al:110,ab:10,mh:16,as:5},
+    "Brassican Mage": {hp:150,def:80,al:80,mh:16,as:3,uf:1},
+    "Bree": {hp:162,def:130,db:13,al:110,ab:10,mh:16,as:5,uf:1},
     "Breoca": {hp:10,def:3,db:-12,al:3,mh:1},
     "Broddi": {hp:1,def:3,db:-12,al:3,mh:1},
     "Bronze dragon": {hp:122,def:112,db:47,al:112,mh:12},
-    "Broodoo victim": {hp:100,def:26,db:20,al:0,mh:7,as:6},
-    "Bruise Blamish Snail#Pointed": {hp:15,def:27,db:13,al:0,ab:10,mh:3,as:6},
-    "Bruise Blamish Snail#Rounded": {hp:12,def:40,db:13,al:0,ab:10,mh:2,as:6},
-    "Brutal blue dragon": {hp:245,def:198,db:47,al:298,mh:21},
-    "Brutal green dragon": {hp:175,def:168,db:47,al:268,mh:18},
-    "Brutal red dragon": {hp:285,def:198,db:47,al:310,mh:22},
+    "Broodoo victim": {hp:100,def:26,db:20,al:0,mh:7,as:6,uf:1},
+    "Bruise Blamish Snail#Pointed": {hp:15,def:27,db:13,al:0,ab:10,mh:3,as:6,uf:1},
+    "Bruise Blamish Snail#Rounded": {hp:12,def:40,db:13,al:0,ab:10,mh:2,as:6,uf:1},
+    "Brutal blue dragon": {hp:245,def:198,db:47,al:298,mh:21,uf:1},
+    "Brutal green dragon": {hp:175,def:168,db:47,al:268,mh:18,uf:1},
+    "Brutal red dragon": {hp:285,def:198,db:47,al:310,mh:22,uf:1},
     "Brutus": {hp:58,def:10,db:-7,al:12,mh:3,as:5},
-    "Bryophyta": {hp:115,def:100,al:130,ab:33,mh:16,as:6},
+    "Bryophyta": {hp:115,def:100,al:130,ab:33,mh:16,as:6,uf:1},
     "Buffalo": {hp:20,def:1,db:-21,al:6,mh:2},
     "Bull shark": {hp:81,def:20,al:80,mh:5},
     "Bunny": {hp:5,def:1,db:-42,al:1,ab:-47,mh:0},
     "Bush snake": {hp:25,def:50,al:25,mh:3,as:3},
     "Butterfly ray": {hp:83,def:15,al:100,mh:4},
-    "Callisto": {hp:1000,def:225,db:135,al:350,mh:55},
-    "Calvar'ion": {hp:150,def:225,db:83,al:250,mh:26,as:6},
+    "Callisto": {hp:1000,def:225,db:135,al:350,mh:55,uf:1},
+    "Calvar'ion": {hp:150,def:225,db:83,al:250,mh:26,as:6,uf:1},
     "Camp dweller": {hp:15,def:5,al:20,mh:3},
-    "Catablepon": {hp:64,def:35,al:45,mh:6},
+    "Catablepon": {hp:64,def:35,al:45,mh:6,uf:1},
     "Cave goblin (monster)": {hp:10,def:1,al:1,mh:1},
     "Cave goblin guard": {hp:26,db:19,al:22,mh:3,as:6},
     "Cave goblin miner": {hp:10,def:7,al:10,mh:2},
     "Cave lizard": {hp:20,def:35,db:12,al:38,mh:5},
     "Ceolburg": {hp:10,def:3,db:-12,al:3,mh:1},
-    "Chaos Elemental": {hp:250,def:270,db:70,al:270,mh:28},
-    "Chaos Fanatic": {hp:225,def:220,db:257,al:1,mh:31,as:2},
+    "Chaos Elemental": {hp:250,def:270,db:70,al:270,mh:28,uf:1},
+    "Chaos Fanatic": {hp:225,def:220,db:257,al:1,mh:31,as:2,uf:1},
     "Chaos Golem": {hp:94,def:59,db:3,al:45,mh:10,as:5},
-    "Chaos druid": {hp:20,def:12,al:8,mh:2},
+    "Chaos druid": {hp:20,def:12,al:8,mh:2,uf:1},
     "Chaos druid warrior": {hp:40,def:25,db:15,al:32,ab:9,mh:5,as:5},
     "Chaos dwarf": {hp:61,def:28,db:33,al:38,ab:13,mh:6},
     "Chaotic death spawn": {hp:50,def:70,al:380,mh:7,as:3},
@@ -296,14 +296,14 @@ const monsterStats = {
     "Clivet": {hp:25,def:4,db:6,al:10,mh:2},
     "Colonel Radick": {hp:65,def:25,db:35,al:25,ab:9,mh:4},
     "Colossal Chocco Chicken": {hp:50,def:20,al:40,mh:1},
-    "Commander Zilyana": {hp:255,def:300,db:100,al:280,ab:195,mh:27,as:2},
+    "Commander Zilyana": {hp:255,def:300,db:100,al:280,ab:195,mh:27,as:2,uf:1},
     "Confused barbarian": {hp:124,def:110,db:2,al:115,ab:9,mh:15},
-    "Corporeal Beast": {hp:2000,def:310,db:108,al:320,ab:50,mh:33},
-    "Corrupt Lizardman": {hp:50,def:38,db:5,al:38,ab:22,mh:6},
+    "Corporeal Beast": {hp:2000,def:310,db:108,al:320,ab:50,mh:33,uf:1},
+    "Corrupt Lizardman": {hp:50,def:38,db:5,al:38,ab:22,mh:6,uf:1},
     "Corrupted Bat": {hp:14,def:2,al:36,mh:11},
     "Corrupted Bear": {hp:100,def:98,al:147,ab:81,mh:48},
-    "Corrupted Dark Beast": {hp:100,def:98,al:147,mh:48},
-    "Corrupted Dragon": {hp:100,def:98,al:147,mh:48},
+    "Corrupted Dark Beast": {hp:100,def:98,al:147,mh:48,uf:1},
+    "Corrupted Dragon": {hp:100,def:98,al:147,mh:48,uf:1},
     "Corrupted Rat": {hp:14,def:6,al:42,mh:14},
     "Corrupted Scorpion": {hp:38,def:18,al:72,mh:17},
     "Corrupted Spider": {hp:12,def:4,al:48,mh:5},
@@ -313,21 +313,21 @@ const monsterStats = {
     "Cow calf": {hp:6,def:1,db:-26,al:1,ab:-20,mh:1},
     "Crab#Level 21": {hp:18,def:22,al:17,mh:3},
     "Crab#Level 23": {hp:19,def:26,al:19,mh:3},
-    "Crazy archaeologist": {hp:225,def:240,db:13,al:160,ab:250,mh:14,as:3},
+    "Crazy archaeologist": {hp:225,def:240,db:13,al:160,ab:250,mh:14,as:3,uf:1},
     "Crocodile": {hp:62,def:54,db:18,al:53,mh:6},
-    "Cruor": {hp:500,def:200,db:75,al:1,mh:29,as:5},
+    "Cruor": {hp:500,def:200,db:75,al:1,mh:29,as:5,uf:1},
     "Crypt rat": {hp:35,def:20,al:70,mh:3},
     "Crystalline Bat": {hp:14,def:2,al:24,mh:8},
     "Crystalline Bear": {hp:100,def:98,al:98,ab:54,mh:28},
-    "Crystalline Dark Beast": {hp:100,def:98,al:98,mh:28},
-    "Crystalline Dragon": {hp:100,def:98,al:98,mh:28},
+    "Crystalline Dark Beast": {hp:100,def:98,al:98,mh:28,uf:1},
+    "Crystalline Dragon": {hp:100,def:98,al:98,mh:28,uf:1},
     "Crystalline Rat": {hp:14,def:6,al:28,mh:4},
     "Crystalline Scorpion": {hp:38,def:18,al:48,mh:11},
     "Crystalline Spider": {hp:12,def:4,al:32,mh:4},
     "Crystalline Unicorn": {hp:44,def:24,al:50,mh:6},
     "Crystalline Wolf": {hp:52,def:22,al:106,mh:8},
     "Cuffs": {hp:7,def:3,db:5,al:1,mh:1},
-    "Culinaromancer": {hp:150,def:10,db:-10,al:10,mh:25},
+    "Culinaromancer": {hp:150,def:10,db:-10,al:10,mh:25,uf:1},
     "Cyclops": {hp:56,def:40,al:47,mh:6},
     "Cyclops (Ardougne Zoo)": {hp:55,def:46,al:47,mh:6},
     "Cyclops (Catacombs of Kourend)": {hp:56,def:40,al:47,mh:6},
@@ -337,50 +337,50 @@ const monsterStats = {
     "Dagannoth": {hp:35,def:20,al:68,mh:8},
     "Dagannoth (Waterbirth Island)#Level 88": {hp:85,def:75,db:37,al:10,mh:20,as:3},
     "Dagannoth (Waterbirth Island)#Level 90": {hp:95,def:65,db:50,al:76,ab:50,mh:15},
-    "Dagannoth Prime": {hp:255,def:255,db:255,al:255,mh:50},
+    "Dagannoth Prime": {hp:255,def:255,db:255,al:255,mh:50,uf:1},
     "Dagannoth Rex": {hp:255,def:255,db:255,al:255,mh:26},
-    "Dagannoth Supreme": {hp:255,def:128,db:10,al:255,mh:30},
+    "Dagannoth Supreme": {hp:255,def:128,db:10,al:255,mh:30,uf:1},
     "Dagannoth fledgeling": {hp:100,def:50,al:50,mh:6},
-    "Dagannoth mother": {hp:120,def:81,db:150,al:78,mh:9},
+    "Dagannoth mother": {hp:120,def:81,db:150,al:78,mh:9,uf:1},
     "Dagannoth spawn": {hp:35,def:25,al:50,mh:4},
     "Damis": {hp:100,def:80,al:90,mh:22},
     "Dark energy core": {hp:25,def:20,db:10,al:1,mh:13,as:2},
     "Dark warrior#Level 145": {hp:165,def:55,db:118,al:75,ab:80,mh:18},
     "Dark warrior#Level 8": {hp:17,def:5,db:78,al:5,ab:20,mh:2},
     "Dark warrior#Zeah": {hp:15,def:8,al:5,ab:20,mh:2},
-    "Dark wizard#Higher level": {hp:25,def:12,al:5,mh:2},
-    "Dark wizard#Lower level": {hp:12,def:5,al:5,mh:2},
+    "Dark wizard#Higher level": {hp:25,def:12,al:5,mh:2,uf:1},
+    "Dark wizard#Lower level": {hp:12,def:5,al:5,mh:2,uf:1},
     "Deadly red spider": {hp:35,def:30,db:13,al:30,mh:3},
     "Death spawn": {hp:60,def:30,db:20,al:67,mh:2},
     "Death wing": {hp:80,def:70,al:70,mh:8},
-    "Deathly mage": {hp:120,def:155,al:1,mh:22},
-    "Deathly ranger": {hp:120,def:155,al:1,mh:70},
-    "Demon of Balance": {hp:320,def:100,db:200,al:150,mh:43},
-    "Demon of Darkness": {hp:320,def:100,db:200,al:150,mh:43},
-    "Demon of Light": {hp:320,def:100,db:200,al:150,mh:43},
+    "Deathly mage": {hp:120,def:155,al:1,mh:22,uf:1},
+    "Deathly ranger": {hp:120,def:155,al:1,mh:70,uf:1},
+    "Demon of Balance": {hp:320,def:100,db:200,al:150,mh:43,uf:1},
+    "Demon of Darkness": {hp:320,def:100,db:200,al:150,mh:43,uf:1},
+    "Demon of Light": {hp:320,def:100,db:200,al:150,mh:43,uf:1},
     "Demonic Brutus": {hp:750,def:200,db:154,al:380,mh:43,as:5},
-    "Demonic gorilla": {hp:380,def:200,al:205,ab:43,mh:31,as:5},
-    "Deranged archaeologist": {hp:200,def:280,db:30,al:280,ab:280,mh:25,as:3},
-    "Derwen": {hp:320,def:100,db:200,al:250,mh:43,as:6},
+    "Demonic gorilla": {hp:380,def:200,al:205,ab:43,mh:31,as:5,uf:1},
+    "Deranged archaeologist": {hp:200,def:280,db:30,al:280,ab:280,mh:25,as:3,uf:1},
+    "Derwen": {hp:320,def:100,db:200,al:250,mh:43,as:6,uf:1},
     "Desert Wolf": {hp:34,def:22,al:20,mh:3},
     "Desert snake": {hp:1,def:1,db:-42},
-    "Dessourt": {hp:130,def:99,db:103,al:99,ab:50,mh:19,as:3},
-    "Dessous": {hp:200,def:99,db:103,al:99,ab:50,mh:19,as:3},
+    "Dessourt": {hp:130,def:99,db:103,al:99,ab:50,mh:19,as:3,uf:1},
+    "Dessous": {hp:200,def:99,db:103,al:99,ab:50,mh:19,as:3,uf:1},
     "Dharok the Wretched": {hp:100,def:100,db:249,al:100,mh:29,as:7},
     "Dire Wolf": {hp:85,def:75,al:75,mh:8},
     "Disciple of Iban": {hp:20,def:12,al:8,mh:2},
     "Dolphin": {hp:45,def:0,al:25,mh:2},
     "Donny the lad": {hp:37,def:27,db:9,al:32,ab:9,mh:4},
-    "Doom of Mokhaiotl": {hp:525,def:90,db:220,al:300,ab:210,mh:47,as:6},
+    "Doom of Mokhaiotl": {hp:525,def:90,db:220,al:300,ab:210,mh:47,as:6,uf:1},
     "Doomion": {hp:87,def:77,al:76,mh:9},
     "Double agent": {hp:80,def:24,db:3,al:80,mh:5},
-    "Druid": {hp:30,def:32,al:28,mh:4},
+    "Druid": {hp:30,def:32,al:28,mh:4,uf:1},
     "Drunken man": {hp:7,def:1,db:-21,al:1,mh:1},
     "Duke": {hp:200,def:150},
-    "Duke Sucellus": {hp:485,def:275,db:163,al:300,ab:200,mh:56,as:5},
+    "Duke Sucellus": {hp:485,def:275,db:163,al:300,ab:200,mh:56,as:5,uf:1},
     "Dungeon rat#Full tail": {hp:12,def:10,al:10,mh:2},
     "Dungeon rat#Short tail": {hp:12,def:10,al:10,mh:2},
-    "Durial321": {hp:9500,def:88,db:148,al:95,ab:95,mh:34},
+    "Durial321": {hp:9500,def:88,db:148,al:95,ab:95,mh:34,uf:1},
     "Dwarf": {hp:16,def:8,al:8,ab:5,mh:2},
     "Dwarf gang member": {hp:40,def:35,db:5,al:40,mh:5,as:5},
     "Dwarf#White Wolf Mountain tunnel": {hp:16,def:8,al:8,ab:5,mh:2},
@@ -389,18 +389,18 @@ const monsterStats = {
     "Earth elemental#Normal variant": {hp:35,def:35,al:20,mh:4,as:6},
     "Earth elemental#Ore variant": {hp:35,def:35,al:20,mh:4,as:6},
     "Earth warrior": {hp:54,def:42,db:30,al:42,mh:5},
-    "Earth wizard": {hp:25,def:10,al:5,mh:6},
+    "Earth wizard": {hp:25,def:10,al:5,mh:6,uf:1},
     "Eduard": {hp:60,def:10,db:-21,al:10,mh:2},
     "Einar": {hp:1,def:1,al:1,mh:1},
-    "Elder Chaos druid": {hp:150,def:65,al:98,mh:17},
+    "Elder Chaos druid": {hp:150,def:65,al:98,mh:17,uf:1},
     "Eldric the Ice King": {hp:600,def:100,db:8,al:300,ab:150,mh:26,as:7},
-    "Elf Archer": {hp:105,def:80,db:50,al:10,mh:11},
+    "Elf Archer": {hp:105,def:80,db:50,al:10,mh:11,uf:1},
     "Elf Warrior": {hp:105,def:80,db:63,al:95,mh:10},
     "Elite Black Knight": {hp:90,def:90,db:93,al:90,ab:85,mh:13,as:6},
-    "Elite Dark Mage": {hp:80,def:80,db:10,al:25,mh:16,as:5},
-    "Elite Dark Ranger": {hp:80,def:80,db:8,al:25,mh:9,as:5},
+    "Elite Dark Mage": {hp:80,def:80,db:10,al:25,mh:16,as:5,uf:1},
+    "Elite Dark Ranger": {hp:80,def:80,db:8,al:25,mh:9,as:5,uf:1},
     "Elite Dark Warrior": {hp:80,def:80,db:15,al:80,ab:80,mh:9,as:5},
-    "Elvarg": {hp:80,def:70,db:33,al:70,mh:8},
+    "Elvarg": {hp:80,def:70,db:33,al:70,mh:8,uf:1},
     "Emissary Acolyte": {hp:25,def:30,db:23,al:30,mh:4},
     "Emissary Chosen": {hp:50,def:60,db:30,al:80,mh:8},
     "Enclave guard": {hp:80,def:70,db:19,al:70,ab:9,mh:10},
@@ -408,23 +408,23 @@ const monsterStats = {
     "Enraged barbarian spirit": {hp:190,def:100,db:2,al:150,ab:9,mh:18},
     "Ent": {hp:75,def:75,db:63,al:75,ab:35,mh:17},
     "Entrana firebird": {hp:5,def:1,db:-26,al:1,ab:-31,mh:1},
-    "Evil Chicken": {hp:120,def:126,al:1,mh:21},
-    "Evil Chicken (Recipe for Disaster)": {hp:120,def:126,al:1,mh:21},
+    "Evil Chicken": {hp:120,def:126,al:1,mh:21,uf:1},
+    "Evil Chicken (Recipe for Disaster)": {hp:120,def:126,al:1,mh:21,uf:1},
     "Evil spirit": {hp:90,def:100,al:170,mh:28},
     "Experiment": {hp:40,def:50,al:40,mh:6},
-    "Experiment No.2": {hp:95,def:90,db:58,al:104,mh:11},
-    "Fareed": {hp:130,def:135,db:100,al:190,mh:37},
+    "Experiment No.2": {hp:95,def:90,db:58,al:104,mh:11,uf:1},
+    "Fareed": {hp:130,def:135,db:100,al:190,mh:37,uf:1},
     "Farmer": {hp:12,def:8,al:3,ab:5,mh:1,as:6},
     "Feral Vampyre": {hp:40,def:55,al:55,mh:7},
     "Ferocious barbarian spirit": {hp:190,def:100,db:48,al:150,ab:9,mh:18},
     "Fire elemental": {hp:30,def:20,al:35,mh:4},
     "Fire giant": {hp:111,def:65,db:2,al:65,ab:29,mh:11,as:5},
-    "Fire wizard": {hp:25,def:10,al:5,mh:4},
+    "Fire wizard": {hp:25,def:10,al:5,mh:4,uf:1},
     "Fiyr Shade": {hp:110,def:85,al:120,mh:11},
     "Flawed Golem": {hp:25,def:6,db:3,al:7,mh:3,as:5},
     "Flesh Crawler": {hp:25,def:10,db:15,al:60,mh:1,as:3},
     "Flight Kilisa": {hp:133,def:175,al:124,mh:15,as:5},
-    "Flockleader Geerin": {hp:132,def:175,al:80,mh:25,as:5},
+    "Flockleader Geerin": {hp:132,def:175,al:80,mh:25,as:5,uf:1},
     "Foreman": {hp:20,def:20,db:1,al:20,mh:3},
     "Forester": {hp:20,def:10},
     "Forgotten Soul": {hp:50,def:12,al:8,mh:2},
@@ -437,12 +437,12 @@ const monsterStats = {
     "Frogeel": {hp:90,def:90,al:91,mh:10},
     "Frost crab": {hp:15,def:5},
     "Frost dragon": {hp:230,def:150,db:43,al:180,mh:16},
-    "Fumus": {hp:500,def:200,db:75,al:1,mh:29,as:5},
+    "Fumus": {hp:500,def:200,db:75,al:1,mh:29,as:5,uf:1},
     "Galina": {hp:60,def:10,db:-21,al:10,mh:2},
     "Gang boss": {hp:80,def:70,db:3,al:1,mh:13,as:3},
     "Gangster": {hp:40,def:50,db:3,al:40,ab:25,mh:5},
     "Gardener": {hp:7,al:2,mh:1},
-    "General Graardor": {hp:255,def:250,db:90,al:280,ab:120,mh:60,as:6},
+    "General Graardor": {hp:255,def:250,db:90,al:280,ab:120,mh:60,as:6,uf:1},
     "Georgy": {hp:60,def:10,db:-21,al:10,mh:2},
     "Ghast": {hp:45,def:18,al:22,mh:3},
     "Ghost": {hp:25,def:18,db:5,al:13,mh:2},
@@ -450,9 +450,9 @@ const monsterStats = {
     "Ghoul": {hp:50,def:30,al:30,mh:5},
     "Giant Champion": {hp:70,def:52,al:36,mh:5},
     "Giant Mole": {hp:200,def:200,db:80,al:200,mh:21},
-    "Giant Roc": {hp:250,def:100,al:130,mh:14,as:6},
+    "Giant Roc": {hp:250,def:100,al:130,mh:14,as:6,uf:1},
     "Giant Rock Crab": {hp:180,def:200,db:200,al:50,mh:9},
-    "Giant Sea Snake": {hp:100,def:160,al:170,mh:14},
+    "Giant Sea Snake": {hp:100,def:160,al:170,mh:14,uf:1},
     "Giant bat": {hp:32,def:22,db:11,al:22,mh:3},
     "Giant bat#Plain": {hp:32,def:22,db:11,al:22,mh:3},
     "Giant crypt rat": {hp:70,def:65,al:80,mh:6},
@@ -464,17 +464,17 @@ const monsterStats = {
     "Giant scarab": {hp:120,def:80},
     "Giant skeleton (Shadow Dungeon)": {hp:70,def:70,al:70,mh:8},
     "Giant skeleton (Tarn's Lair)": {hp:110,def:80,db:30,al:84,mh:11},
-    "Giant snail": {hp:125,def:60,al:30,mh:8},
+    "Giant snail": {hp:125,def:60,al:30,mh:8,uf:1},
     "Giant spider": {hp:5,def:1,db:-10,al:1,ab:-10,mh:1},
-    "Glacies": {hp:500,def:200,db:75,al:1,mh:29,as:5},
+    "Glacies": {hp:500,def:200,db:75,al:1,mh:29,as:5,uf:1},
     "Glod": {hp:160,def:110,db:115,al:115,mh:25},
-    "Gnome": {hp:3,def:1,db:-42,al:1,ab:-42,mh:1},
-    "Gnome Archer": {hp:10,def:1,db:-30,al:1,mh:2,as:6},
+    "Gnome": {hp:3,def:1,db:-42,al:1,ab:-42,mh:1,uf:1},
+    "Gnome Archer": {hp:10,def:1,db:-30,al:1,mh:2,as:6,uf:1},
     "Gnome Driver": {hp:10,def:3,db:-30,al:3,mh:1,as:6},
-    "Gnome Mage": {hp:10,def:1,db:-30,al:3,mh:1,as:6},
+    "Gnome Mage": {hp:10,def:1,db:-30,al:3,mh:1,as:6,uf:1},
     "Gnome child": {hp:2,def:1,db:-42,al:1,ab:-42,mh:0},
     "Gnome guard": {hp:31,al:17,ab:8,mh:3,as:6},
-    "Gnome troop": {hp:3,def:1,db:4,al:1,ab:2,mh:1},
+    "Gnome troop": {hp:3,def:1,db:4,al:1,ab:2,mh:1,uf:1},
     "Gnome woman": {hp:2,def:1,db:-42,al:1,ab:-42,mh:1},
     "Goat": {hp:21,def:20,db:7,al:20,ab:10,mh:4},
     "Goblin (Goblin Village)#Green": {hp:12,def:4,al:3,ab:12,mh:1,as:6},
@@ -499,14 +499,14 @@ const monsterStats = {
     "Grizzly bear": {hp:27,def:15,al:17,mh:3},
     "Grizzly bear (Escape Caves)": {hp:75,def:72,al:72,mh:8},
     "Grizzly bear cub": {hp:35,al:30,mh:4},
-    "Growler": {hp:146,def:120,db:13,al:100,ab:10,mh:16,as:5},
+    "Growler": {hp:146,def:120,db:13,al:100,ab:10,mh:16,as:5,uf:1},
     "Guard": {hp:22,def:14,db:21,al:19,ab:4,mh:3},
     "Guard (Burthorpe)": {hp:40,def:30,db:45,al:30,ab:18,mh:5,as:6},
     "Guard (Cave goblin)": {hp:26,db:19,al:25,mh:3,as:6},
     "Guard (Desert Mining Camp)": {hp:60,def:39,db:17,al:32,ab:9,mh:5},
     "Guard (Hosidius)": {hp:22,def:16,db:5,al:15,ab:6,mh:4,as:6},
     "Guard (Prifddinas)": {hp:105,def:80,db:63,al:95,mh:10},
-    "Guard (Ranging Guild)": {hp:50,def:20,db:23,al:20,ab:19,mh:4,as:6},
+    "Guard (Ranging Guild)": {hp:50,def:20,db:23,al:20,ab:19,mh:4,as:6,uf:1},
     "Guard (Shayzien)": {hp:22,def:14,db:19,al:19,ab:9,mh:3},
     "Guard (dwarf)": {hp:16,def:9,db:4,al:8,ab:5,mh:2},
     "Guard Bandit": {hp:27,def:17,db:6,al:17,ab:11,mh:3},
@@ -528,7 +528,7 @@ const monsterStats = {
     "Hengel": {hp:7,def:1,db:-21,al:1,mh:1},
     "Hermit crab": {hp:75,def:1,db:-17,al:1,mh:1},
     "Hero": {hp:82,def:54,db:82,al:54,ab:20,mh:9,as:5},
-    "Hespori": {hp:300,def:120,db:47,al:1,mh:8,as:6},
+    "Hespori": {hp:300,def:120,db:47,al:1,mh:8,as:6,uf:1},
     "Het (monster)": {hp:150,def:100},
     "Highwayman#Hood": {hp:13,def:2,db:2,al:2,ab:6,mh:1},
     "Highwayman#No hood": {hp:13,def:2,db:2,al:2,ab:6,mh:1},
@@ -542,14 +542,14 @@ const monsterStats = {
     "Hoop Snake": {hp:25,def:20,al:15,mh:2},
     "Hygd": {hp:10,def:3,db:-12,al:3,mh:1},
     "Ice Queen": {hp:104,def:95,db:30,al:95,mh:10},
-    "Ice demon": {hp:140,def:160,db:83,al:1,as:3},
+    "Ice demon": {hp:140,def:160,db:83,al:1,as:3,uf:1},
     "Ice giant": {hp:70,def:40,db:2,al:40,ab:29,mh:7,as:5},
     "Ice giant#Wilderness Slayer Cave": {hp:70,def:40,db:2,al:40,ab:29,mh:7,as:5},
     "Ice spider": {hp:65,def:43,db:16,al:50,mh:6},
     "Ice troll": {hp:100,def:120,db:40,al:100,ab:60,mh:21},
-    "Ice troll female#Variant 1": {hp:80,def:40,db:40,al:80,ab:60,mh:17},
-    "Ice troll female#Variant 2": {hp:80,def:40,db:40,al:80,ab:60,mh:17},
-    "Ice troll female#Variant 3": {hp:80,def:40,db:40,al:80,ab:60,mh:17},
+    "Ice troll female#Variant 1": {hp:80,def:40,db:40,al:80,ab:60,mh:17,uf:1},
+    "Ice troll female#Variant 2": {hp:80,def:40,db:40,al:80,ab:60,mh:17,uf:1},
+    "Ice troll female#Variant 3": {hp:80,def:40,db:40,al:80,ab:60,mh:17,uf:1},
     "Ice troll grunt": {hp:80,def:60,db:40,al:100,ab:60,mh:21},
     "Ice troll grunt#Quest area": {hp:80,def:60,db:40,al:100,ab:60,mh:21},
     "Ice troll male#Variant 1": {hp:80,def:40,db:40,al:80,ab:60,mh:17},
@@ -564,8 +564,8 @@ const monsterStats = {
     "Icelord": {hp:60,def:40,al:40,mh:5},
     "Imp": {hp:8,def:1,db:-42,al:1,ab:-42,mh:0},
     "Imre": {hp:60,def:10,db:-21,al:10,mh:2},
-    "Invrigar the Necromancer": {hp:24,def:14,al:17,mh:3},
-    "Iorwerth Archer": {hp:105,def:80,db:50,al:10,mh:11},
+    "Invrigar the Necromancer": {hp:24,def:14,al:17,mh:3,uf:1},
+    "Iorwerth Archer": {hp:105,def:80,db:50,al:10,mh:11,uf:1},
     "Iorwerth Warrior#Iorwerth Camp": {hp:105,def:80,db:63,al:95,mh:10},
     "Iorwerth Warrior#Iorwerth Dungeon": {hp:105,def:80,db:63,al:95,mh:10},
     "Irina": {hp:60,def:10,db:-21,al:10,mh:2},
@@ -583,20 +583,20 @@ const monsterStats = {
     "Joseph": {hp:60,def:10,db:-21,al:10,mh:2},
     "Jubbly bird": {hp:20,def:6,al:5,mh:0},
     "Jubster": {hp:60,def:81,al:82,mh:9},
-    "Jungle Demon": {hp:170,def:170,db:17,al:170,ab:50,mh:32,as:6},
+    "Jungle Demon": {hp:170,def:170,db:17,al:170,ab:50,mh:32,as:6,uf:1},
     "Jungle Wolf": {hp:69,def:52,al:50,mh:6},
     "Jungle horror": {hp:45,def:55,al:70,mh:8},
     "Jungle spider": {hp:50,def:35,db:17,al:35,mh:6},
     "Jungle spider (Ape Atoll)": {hp:35,def:10,al:50,ab:100,mh:10},
-    "Justiciar Zachariah": {hp:320,def:100,db:200,al:500,ab:200,mh:43,as:6},
-    "K'ril Tsutsaroth": {hp:255,def:270,db:77,al:340,ab:160,mh:30,as:6},
+    "Justiciar Zachariah": {hp:320,def:100,db:200,al:500,ab:200,mh:43,as:6,uf:1},
+    "K'ril Tsutsaroth": {hp:255,def:270,db:77,al:340,ab:160,mh:30,as:6,uf:1},
     "Kalphite Guardian": {hp:170,def:110,db:18,al:110,mh:12},
-    "Kalphite Queen": {hp:255,def:300,al:300,mh:31},
+    "Kalphite Queen": {hp:255,def:300,al:300,mh:31,uf:1},
     "Kalphite Soldier": {hp:90,def:70,db:18,al:70,mh:8},
     "Kalphite Worker": {hp:40,def:20,db:4,al:20,mh:3},
-    "Kamil": {hp:130,def:135,db:43,al:190,ab:60,mh:23},
-    "Karamel": {hp:250,def:100,db:150,al:1,mh:7,as:3},
-    "Karil the Tainted": {hp:100,def:100,db:80,al:1,mh:20},
+    "Kamil": {hp:130,def:135,db:43,al:190,ab:60,mh:23,uf:1},
+    "Karamel": {hp:250,def:100,db:150,al:1,mh:7,as:3,uf:1},
+    "Karil the Tainted": {hp:100,def:100,db:80,al:1,mh:20,uf:1},
     "Kebbit": {hp:5,def:1},
     "Khazard Guard": {hp:25,def:20,db:28,al:20,ab:10,mh:3},
     "Khazard commander": {hp:22,def:50,al:50,mh:5},
@@ -610,7 +610,7 @@ const monsterStats = {
     "Knight of Saradomin": {hp:108,def:82,db:13,al:75,ab:13,mh:12,as:6},
     "Knight of Varlamore": {hp:52,def:31,db:38,al:38,ab:8,mh:8,as:5},
     "Kraka": {hp:120,def:50,db:30,al:50,ab:40,mh:23,as:6},
-    "Kree'arra": {hp:255,def:260,db:180,al:300,ab:136,mh:69,as:3},
+    "Kree'arra": {hp:255,def:260,db:180,al:300,ab:136,mh:69,as:3,uf:1},
     "Ksenia": {hp:60,def:10,db:-21,al:10,mh:2},
     "Lanzig": {hp:50,def:40,al:40,mh:6},
     "Large mosquito": {hp:3,def:45,db:3,al:5,mh:1},
@@ -621,11 +621,11 @@ const monsterStats = {
     "Lesser demon#Wilderness Slayer Cave": {hp:110,def:71,al:68,mh:9},
     "Lev": {hp:60,def:10,db:-21,al:10,mh:2},
     "Liliya": {hp:60,def:10,db:-21,al:10,mh:2},
-    "Lizardman brute": {hp:60,def:65,db:7,al:65,ab:34,mh:11},
-    "Lizardman shaman": {hp:150,def:140,db:17,al:120,ab:45,mh:31},
-    "Lizardman shaman (Chambers of Xeric)": {hp:190,def:210,db:137,al:130,ab:58,mh:65},
-    "Lizardman#Level 53": {hp:60,def:43,db:2,al:43,ab:22,mh:7},
-    "Lizardman#Level 62": {hp:60,def:52,db:2,al:53,ab:28,mh:9},
+    "Lizardman brute": {hp:60,def:65,db:7,al:65,ab:34,mh:11,uf:1},
+    "Lizardman shaman": {hp:150,def:140,db:17,al:120,ab:45,mh:31,uf:1},
+    "Lizardman shaman (Chambers of Xeric)": {hp:190,def:210,db:137,al:130,ab:58,mh:65,uf:1},
+    "Lizardman#Level 53": {hp:60,def:43,db:2,al:43,ab:22,mh:7,uf:1},
+    "Lizardman#Level 62": {hp:60,def:52,db:2,al:53,ab:28,mh:9,uf:1},
     "Loar Shade": {hp:38,def:26,al:45,mh:4},
     "Lobstrosity": {hp:50,def:40,db:32,al:60,mh:9},
     "Locust": {hp:27,def:1,al:17,mh:3},
@@ -639,7 +639,7 @@ const monsterStats = {
     "Man": {hp:7,def:1,db:-21,al:1,mh:1},
     "Man (East Ardougne)": {hp:7,def:1,db:-21,al:1,mh:1},
     "Man (level 4)": {hp:13,def:1,db:1,al:2,mh:1},
-    "Maniacal Monkey Archer": {hp:60,def:80,al:120,mh:24},
+    "Maniacal Monkey Archer": {hp:60,def:80,al:120,mh:24,uf:1},
     "Maniacal monkey": {hp:65,def:10,al:200,mh:18},
     "Manta ray (monster)": {hp:194,def:40,al:155,mh:8},
     "Market Guard": {hp:50,def:40,db:50,al:40,ab:40,mh:8,as:3},
@@ -650,11 +650,11 @@ const monsterStats = {
     "Milla": {hp:60,def:10,db:-21,al:10,mh:2},
     "Mind Golem": {hp:40,def:25,db:3,al:14,mh:5,as:5},
     "Minotaur": {hp:10,def:5,al:12,mh:2},
-    "Mithril dragon": {hp:254,def:268,db:57,al:268,mh:28},
+    "Mithril dragon": {hp:254,def:268,db:57,al:268,mh:28,uf:1},
     "Monk": {hp:15,def:7,al:2,mh:1},
-    "Monk of Zamorak": {hp:30,def:24,al:8,mh:5},
+    "Monk of Zamorak": {hp:30,def:24,al:8,mh:5,uf:1},
     "Monkey (monster)": {hp:6,def:2,al:2,mh:1},
-    "Monkey Archer": {hp:50,def:80,al:80,mh:20},
+    "Monkey Archer": {hp:50,def:80,al:80,mh:20,uf:1},
     "Monkey Guard": {hp:130,def:200,al:130,ab:50,mh:14},
     "Monkey Zombie": {hp:55,def:30,al:100,ab:15,mh:7},
     "Mosquito swarm": {hp:6,def:1,al:10,mh:1,as:2},
@@ -673,27 +673,27 @@ const monsterStats = {
     "Mummy#Level 84": {hp:80,def:60},
     "Mummy#Level 98": {hp:95,def:70},
     "Muttadile": {hp:400,def:200,db:70,al:150,ab:71,mh:28},
-    "Myre Blamish Snail#Pointed": {hp:13,def:12,db:13,al:0,ab:10,mh:2},
-    "Myre Blamish Snail#Rounded": {hp:8,def:22,db:13,al:0,ab:10,mh:2},
+    "Myre Blamish Snail#Pointed": {hp:13,def:12,db:13,al:0,ab:10,mh:2,uf:1},
+    "Myre Blamish Snail#Rounded": {hp:8,def:22,db:13,al:0,ab:10,mh:2,uf:1},
     "Nail beast": {hp:69,def:56,al:150,mh:2,as:8},
     "Narf": {hp:7,def:1,db:-5,al:1,mh:1},
     "Narwhal": {hp:187,def:50,al:95,mh:7},
     "Nazastarool": {hp:80,def:50,al:85,mh:9},
     "Necromancer": {hp:40,def:18,al:18,mh:3},
-    "Necromancer (Great Kourend)": {hp:80,def:50,db:8,al:56,mh:7},
+    "Necromancer (Great Kourend)": {hp:80,def:50,db:8,al:56,mh:7,uf:1},
     "Newtroost": {hp:18,def:17,al:18,mh:3},
-    "Nex": {hp:3400,def:260,db:80,al:315,ab:200,mh:33},
+    "Nex": {hp:3400,def:260,db:80,al:315,ab:200,mh:33,uf:1},
     "Nikita": {hp:60,def:10,db:-21,al:10,mh:2},
     "Nikolai": {hp:60,def:10,db:-21,al:10,mh:2},
     "Nylocas Vasilias": {hp:2500,def:50,al:160,mh:24},
-    "Obor": {hp:120,def:60,db:40,al:90,ab:100,mh:22,as:6},
+    "Obor": {hp:120,def:60,db:40,al:90,ab:100,mh:22,as:6,uf:1},
     "Ocelot": {hp:40,def:30,al:30,mh:3},
     "Ocga": {hp:10,def:3,db:-12,al:3,mh:1},
-    "Ochre Blamish Snail#Pointed": {hp:20,def:25,db:13,al:0,ab:10,mh:2,as:6},
-    "Ochre Blamish Snail#Rounded": {hp:10,def:18,db:13,al:0,ab:10,mh:2,as:6},
+    "Ochre Blamish Snail#Pointed": {hp:20,def:25,db:13,al:0,ab:10,mh:2,as:6,uf:1},
+    "Ochre Blamish Snail#Rounded": {hp:10,def:18,db:13,al:0,ab:10,mh:2,as:6,uf:1},
     "Ogre": {hp:60,def:30,al:43,ab:22,mh:7,as:6},
     "Ogre chieftain": {hp:60,def:75,db:16,al:75,ab:5,mh:9},
-    "Ogress Shaman": {hp:82,def:82,db:13,al:68,mh:8},
+    "Ogress Shaman": {hp:82,def:82,db:13,al:68,mh:8,uf:1},
     "Ogress Warrior": {hp:82,def:82,db:11,al:68,mh:8},
     "Oipuis": {hp:130,def:130,al:130,ab:50,mh:14},
     "Oomlie bird": {hp:40,def:40,al:40,mh:5},
@@ -711,14 +711,14 @@ const monsterStats = {
     "Pee Hat": {hp:120,def:50,db:30,al:50,ab:40,mh:23,as:6},
     "Penance Fighter": {hp:30,def:20,al:26,mh:4},
     "Penance Healer": {hp:27,def:15,al:9,mh:0},
-    "Penance Ranger": {hp:30,def:20,al:22,mh:3},
+    "Penance Ranger": {hp:30,def:20,al:22,mh:3,uf:1},
     "Penance Runner": {hp:5,def:1,al:1,mh:0},
     "Penda": {hp:10,def:3,db:-12,al:3,mh:1},
     "Penguin (monster)": {hp:4,def:2,al:1,mh:1},
-    "Pestilent Bloat": {hp:1500,def:100,db:100,al:100,ab:60,mh:8,as:1},
+    "Pestilent Bloat": {hp:1500,def:100,db:100,al:100,ab:60,mh:8,as:1,uf:1},
     "Phantom Muspah": {hp:400,def:180,db:30,al:280,ab:393,mh:61,as:6},
     "Pheasant": {hp:5,def:3,al:3,mh:1},
-    "Phosani's Nightmare": {hp:3200,def:150,db:113,al:150,ab:220,mh:73,as:6},
+    "Phosani's Nightmare": {hp:3200,def:150,db:113,al:150,ab:220,mh:73,as:6,uf:1},
     "Phrin Shade": {hp:56,def:42,al:64,mh:6},
     "Pirate": {hp:20,def:12,al:21,ab:8,mh:3,as:5},
     "Pirate (Theiving)": {hp:20,def:12},
@@ -728,11 +728,11 @@ const monsterStats = {
     "Poison Scorpion": {hp:23,def:15,db:12,al:16,mh:3},
     "Poison spider": {hp:10,def:5,al:28,mh:4},
     "Poltenip": {hp:22,def:14,db:21,al:19,ab:4,mh:3},
-    "Porazdir": {hp:320,def:100,db:200,al:250,mh:43,as:6},
+    "Porazdir": {hp:320,def:100,db:200,al:250,mh:43,as:6,uf:1},
     "Porcupine": {hp:5,def:2,al:4,mh:1},
     "Possessed pickaxe#Catacombs of Kourend": {hp:40,def:40,db:10,al:40,mh:6},
     "Possessed pickaxe#Haunted Mine": {hp:40,def:40,db:10,al:40,mh:6},
-    "Pygmy kraken": {hp:150,def:50,al:1,mh:10,as:5},
+    "Pygmy kraken": {hp:150,def:50,al:1,mh:10,as:5,uf:1},
     "Rabbit": {hp:5,def:1,db:-42,al:1,ab:-47,mh:1},
     "Rabbit (Prifddinas)": {hp:2000,def:450,db:150,al:600,ab:80,mh:40,as:3},
     "Radat": {hp:22,def:14,db:21,al:19,ab:4,mh:3},
@@ -742,18 +742,18 @@ const monsterStats = {
     "Rat": {hp:2,def:1,db:-42,al:1,ab:-47,mh:0},
     "Red dragon": {hp:140,def:130,db:47,al:130,mh:14},
     "Renegade knight": {hp:48,def:28,db:81,al:28,ab:20,mh:5},
-    "Revenant cyclops": {hp:110,def:49,db:125,al:60,ab:53,mh:16,as:6},
-    "Revenant dark beast": {hp:140,def:80,db:140,al:93,ab:65,mh:23,as:5},
-    "Revenant demon": {hp:80,def:80,db:124,al:83,ab:30,mh:15,as:5},
-    "Revenant dragon": {hp:155,def:87,db:179,al:106,ab:72,mh:30,as:5},
-    "Revenant goblin": {hp:14,def:14,db:28,al:13,ab:6,mh:3,as:5},
-    "Revenant hellhound": {hp:80,def:80,db:127,al:76,ab:38,mh:14,as:5},
-    "Revenant hobgoblin": {hp:72,def:41,db:64,al:50,ab:20,mh:8},
-    "Revenant imp": {hp:10,def:4,al:5,mh:2,as:5},
-    "Revenant knight": {hp:143,def:80,db:175,al:100,ab:69,mh:27,as:5},
-    "Revenant maledictus": {hp:1250,def:90,db:198,al:106,ab:72,mh:30,as:5},
-    "Revenant ork": {hp:105,def:60,db:138,al:99,ab:60,mh:20,as:5},
-    "Revenant pyrefiend": {hp:48,def:33,db:45,al:60,mh:5,as:5},
+    "Revenant cyclops": {hp:110,def:49,db:125,al:60,ab:53,mh:16,as:6,uf:1},
+    "Revenant dark beast": {hp:140,def:80,db:140,al:93,ab:65,mh:23,as:5,uf:1},
+    "Revenant demon": {hp:80,def:80,db:124,al:83,ab:30,mh:15,as:5,uf:1},
+    "Revenant dragon": {hp:155,def:87,db:179,al:106,ab:72,mh:30,as:5,uf:1},
+    "Revenant goblin": {hp:14,def:14,db:28,al:13,ab:6,mh:3,as:5,uf:1},
+    "Revenant hellhound": {hp:80,def:80,db:127,al:76,ab:38,mh:14,as:5,uf:1},
+    "Revenant hobgoblin": {hp:72,def:41,db:64,al:50,ab:20,mh:8,uf:1},
+    "Revenant imp": {hp:10,def:4,al:5,mh:2,as:5,uf:1},
+    "Revenant knight": {hp:143,def:80,db:175,al:100,ab:69,mh:27,as:5,uf:1},
+    "Revenant maledictus": {hp:1250,def:90,db:198,al:106,ab:72,mh:30,as:5,uf:1},
+    "Revenant ork": {hp:105,def:60,db:138,al:99,ab:60,mh:20,as:5,uf:1},
+    "Revenant pyrefiend": {hp:48,def:33,db:45,al:60,mh:5,as:5,uf:1},
     "River troll": {hp:66,def:39,al:9,mh:2},
     "Riyl Shade": {hp:76,def:60,al:88,mh:6},
     "Riyl shadow (Temple Trekking)": {hp:76,def:60,al:87,mh:7},
@@ -765,30 +765,30 @@ const monsterStats = {
     "Rogue#Level 15": {hp:17,def:13,db:9,al:13,ab:5,mh:2},
     "Rooster": {hp:3,def:1,db:-42,al:1,ab:-47,mh:0},
     "Rowdy slave": {hp:16,def:7,al:7,mh:2},
-    "Rune dragon": {hp:330,def:276,db:75,al:284,mh:29},
+    "Rune dragon": {hp:330,def:276,db:75,al:284,mh:29,uf:1},
     "Rusty": {hp:7,def:1,db:-15,al:1,mh:1},
     "Salarin the twisted": {hp:70,def:62,al:58,mh:7},
     "Sand Crab": {hp:60,def:1,al:1,mh:1},
-    "Sarachnis": {hp:400,def:150,db:37,al:200,ab:30,mh:31},
-    "Saradomin priest": {hp:89,def:120,db:13,al:120,ab:9,mh:20,as:5},
-    "Saradomin wizard": {hp:120,def:80,al:100,ab:40,mh:14},
+    "Sarachnis": {hp:400,def:150,db:37,al:200,ab:30,mh:31,uf:1},
+    "Saradomin priest": {hp:89,def:120,db:13,al:120,ab:9,mh:20,as:5,uf:1},
+    "Saradomin wizard": {hp:120,def:80,al:100,ab:40,mh:14,uf:1},
     "Scabaras (monster)": {hp:150,def:100},
     "Scarab mage": {hp:60,def:40},
     "Scarab swarm": {hp:10,def:1},
     "Scavenger beast": {hp:20,def:1,al:120,mh:13},
-    "Scion": {hp:50,def:50,al:120,ab:30,mh:16},
+    "Scion": {hp:50,def:50,al:120,ab:30,mh:16,uf:1},
     "Scorpia": {hp:200,def:180,db:271,al:250,ab:60,mh:16},
     "Scorpia's guardian": {hp:70,def:60,al:1,mh:4},
-    "Scorpia's offspring (monster)": {hp:2,def:1,al:1,mh:2},
+    "Scorpia's offspring (monster)": {hp:2,def:1,al:1,mh:2,uf:1},
     "Scorpion": {hp:17,def:10,al:1,ab:-35,mh:0},
     "Scorpion (Sailing)": {hp:17,def:10},
-    "Scurrius": {hp:200,def:60,al:300,ab:150,mh:13},
+    "Scurrius": {hp:200,def:60,al:300,ab:150,mh:13,uf:1},
     "Sea troll": {hp:65,def:40,al:50,mh:6},
     "Seagull": {hp:3,def:1,db:-42,al:1,ab:-47,mh:0},
     "Seagull#Icyene Graveyard": {hp:3,def:1,db:-42,al:1,ab:-47,mh:0},
     "Sergeant (Shayzien)": {hp:86,def:61,db:17,al:75,ab:17,mh:10},
-    "Sergeant Grimspike": {hp:146,def:132,al:80,mh:21,as:5},
-    "Sergeant Steelwill": {hp:127,def:150,al:80,mh:15,as:5},
+    "Sergeant Grimspike": {hp:146,def:132,al:80,mh:21,as:5,uf:1},
+    "Sergeant Steelwill": {hp:127,def:150,al:80,mh:15,as:5,uf:1},
     "Sergeant Strongstack": {hp:128,def:125,al:124,mh:15,as:5},
     "Servant (Burthorpe)": {hp:10,def:3,db:-12,al:3,mh:1},
     "Shade": {hp:29,def:14,al:130,mh:14},
@@ -796,14 +796,14 @@ const monsterStats = {
     "Shadow Hound": {hp:62,def:54,al:53,mh:6},
     "Shadow spider": {hp:55,def:44,db:15,al:44,mh:5},
     "Shadow warrior": {hp:67,def:36,db:31,al:36,ab:20,mh:6},
-    "Shaeded Beast": {hp:210,def:50,db:60,al:50,mh:30},
+    "Shaeded Beast": {hp:210,def:50,db:60,al:50,mh:30,uf:1},
     "Shantay Guard": {hp:32,def:16,db:15,al:17,ab:11,mh:3},
     "Shipyard worker": {hp:10,def:10,al:10,ab:6,mh:2},
     "Sir Carl": {hp:57,def:54,db:82,al:54,ab:20,mh:8,as:5},
     "Sir Harry": {hp:57,def:54,db:82,al:54,ab:20,mh:8,as:5},
     "Sir Jerro": {hp:57,def:54,db:82,al:54,ab:20,mh:8,as:5},
     "Sir Mordred": {hp:38,def:33,db:75,al:33,ab:20,mh:5},
-    "Skeletal Mystic": {hp:200,def:120,al:140,ab:85},
+    "Skeletal Mystic": {hp:200,def:120,al:140,ab:85,uf:1},
     "Skeletal miner": {hp:39,def:38,db:6,al:35,ab:15,mh:6},
     "Skeleton (Ape Atoll)": {hp:77,def:110,al:180,ab:50,mh:10},
     "Skeleton (Barrows)": {hp:51,def:72,db:2,al:72,mh:10},
@@ -817,7 +817,7 @@ const monsterStats = {
     "Skeleton (Tarn's Lair)#Mid level": {hp:50,def:30,al:33,mh:4},
     "Skeleton (The Restless Ghost)": {hp:18,def:7,db:2,al:10,mh:2},
     "Skeleton (Wilderness Agility Course)": {hp:17,def:24,db:6,al:24,ab:15,mh:1},
-    "Skeleton (mage)": {hp:85,def:80,db:30,al:70,mh:12},
+    "Skeleton (mage)": {hp:85,def:80,db:30,al:70,mh:12,uf:1},
     "Skeleton Hellhound (Calvar'ion)": {hp:30,def:95,db:53,al:110,mh:16},
     "Skeleton Hellhound (Vet'ion)": {hp:30,def:150,db:71,al:210,mh:26},
     "Skeleton Mage#Level 16": {hp:17,def:14,al:14,mh:3},
@@ -832,11 +832,11 @@ const monsterStats = {
     "Skeleton#Plain": {hp:24,def:17,db:2,al:17,mh:3},
     "Skeleton#Unarmed": {hp:24,def:17,db:2,al:17,mh:3},
     "Skogre": {hp:71,def:35,al:20,mh:5,as:6},
-    "Skotizo": {hp:450,def:200,db:80,al:240,ab:160,mh:38},
+    "Skotizo": {hp:450,def:200,db:80,al:240,ab:160,mh:38,uf:1},
     "Skraeling (Etceteria)": {hp:1,def:3,db:-12,al:3,mh:1},
     "Skraeling (Miscellania)": {hp:1,def:3,db:-12,al:3,mh:1},
     "Slagilith": {hp:60,def:75,db:35,al:60,ab:10,mh:13},
-    "Slash Bash": {hp:100,def:60,db:30,al:100,ab:22,mh:13,as:6},
+    "Slash Bash": {hp:100,def:60,db:30,al:100,ab:22,mh:13,as:6,uf:1},
     "Snake": {hp:6,def:3,al:4,mh:1},
     "Snake (Ape Atoll)": {hp:36,def:10,al:15,ab:100,mh:10},
     "Snake (Mos Le'Harmless)": {hp:25,def:50,al:25,mh:3,as:3},
@@ -851,17 +851,17 @@ const monsterStats = {
     "Soldier (tier 4)": {hp:65,def:60,db:1,al:60,ab:10,mh:8,as:5},
     "Soldier (tier 5)": {hp:90,def:86,al:85,ab:5,mh:10},
     "Sorebones": {hp:52,def:50,al:49,mh:6},
-    "Sotetseg": {hp:4000,def:200,db:100,al:180,mh:20,as:5},
+    "Sotetseg": {hp:4000,def:200,db:100,al:180,mh:20,as:5,uf:1},
     "Soulless": {hp:24,def:18,al:13,mh:2},
-    "Sourhog": {hp:40,def:25,db:13,al:35,mh:6,as:5},
-    "Spawn": {hp:15,def:10,al:120,mh:9},
+    "Sourhog": {hp:40,def:25,db:13,al:35,mh:6,as:5,uf:1},
+    "Spawn": {hp:15,def:10,al:120,mh:9,uf:1},
     "Speedy Keith": {hp:37,def:27,db:9,al:32,ab:9,mh:4},
     "Spider": {hp:1,def:1,db:-42,al:1,ab:-35,mh:0},
     "Spider (Ape Atoll)": {hp:2,def:1,al:1,ab:1,mh:1,as:6},
     "Spider (Ungael)": {hp:4,def:20,db:17,al:45,mh:6},
     "Spidine": {hp:35,def:36,al:37,mh:5},
-    "Spindel": {hp:515,def:225,db:50,al:200,mh:14},
-    "Spined kraken": {hp:177,def:75,al:1,mh:14,as:5},
+    "Spindel": {hp:515,def:225,db:50,al:200,mh:14,uf:1},
+    "Spined kraken": {hp:177,def:75,al:1,mh:14,as:5,uf:1},
     "Spinolyp": {hp:100,def:10,al:10,mh:10},
     "Stag": {hp:19,def:13,al:11,mh:2},
     "Starlight": {hp:160,def:120,db:13,al:120,ab:60,mh:15,as:5},
@@ -869,24 +869,24 @@ const monsterStats = {
     "Stick": {hp:135,def:60,db:37,al:60,ab:50,mh:27,as:6},
     "Stingray": {hp:106,def:25,al:130,mh:6},
     "Summoned Zombie": {hp:22,def:10,al:8,mh:2},
-    "Suqah": {hp:105,def:95,db:63,al:95,mh:10,as:6},
+    "Suqah": {hp:105,def:95,db:63,al:95,mh:10,as:6,uf:1},
     "Svetlana": {hp:60,def:10,db:-21,al:10,mh:2},
     "Swamp Crab": {hp:75,def:50,db:100,al:1,mh:1},
     "Swamp snake": {hp:10,def:5,al:50,mh:6},
     "Swordchick": {hp:35,def:45,al:41,mh:5},
     "Tanglefoot": {hp:102,def:91,al:97,mh:11},
-    "Tar Monster": {hp:200,def:70,al:120,mh:9},
+    "Tar Monster": {hp:200,def:70,al:120,mh:9,uf:1},
     "Tarik (Nardah)": {hp:22,def:14,db:21,al:19,ab:4,mh:3},
     "Tekton": {hp:600,def:205,db:120,al:390,ab:64,mh:52,as:3},
     "Temple Spider": {hp:70,def:10,db:20,al:120,mh:6},
     "Tern": {hp:22,def:0,al:25,mh:3},
     "Terrorbird": {hp:34,def:19,al:23,mh:3},
-    "The Hueycoatl": {hp:2500,def:125,db:67,al:150,ab:100,mh:14},
+    "The Hueycoatl": {hp:2500,def:125,db:67,al:150,ab:100,mh:14,uf:1},
     "The Kendal": {hp:50,def:60,db:10,al:65,ab:5,mh:9},
-    "The Leviathan": {hp:800,def:200,db:40,al:300,ab:200,mh:50},
-    "The Maiden of Sugadinti": {hp:3500,def:200,al:140,mh:18,as:10},
-    "The Mimic": {hp:230,def:120,db:158,al:185,ab:135,mh:23,as:3},
-    "The Nightmare": {hp:2400,def:150,db:113,al:150,ab:140,mh:50,as:6},
+    "The Leviathan": {hp:800,def:200,db:40,al:300,ab:200,mh:50,uf:1},
+    "The Maiden of Sugadinti": {hp:3500,def:200,al:140,mh:18,as:10,uf:1},
+    "The Mimic": {hp:230,def:120,db:158,al:185,ab:135,mh:23,as:3,uf:1},
+    "The Nightmare": {hp:2400,def:150,db:113,al:150,ab:140,mh:50,as:6,uf:1},
     "The Shaikahan": {hp:100,def:25,al:80,mh:9},
     "The Whisperer": {hp:700,def:220,db:80,al:280,ab:140,mh:42,as:10},
     "Thief": {hp:19,def:8,al:14,mh:2},
@@ -894,8 +894,8 @@ const monsterStats = {
     "Thief#Plain": {hp:19,def:8,al:14,mh:2},
     "Thora (Miscellania)": {hp:1,def:3,db:-12,al:3,mh:1},
     "Thorhild": {hp:1,def:1,al:1,mh:1},
-    "Thrower Troll": {hp:95,def:30,al:30,mh:10,as:7},
-    "Thrower troll (Trollheim)": {hp:95,def:15,al:30,mh:10,as:7},
+    "Thrower Troll": {hp:95,def:30,al:30,mh:10,as:7,uf:1},
+    "Thrower troll (Trollheim)": {hp:95,def:15,al:30,mh:10,as:7,uf:1},
     "Thug": {hp:18,def:9,db:3,al:7,ab:5,mh:2},
     "Tiger shark": {hp:174,def:60,al:120,mh:9},
     "Torag the Corrupted": {hp:100,def:100,db:226,al:100,mh:23,as:5},
@@ -908,7 +908,7 @@ const monsterStats = {
     "Tough Guy": {hp:75,def:50,db:9,al:85,ab:9,mh:7},
     "Tower guard": {hp:22,def:26,db:29,al:26,ab:8,mh:4},
     "Tree spirit": {hp:54,def:35,al:9,mh:2},
-    "Treus Dayth": {hp:100,def:100,db:5,al:70,mh:15},
+    "Treus Dayth": {hp:100,def:100,db:5,al:70,mh:15,uf:1},
     "Tribesman": {hp:39,def:26,db:5,al:23,ab:8,mh:4},
     "Tribeswoman": {hp:39,def:26,db:5,al:23,ab:8,mh:4},
     "Troll general": {hp:140,def:40,db:43,al:70,ab:60,mh:38},
@@ -919,14 +919,14 @@ const monsterStats = {
     "TzHaar-Hur": {hp:80,def:60,al:60,mh:7,as:5},
     "TzHaar-Ket#Level 149": {hp:140,def:120,al:120,mh:15},
     "TzHaar-Ket#Level 221": {hp:200,def:190,al:200,mh:19},
-    "TzHaar-Mej": {hp:100,def:80,al:80,mh:13,as:5},
+    "TzHaar-Mej": {hp:100,def:80,al:80,mh:13,as:5,uf:1},
     "TzHaar-Xil": {hp:120,def:100,al:140,mh:11},
-    "TzKal-Zuk": {hp:1200,def:260,al:350,mh:148,as:10},
-    "TzTok-Jad": {hp:250,def:480,al:640,mh:97,as:8},
+    "TzKal-Zuk": {hp:1200,def:260,al:350,mh:148,as:10,uf:1},
+    "TzTok-Jad": {hp:250,def:480,al:640,mh:97,as:8,uf:1},
     "Ugthanki": {hp:45,def:35,al:35,mh:4},
     "Ulfric": {hp:60,def:82,al:100,mh:11},
-    "Umbra": {hp:500,def:200,db:100,al:1,mh:29,as:5},
-    "Undead Druid": {hp:140,def:60,db:50,al:60,ab:50,mh:22},
+    "Umbra": {hp:500,def:200,db:100,al:1,mh:29,as:5,uf:1},
+    "Undead Druid": {hp:140,def:60,db:50,al:60,ab:50,mh:22,uf:1},
     "Undead Lumberjack": {hp:10,def:5,al:73,mh:2},
     "Undead Zealot": {hp:28,def:38,db:13,al:28,mh:4},
     "Undead chicken": {hp:3,def:1,db:-42,al:1,ab:-47,mh:0},
@@ -941,28 +941,28 @@ const monsterStats = {
     "Uyoro": {hp:130,def:130,al:130,ab:50,mh:14},
     "Valgerd": {hp:1,def:3,db:-12,al:3,mh:1},
     "Vampyre Juvenile": {hp:60,def:30,al:40,mh:4},
-    "Vampyre kraken": {hp:311,def:115,al:1,mh:22,as:5},
+    "Vampyre kraken": {hp:311,def:115,al:1,mh:22,as:5,uf:1},
     "Vanguard": {hp:300,def:150,db:50,al:150,mh:22},
     "Vardorvis": {hp:700,def:215,db:60,al:280,ab:190,mh:32,as:5},
-    "Vasa Nistirio": {hp:600,def:175,db:50,al:1,as:3},
+    "Vasa Nistirio": {hp:600,def:175,db:50,al:1,as:3,uf:1},
     "Veiled kraken": {hp:225,def:115,al:200,mh:19,as:5},
-    "Venenatis": {hp:850,def:321,db:70,al:300,mh:21},
+    "Venenatis": {hp:850,def:321,db:70,al:300,mh:21,uf:1},
     "Vera": {hp:60,def:10,db:-21,al:10,mh:2},
     "Verac the Defiled": {hp:100,def:100,db:226,al:100,mh:23,as:5},
     "Verzik Vitur": {hp:6525,def:200,db:60,al:180,mh:60,as:14},
-    "Vespula": {hp:200,def:150,al:150,mh:14,as:3},
-    "Vet'ion": {hp:255,def:395,db:130,al:430,mh:44,as:6},
-    "Vorkath": {hp:750,def:214,db:26,al:560,ab:16,mh:30,as:5},
+    "Vespula": {hp:200,def:150,al:150,mh:14,as:3,uf:1},
+    "Vet'ion": {hp:255,def:395,db:130,al:430,mh:44,as:6,uf:1},
+    "Vorkath": {hp:750,def:214,db:26,al:560,ab:16,mh:30,as:5,uf:1},
     "Vulture": {hp:10,def:10,al:40,mh:5},
     "Vyrewatch": {hp:125,def:75,al:80,mh:8,as:8},
     "Vyrewatch Sentinel": {hp:150,def:180,al:120,mh:17},
-    "Wallasalki": {hp:65,def:40,al:1,mh:30,as:6},
+    "Wallasalki": {hp:65,def:40,al:1,mh:30,as:6,uf:1},
     "Warrior (Rellekka)": {hp:50,def:40,db:50,al:40,ab:40,mh:8,as:3},
     "Warrior (Thieving)": {hp:20,def:22,db:39,al:22,ab:6,mh:3},
     "Watchman": {hp:22,def:31,db:19,al:31,mh:4},
     "Water elemental": {hp:30,def:30,al:30,mh:4},
-    "Water wizard": {hp:25,def:10,al:5,mh:2},
-    "Waterfiend": {hp:128,def:128,db:70,al:0,mh:16},
+    "Water wizard": {hp:25,def:10,al:5,mh:2,uf:1},
+    "Waterfiend": {hp:128,def:128,db:70,al:0,mh:16,uf:1},
     "Weaponsmaster": {hp:20,def:21,db:22,al:21,ab:8,mh:3,as:5},
     "Werewolf": {hp:100,def:70,al:70,mh:8},
     "White Knight (Burthorpe)": {hp:52,def:21,db:76,al:27,ab:30,mh:6,as:7},
@@ -974,26 +974,26 @@ const monsterStats = {
     "White wolf": {hp:28,def:14,al:20,mh:3},
     "Wild dog": {hp:62,def:54,al:53,mh:6},
     "Wilson": {hp:50,def:25,al:27,mh:4},
-    "Wingman Skree": {hp:121,def:160,al:80,ab:45,mh:16,as:5},
-    "Wizard": {hp:14,def:5,al:8,mh:4},
+    "Wingman Skree": {hp:121,def:160,al:80,ab:45,mh:16,as:5,uf:1},
+    "Wizard": {hp:14,def:5,al:8,mh:4,uf:1},
     "Wolf": {hp:15,def:9,al:10,mh:2},
     "Wolf (Soul Wars)": {hp:80,def:30,db:10,al:85,mh:8},
     "Woman": {hp:7,def:1,db:-21,al:1,mh:1},
     "Woman (East Ardougne)": {hp:7,def:1,db:-21,al:1,mh:1},
     "Woman (West Ardougne)": {hp:20,def:7,al:2,mh:1},
     "Wormbrain": {hp:5,def:1,al:1,mh:1},
-    "Xarpus": {hp:3400,def:100,al:1,mh:6},
+    "Xarpus": {hp:3400,def:100,al:1,mh:6,uf:1},
     "Yadviga": {hp:60,def:10,db:-21,al:10,mh:2},
     "Yak": {hp:50,def:1,al:20,mh:2},
-    "Yama": {hp:2500,def:225,al:320,ab:50,mh:46,as:8},
+    "Yama": {hp:2500,def:225,al:320,ab:50,mh:46,as:8,uf:1},
     "Yuri": {hp:60,def:10,db:-21,al:10,mh:2},
-    "Zakl'n Gritch": {hp:150,def:127,al:83,mh:21,as:5},
+    "Zakl'n Gritch": {hp:150,def:127,al:83,mh:21,as:5,uf:1},
     "Zalcano": {hp:600,def:200,al:1,mh:53,as:5},
     "Zamorak crafter": {hp:25,def:12,al:15,mh:2},
-    "Zamorak mage": {hp:50,al:75,mh:9},
-    "Zamorak ranger": {hp:50,def:80,al:75,mh:9},
+    "Zamorak mage": {hp:50,al:75,mh:9,uf:1},
+    "Zamorak ranger": {hp:50,def:80,al:75,mh:9,uf:1},
     "Zamorak warrior": {hp:45,def:90,al:85,mh:8},
-    "Zamorak wizard": {hp:76,def:24,al:24,mh:20},
+    "Zamorak wizard": {hp:76,def:24,al:24,mh:20,uf:1},
     "Zogre": {hp:71,def:35,al:20,mh:5,as:6},
     "Zoja": {hp:60,def:10,db:-21,al:10,mh:2},
     "Zombie (Entrana Dungeon)": {hp:30,def:21,db:10,al:19,ab:5,mh:3},
@@ -2541,8 +2541,10 @@ const estimateKillTime = function(atkLevel, strLevel, weaponAtk, weaponStr, weap
 };
 
 // Estimate effective kill time accounting for flinching when monster out-DPSes player
-const estimateEffectiveKillTime = function(atkLevel, strLevel, weaponAtk, weaponStr, weaponSpeed, monsterHp, monsterDef, monsterDefBonus, monsterAtkLevel, monsterAtkBonus, monsterMaxHit, monsterAtkSpeed) {
+const estimateEffectiveKillTime = function(atkLevel, strLevel, weaponAtk, weaponStr, weaponSpeed, monsterHp, monsterDef, monsterDefBonus, monsterAtkLevel, monsterAtkBonus, monsterMaxHit, monsterAtkSpeed, isUnflinchable) {
     let baseKillTime = estimateKillTime(atkLevel, strLevel, weaponAtk, weaponStr, weaponSpeed, monsterHp, monsterDef, monsterDefBonus);
+    // If prayer bypass active, skip all flinch/survivability logic
+    if (gateHasPrayerBypass) return baseKillTime;
     // If we don't have monster offense data, assume no flinching needed
     if (!monsterMaxHit || monsterMaxHit <= 0) return baseKillTime;
     let mAtkSpeed = monsterAtkSpeed || 4;
@@ -2563,6 +2565,8 @@ const estimateEffectiveKillTime = function(atkLevel, strLevel, weaponAtk, weapon
     let monsterTTK = (gatePlayerHP / monsterAvgDmg) * mAtkSpeed * 0.6;
     // If monster kills player before player kills monster, must corner flinch
     if (monsterTTK < baseKillTime) {
+        // Unflinchable monsters (Ranged/Magic) = unkillable without prayer
+        if (isUnflinchable) return Infinity;
         let flinchEfficiency = weaponSpeed / FLINCH_CYCLE_TICKS;
         return baseKillTime / flinchEfficiency;
     }
@@ -2570,7 +2574,7 @@ const estimateEffectiveKillTime = function(atkLevel, strLevel, weaponAtk, weapon
 };
 
 // Build a detailed multi-line breakdown of the kill time calculation
-const buildKillTimeBreakdown = function(monsterName, monsterHp, monsterDef, monsterDefBonus, monsterAtkLevel, monsterAtkBonus, monsterMaxHit, monsterAtkSpeed) {
+const buildKillTimeBreakdown = function(monsterName, monsterHp, monsterDef, monsterDefBonus, monsterAtkLevel, monsterAtkBonus, monsterMaxHit, monsterAtkSpeed, isUnflinchable) {
     let lines = [];
     let atkLv = gatePlayerAtkLevel, strLv = gatePlayerStrLevel;
     let wpnAtk = gatePlayerWeaponAtk, wpnStr = gatePlayerWeaponStr, wpnSpd = gatePlayerWeaponSpeed;
@@ -2598,13 +2602,18 @@ const buildKillTimeBreakdown = function(monsterName, monsterHp, monsterDef, mons
     let hitsNeeded = monsterHp / avgDmg;
     let baseKillTime = hitsNeeded * wpnSpd * 0.6;
     lines.push('avg_dmg/hit=' + avgDmg.toFixed(2) + ', hits_needed=' + hitsNeeded.toFixed(1) + ', base_kill_time=' + Math.round(baseKillTime) + 's');
+    // Prayer bypass check
+    if (gateHasPrayerBypass) {
+        lines.push('<b>Prayer bypass:</b> Player has access to useful bones → protection prayers assumed. Kill time: ' + Math.round(baseKillTime) + 's');
+        return lines.join('<br>');
+    }
     // Flinch check
     if (monsterMaxHit && monsterMaxHit > 0) {
         let mAtkSpd = monsterAtkSpeed || 4;
         let mAtkLv = monsterAtkLevel || 1;
         let mAtkBon = monsterAtkBonus || 0;
         lines.push('<b>Flinch check:</b> Player HP ' + gatePlayerHP + ', DEF ' + gatePlayerDefLevel + ', armour_def +' + gatePlayerArmourDef);
-        lines.push('Monster ATK ' + mAtkLv + ', atk_bonus +' + mAtkBon + ', max_hit ' + monsterMaxHit + ', speed ' + mAtkSpd + '-tick');
+        lines.push('Monster ATK ' + mAtkLv + ', atk_bonus +' + mAtkBon + ', max_hit ' + monsterMaxHit + ', speed ' + mAtkSpd + '-tick' + (isUnflinchable ? ' <b>[RANGED/MAGIC — unflinchable]</b>' : ''));
         let mAttackRoll = (mAtkLv + 9) * (mAtkBon + 64);
         let pDefenceRoll = (gatePlayerDefLevel + 9) * (gatePlayerArmourDef + 64);
         let mAccuracy;
@@ -2618,9 +2627,13 @@ const buildKillTimeBreakdown = function(monsterName, monsterHp, monsterDef, mons
         lines.push('mon_atk_roll=' + mAttackRoll + ', plr_def_roll=' + pDefenceRoll + ', mon_accuracy=' + (mAccuracy * 100).toFixed(1) + '%');
         lines.push('mon_avg_dmg=' + mAvgDmg.toFixed(2) + '/hit, mon_TTK=' + (monsterTTK === Infinity ? '∞' : Math.round(monsterTTK) + 's') + ' vs player_TTK=' + Math.round(baseKillTime) + 's');
         if (monsterTTK < baseKillTime) {
-            let flinchEff = wpnSpd / FLINCH_CYCLE_TICKS;
-            let effectiveKillTime = baseKillTime / flinchEff;
-            lines.push('→ <b>Must flinch</b> (monster kills faster). Efficiency=' + wpnSpd + '/' + FLINCH_CYCLE_TICKS + '=' + (flinchEff * 100).toFixed(1) + '%, effective_kill_time=' + Math.round(effectiveKillTime) + 's');
+            if (isUnflinchable) {
+                lines.push('→ <b>UNKILLABLE</b> — monster has Ranged/Magic attacks (cannot corner-flinch) and kills player first. No path to success without protection prayers.');
+            } else {
+                let flinchEff = wpnSpd / FLINCH_CYCLE_TICKS;
+                let effectiveKillTime = baseKillTime / flinchEff;
+                lines.push('→ <b>Must flinch</b> (monster kills faster). Efficiency=' + wpnSpd + '/' + FLINCH_CYCLE_TICKS + '=' + (flinchEff * 100).toFixed(1) + '%, effective_kill_time=' + Math.round(effectiveKillTime) + 's');
+            }
         } else {
             lines.push('→ <b>No flinch</b> (player survives). Kill time stays ' + Math.round(baseKillTime) + 's');
         }
@@ -2643,6 +2656,7 @@ let gatePlayerHP = 10;
 let gatePlayerDefLevel = 1;
 let gatePlayerArmourDef = 0;
 const FLINCH_CYCLE_TICKS = 14; // measured corner-flinch cycle in game ticks
+let gateHasPrayerBypass = false; // true if player has farmable bones → protection prayers assumed
 
 // Shop Cost Gate: module-level state
 let shopCostGateActive = false;
@@ -2660,7 +2674,7 @@ const calcBestCoinsPerHour = function(atkLevel, strLevel, weaponAtk, weaponStr, 
         if (!dropRatesGlobal[monster]['Coins'] && !dropRatesGlobal[monster]['Coins*']) return;
         let coinEntry = dropRatesGlobal[monster]['Coins'] || dropRatesGlobal[monster]['Coins*'];
         let ms = monsterStats[monster] || {hp: 10, def: 1, db: 0};
-        let killTimeSec = estimateEffectiveKillTime(atkLevel, strLevel, weaponAtk, weaponStr, weaponSpeed, ms.hp || 10, ms.def || 1, ms.db || 0, ms.al || 0, ms.ab || 0, ms.mh || 0, ms.as || 4);
+        let killTimeSec = estimateEffectiveKillTime(atkLevel, strLevel, weaponAtk, weaponStr, weaponSpeed, ms.hp || 10, ms.def || 1, ms.db || 0, ms.al || 0, ms.ab || 0, ms.mh || 0, ms.as || 4, ms.uf);
         if (killTimeSec <= 0) return;
         // Skip monsters where a single kill takes over 1 hour — not a realistic coin farm
         if (killTimeSec > 3600) {
@@ -2726,7 +2740,7 @@ const passesMonsterGate = function(itemName, itemSources, combatContext) {
             let ms = monsterStats[source] || {hp: 10, def: 1, db: 0};
             let mHp = ms.hp || 10, mDef = ms.def || 1, mDb = ms.db || 0;
             let mAl = ms.al || 0, mAb = ms.ab || 0, mMh = ms.mh || 0, mAs = ms.as || 4;
-            let killTime = estimateEffectiveKillTime(gatePlayerAtkLevel, gatePlayerStrLevel, gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed, mHp, mDef, mDb, mAl, mAb, mMh, mAs);
+            let killTime = estimateEffectiveKillTime(gatePlayerAtkLevel, gatePlayerStrLevel, gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed, mHp, mDef, mDb, mAl, mAb, mMh, mAs, ms.uf);
             let avgKills = 128;
             let rateStr = '1/128';
             if (dropRatesGlobal[source] && dropRatesGlobal[source][itemName]) {
@@ -2744,8 +2758,11 @@ const passesMonsterGate = function(itemName, itemSources, combatContext) {
             if (totalHours <= bisMonsterGateHours) {
                 hasReasonableSource = true;
                 // Full calculation breakdown
-                let breakdown = buildKillTimeBreakdown(source, mHp, mDef, mDb, mAl, mAb, mMh, mAs);
-                bestDetail = breakdown + '<br><b>Drop:</b> rate ' + rateStr + ', avg_kills=' + avgKills + ', total=' + Math.round(killTime) + 's×' + avgKills + '/3600=<b>' + totalHours.toFixed(1) + 'h</b> (threshold: ' + bisMonsterGateHours + 'h) ✓';
+                let breakdown = buildKillTimeBreakdown(source, mHp, mDef, mDb, mAl, mAb, mMh, mAs, ms.uf);
+                bestDetail = breakdown + '<br><b>Drop:</b> rate ' + rateStr + ', avg_kills=' + avgKills + ', total=' + (killTime === Infinity ? '∞' : Math.round(killTime) + 's') + '×' + avgKills + '/3600=<b>' + (totalHours === Infinity ? '∞' : totalHours.toFixed(1) + 'h') + '</b> (threshold: ' + bisMonsterGateHours + 'h) ✓';
+            } else if (!bestDetail && killTime === Infinity) {
+                let breakdown = buildKillTimeBreakdown(source, mHp, mDef, mDb, mAl, mAb, mMh, mAs, ms.uf);
+                bestDetail = breakdown + '<br><b>Drop:</b> rate ' + rateStr + ' — <b>BLOCKED</b> (unkillable without protection prayers)';
             }
         }
     });
@@ -3005,6 +3022,7 @@ onmessage = function(e) {
         gatePlayerHP = 10;
         gatePlayerDefLevel = 1;
         gatePlayerArmourDef = 0;
+        gateHasPrayerBypass = false;
         didWeaponRestart = false;
         type === 'current' && postMessage({ type: 'loading-update', percentage: '5%' });
         globalValids = calcChallenges(chunks, baseChunkData);
@@ -3042,6 +3060,31 @@ onmessage = function(e) {
                 });
                 gatePlayerArmourDef = Math.round(Object.values(bestDefPerSlot).reduce((a, b) => a + b, 0));
                 // Weapon stays unarmed for first pass — will be updated from BiS result after calcBIS()
+                // Prayer bypass: check if player has access to useful bones
+                const usefulBones = ['Big bones', 'Babydragon bones', 'Dragon bones', 'Wyvern bones',
+                    'Lava dragon bones', 'Superior dragon bones', 'Dagannoth bones', 'Ourg bones', 'Hydra bones'];
+                for (let boneName of usefulBones) {
+                    if (gateHasPrayerBypass) break;
+                    if (!baseChunkData['items'] || !baseChunkData['items'][boneName]) continue;
+                    let sources = baseChunkData['items'][boneName];
+                    for (let source of Object.keys(sources)) {
+                        let sourceVal = sources[source];
+                        if (!sourceVal.includes('drop')) {
+                            // Spawn, shop, or skill source — free bones
+                            gateHasPrayerBypass = true;
+                            break;
+                        }
+                        // Monster drop — check if farmable (TTK < 60s)
+                        let ms = monsterStats[source] || {hp: 10, def: 1, db: 0};
+                        let ttk = estimateKillTime(gatePlayerAtkLevel, gatePlayerStrLevel,
+                            gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed,
+                            ms.hp || 10, ms.def || 1, ms.db || 0);
+                        if (ttk <= 60) {
+                            gateHasPrayerBypass = true;
+                            break;
+                        }
+                    }
+                }
             }
         }
         // Set up Shop Cost Gate — uses same player combat estimates as monster gate
@@ -3137,6 +3180,25 @@ onmessage = function(e) {
                 // Recalc coins/hr with new weapon if shop gate is active
                 if (shopCostGateActive) {
                     bestCoinsPerHour = calcBestCoinsPerHour(gatePlayerAtkLevel, gatePlayerStrLevel, gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed);
+                }
+                // Recheck prayer bypass with upgraded weapon
+                if (!gateHasPrayerBypass) {
+                    const usefulBones = ['Big bones', 'Babydragon bones', 'Dragon bones', 'Wyvern bones',
+                        'Lava dragon bones', 'Superior dragon bones', 'Dagannoth bones', 'Ourg bones', 'Hydra bones'];
+                    for (let boneName of usefulBones) {
+                        if (gateHasPrayerBypass) break;
+                        if (!baseChunkData['items'] || !baseChunkData['items'][boneName]) continue;
+                        let sources = baseChunkData['items'][boneName];
+                        for (let source of Object.keys(sources)) {
+                            let sourceVal = sources[source];
+                            if (!sourceVal.includes('drop')) { gateHasPrayerBypass = true; break; }
+                            let ms = monsterStats[source] || {hp: 10, def: 1, db: 0};
+                            let ttk = estimateKillTime(gatePlayerAtkLevel, gatePlayerStrLevel,
+                                gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed,
+                                ms.hp || 10, ms.def || 1, ms.db || 0);
+                            if (ttk <= 60) { gateHasPrayerBypass = true; break; }
+                        }
+                    }
                 }
                 didWeaponRestart = true;
                 // Re-run challenges and BiS with updated weapon

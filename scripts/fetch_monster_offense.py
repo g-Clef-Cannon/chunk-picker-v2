@@ -41,7 +41,7 @@ def parse_max_hit(val_str):
 
 def parse_infobox_offense(content, variant_hint=None):
     """Parse monster infobox for offensive stats."""
-    result = {'att': None, 'abonus': None, 'maxhit': None, 'aspeed': None}
+    result = {'att': None, 'abonus': None, 'maxhit': None, 'aspeed': None, 'attack_style': None}
     
     variant_idx = ''
     if variant_hint:
@@ -93,6 +93,18 @@ def parse_infobox_offense(content, variant_hint=None):
                         result[our_key] = parse_max_hit(m.group(1))
                     else:
                         result[our_key] = parse_int_value(m.group(1))
+        
+        # Parse attack style (not versioned — applies globally to the monster)
+        if result['attack_style'] is None:
+            style_match = re.match(r'\|attack style\s*=\s*(.+)', line)
+            if style_match:
+                raw = style_match.group(1).strip()
+                # Strip wiki links: [[Crush]] -> Crush
+                raw = re.sub(r'\[\[([^\]|]+)(?:\|[^\]]+)?\]\]', r'\1', raw)
+                # Strip HTML tags and templates
+                raw = re.sub(r'<[^>]+>', '', raw)
+                raw = re.sub(r'\{\{[^}]+\}\}', '', raw)
+                result['attack_style'] = raw.strip()
     
     return result
 
@@ -179,6 +191,8 @@ for name in monster_names:
         merged_stats[name]['maxhit'] = offense['maxhit']
     if offense['aspeed'] is not None:
         merged_stats[name]['aspeed'] = offense['aspeed']
+    if offense['attack_style'] is not None:
+        merged_stats[name]['attack_style'] = offense['attack_style']
     
     if any(v is not None for v in offense.values()):
         offense_count += 1
@@ -191,7 +205,10 @@ print(f'  Missing pages: {len(missing)}', file=sys.stderr)
 att_count = sum(1 for m in merged_stats.values() if 'att' in m)
 maxhit_count = sum(1 for m in merged_stats.values() if 'maxhit' in m)
 aspeed_count = sum(1 for m in merged_stats.values() if 'aspeed' in m)
+style_count = sum(1 for m in merged_stats.values() if 'attack_style' in m)
+ranged_count = sum(1 for m in merged_stats.values() if 'attack_style' in m and re.search(r'(?i)ranged|magic', m.get('attack_style', '')))
 print(f'  Has att: {att_count}, maxhit: {maxhit_count}, aspeed: {aspeed_count}', file=sys.stderr)
+print(f'  Has attack_style: {style_count}, of which ranged/magic: {ranged_count}', file=sys.stderr)
 
 # Show a few examples
 examples = ['Lesser demon', 'Greater demon', 'Dwarf', 'Soldier (Shayzien)', 'Black demon', 'Lizardman shaman']

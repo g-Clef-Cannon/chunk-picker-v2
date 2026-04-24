@@ -3,8 +3,9 @@ Generate monsterStats JS object from monster_stats.json.
 Includes both defensive and offensive fields.
 Field mapping:
   hp -> hp, def -> def, def_bonus -> db, att -> al, abonus -> ab, maxhit -> mh, aspeed -> as
+  attack_style containing Ranged/Magic -> uf:1 (unflinchable)
 """
-import json
+import json, re
 
 with open(r'C:\Users\user\Chunk-Picker-Mod\scripts\monster_stats.json') as f:
     stats = json.load(f)
@@ -29,6 +30,9 @@ for name in sorted(stats.keys()):
     if 'aspeed' in s and s['aspeed'] is not None and s['aspeed'] != 4:
         # Only include attack speed if non-default (4)
         parts.append(f"as:{s['aspeed']}")
+    # Unflinchable: monster uses Ranged or Magic attacks
+    if 'attack_style' in s and s['attack_style'] and re.search(r'(?i)\branged\b|\bmagic\b', s['attack_style']):
+        parts.append("uf:1")
     
     if not parts:
         continue
