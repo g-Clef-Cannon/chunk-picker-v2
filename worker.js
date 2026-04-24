@@ -2663,6 +2663,7 @@ let shopCostGateActive = false;
 let bestCoinsPerHour = 0;
 let bestCoinsMonsterName = '';
 let globalTaskRuleInfo = {};
+let globalRuleSkippedTasks = {};
 let monsterGateDetails = {};
 let shopGateDetails = {};
 
@@ -3357,7 +3358,8 @@ onmessage = function(e) {
             bankMemoryFormat,
             globalValidsBoosts,
             globalEveryDropAltMap,
-            globalTaskRuleInfo
+            globalTaskRuleInfo,
+            globalRuleSkippedTasks
         });
     } catch (err) {
         postMessage({ type: 'error', err });
@@ -4097,7 +4099,7 @@ let calcChallenges = function(chunks, baseChunkData) {
             });
         });
         valids = newValids;
-        [newValids, tempItemSkill, tempMultiStepSkill, globalTaskRuleInfo] = calcChallengesWork(chunks, baseChunkData, tempItemSkill);
+        [newValids, tempItemSkill, tempMultiStepSkill, globalTaskRuleInfo, globalRuleSkippedTasks] = calcChallengesWork(chunks, baseChunkData, tempItemSkill);
         !!manualTasks && Object.keys(manualTasks).forEach((skill) => {
             skill !== 'BiS' && Object.keys(manualTasks[skill]).filter(challenge => !!chunkInfo['challenges'][skill] && !!chunkInfo['challenges'][skill][challenge]).forEach((challenge) => {
                 if (!valids[skill]) {
@@ -7574,6 +7576,9 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
         });
     });
 
+    // Track tasks removed by custom rules (for Rule-Skipped Tasks display)
+    let ruleSkippedTasks = {};
+
     // Strict Tool Gating: cap gathering skill tasks by best available tool tier
     let toolGatingCaps = {}; // saved for task rule info
     let toolGatingToolNames = {}; // best tool name per skill
@@ -7610,6 +7615,12 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                 Object.keys(valids[skill]).forEach((name) => {
                     let taskLevel = chunkInfo['challenges'][skill][name]['Level'] || 0;
                     if (taskLevel > cap) {
+                        if (!ruleSkippedTasks[skill]) ruleSkippedTasks[skill] = {};
+                        if (!ruleSkippedTasks[skill][name]) ruleSkippedTasks[skill][name] = { level: taskLevel, reasons: [] };
+                        ruleSkippedTasks[skill][name].reasons.push({
+                            label: 'Tool Gating',
+                            detail: 'Best tool: ' + bestToolName + ' → cap lv' + cap + '; task needs lv' + taskLevel
+                        });
                         delete valids[skill][name];
                     }
                 });
@@ -7647,6 +7658,12 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             Object.keys(valids[skill]).forEach((name) => {
                 let taskLevel = chunkInfo['challenges'][skill][name]['Level'] || 0;
                 if (taskLevel > cap) {
+                    if (!ruleSkippedTasks[skill]) ruleSkippedTasks[skill] = {};
+                    if (!ruleSkippedTasks[skill][name]) ruleSkippedTasks[skill][name] = { level: taskLevel, reasons: [] };
+                    ruleSkippedTasks[skill][name].reasons.push({
+                        label: 'Method Cap',
+                        detail: 'Highest primary method lv' + highestPrimaryLevel + ' → cap lv' + cap + '; task needs lv' + taskLevel
+                    });
                     delete valids[skill][name];
                 }
             });
@@ -7690,6 +7707,13 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             Object.keys(valids[skill]).forEach((name) => {
                 let taskLevel = chunkInfo['challenges'][skill][name]['Level'] || 0;
                 if (taskLevel > cap) {
+                    let capLabel = skillTaskCap === 'quest' ? 'Quest' : skillTaskCap === 'diary' ? 'Diary' : 'Custom';
+                    if (!ruleSkippedTasks[skill]) ruleSkippedTasks[skill] = {};
+                    if (!ruleSkippedTasks[skill][name]) ruleSkippedTasks[skill][name] = { level: taskLevel, reasons: [] };
+                    ruleSkippedTasks[skill][name].reasons.push({
+                        label: capLabel + ' Cap',
+                        detail: capLabel + ' cap for ' + skill + ': lv' + cap + '; task needs lv' + taskLevel
+                    });
                     delete valids[skill][name];
                 }
             });
@@ -8135,7 +8159,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
 
     //console.log(JSON.parse(JSON.stringify(tempItemSkill)));
     //console.log(JSON.parse(JSON.stringify(valids)));
-    return [valids, tempItemSkill, tempMultiStepSkill, taskRuleInfo];
+    return [valids, tempItemSkill, tempMultiStepSkill, taskRuleInfo, ruleSkippedTasks];
 }
 
 // Checks if skill has primary training

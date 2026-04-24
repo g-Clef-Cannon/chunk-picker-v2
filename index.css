@@ -7139,6 +7139,30 @@ input#searchChunks {
     font-family: monospace, monospace;
 }
 
+.skipped-challenge {
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+.skipped-challenge:hover {
+    opacity: 1;
+}
+
+.skipped-reason {
+    color: #d97c50;
+    font-size: 12px;
+    font-style: italic;
+}
+
+.skipped-rule-tag {
+    border-color: #d97c50;
+    color: #d97c50;
+}
+
+.rule-entry:has(.skipped-rule-tag) {
+    border-left-color: #d97c50;
+}
+
 .addEquipment {
     cursor: pointer;
     -webkit-transition-duration: 0.4s;

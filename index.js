@@ -140,8 +140,9 @@ let challengePanelVis = {
     active: false,
     areas: false,
     backlog: false,
+    skipped: false,
     completed: false
-};                                                                              // JSON showing state of which challenge panels are open/closed
+};// JSON showing state of which challenge panels are open/closed
 
 let rulesPanelVis = {
     visibletasks: false,
@@ -1396,6 +1397,7 @@ let bankMemoryFormat = '';
 let globalValidsBoosts = {};
 let globalEveryDropAltMap = {};
 let globalTaskRuleInfo = {};
+let globalRuleSkippedTasks = {};
 let oldChallengeArr = {};
 let futureChunkData = {};
 let futureUnlockedSections = {};
@@ -4110,7 +4112,8 @@ let workerOnMessage = function(e) {
                 bankMemoryFormat,
                 globalValidsBoosts,
                 globalEveryDropAltMap,
-                globalTaskRuleInfo
+                globalTaskRuleInfo,
+                globalRuleSkippedTasks
             } = e.data);
             if (settings['newTasks'] && chunkJustRolled) {
                 openNewTasksModal(calcFutureChallenges2(globalValids, baseChunkData, highestOverall)[1].replaceAll(", 'future'", ", ''"));
@@ -10041,6 +10044,9 @@ let backlogManualSource = function(category, source) {
     $('.panel-backlog > i').css('line-height', '');
     (testMode || !(viewOnly || inEntry || locked)) && $('.panel-backlog').append(`<div class='noscroll backlogSources-container'><span class='noscroll backlogSources' onclick='backlogSources()'><i class="fa-solid fa-archive"></i>Backlog Sources</span></div>`);
     $('.panel-backlog').append(...backlogArr);
+    let skippedArr = setupSkippedArr();
+    $('.panel-skipped').css({ 'min-height': '', 'font-size': '' }).removeClass('calculating').empty();
+    $('.panel-skipped').append(...skippedArr);
 }
 
 // Opens the sticker menu
@@ -10766,6 +10772,9 @@ let setCurrentChallenges = function(backlogArr, completedArr, useOld, noClear) {
         $('.panel-backlog > i').css('line-height', '');
         (testMode || !(viewOnly || inEntry || locked)) && $('.panel-backlog').append(`<div class='noscroll backlogSources-container'><span class='noscroll backlogSources' onclick='backlogSources()'><i class="fa-solid fa-archive"></i>Backlog Sources</span></div>`);
         $('.panel-backlog').append(...backlogArr);
+        let skippedArr = setupSkippedArr();
+        $('.panel-skipped').css({ 'min-height': '', 'font-size': '' }).removeClass('calculating').empty();
+        $('.panel-skipped').append(...skippedArr);
         $('.panel-completed').css({ 'min-height': '', 'font-size': '' }).removeClass('calculating').empty();
         $('.panel-completed > i').css('line-height', '');
         $('.panel-completed').append(...completedArr);
@@ -10883,6 +10892,34 @@ let goBackDetails = function(type) {
     detailsStack.pop();
     let el = detailsStack.pop();
     showDetails(el[0], encodeRFC5987ValueChars(el[1]), type, detailsStack.length > 0);
+}
+
+// Shows details for a rule-skipped task
+let showSkippedDetails = function(challenge, skill) {
+    if (!activeContextMenuOpen && (Date.now() > activeContextMenuOpenTime + 10) && !inEntry && !importMenuOpen && !notesModalOpen && !highscoreMenuOpen && !helpMenuOpen) {
+        modal.generate('challengeDetailsModal', onMobile);
+        challenge = decodeQueryParam(challenge);
+        detailsModalOpen = true;
+        $('#details-data').empty();
+        $('.details-back').hide();
+        let entry = globalRuleSkippedTasks && globalRuleSkippedTasks[skill] && globalRuleSkippedTasks[skill][challenge];
+        let level = entry ? entry.level : '?';
+        let challengeLabelLine = `[${level}] ${skill}: `;
+        let titleHtml = challenge.split('~').length > 1 ? `${challenge.split('~')[0]}<a class='link noscroll' href="${"https://oldschool.runescape.wiki/w/" + encodeForUrl((challenge.split('|')[1]))}" target="_blank">${challenge.split('~')[1].split('|').join('')}</a>${challenge.split('~')[2]}` : challenge;
+        $('#details-title').html(`<b class="noscroll">${challengeLabelLine}${titleHtml}</b>`);
+        if (entry && entry.reasons && entry.reasons.length > 0) {
+            let ruleRows = entry.reasons.map(r => {
+                if (typeof r === 'object' && r.label) {
+                    return `<div class="noscroll rule-entry"><span class="noscroll rule-tag skipped-rule-tag">${r.label}</span><div class="noscroll rule-tag-detail">${r.detail}</div></div>`;
+                }
+                return `<div class="noscroll rule-entry"><span class="noscroll rule-tag skipped-rule-tag">${r}</span></div>`;
+            }).join('');
+            $('#details-data').append(`<span class="details-subtitle noscroll"><u class="noscroll"><b class="noscroll">skipped by rules</b></u></span><br /><div class="noscroll rule-tags-container">${ruleRows}</div>`);
+        } else {
+            $('#details-data').append(`<span class="details-subtitle noscroll">Skipped by an active rule.</span>`);
+        }
+        $('#challengeDetailsModal').css('display', 'block');
+    }
 }
 
 // Shows challenge details
@@ -12289,6 +12326,9 @@ let backlogChallenge = function(challenge, skill, note, noUpdate) {
     $('.panel-backlog > i').css('line-height', '');
     (testMode || !(viewOnly || inEntry || locked)) && $('.panel-backlog').append(`<div class='noscroll backlogSources-container'><span class='noscroll backlogSources' onclick='backlogSources()'><i class="fa-solid fa-archive"></i>Backlog Sources</span></div>`);
     $('.panel-backlog').append(...backlogArr);
+    let skippedArr = setupSkippedArr();
+    $('.panel-skipped').css({ 'min-height': '', 'font-size': '' }).removeClass('calculating').empty();
+    $('.panel-skipped').append(...skippedArr);
     setData();
 }
 
@@ -12327,6 +12367,28 @@ let setupBacklogArr = function(noEdit) {
         backlogArr.push('No tasks currently backlogged.');
     }
     return backlogArr;
+}
+
+let setupSkippedArr = function() {
+    let skippedArr = [];
+    if (!globalRuleSkippedTasks || Object.keys(globalRuleSkippedTasks).length === 0) {
+        skippedArr.push('No tasks currently skipped by rules.');
+        return skippedArr;
+    }
+    Object.keys(globalRuleSkippedTasks).forEach((skill) => {
+        Object.keys(globalRuleSkippedTasks[skill]).forEach((name) => {
+            let entry = globalRuleSkippedTasks[skill][name];
+            let level = entry.level || '?';
+            let reasons = entry.reasons || [];
+            let reasonText = reasons.map(r => r.label).join(', ');
+            let taskDisplay = name.includes('~') ? (name.split('~')[0] + `<a class='link' href="${"https://oldschool.runescape.wiki/w/" + encodeForUrl(name.split('|')[1])}" target="_blank">${name.split('~')[1].split('|').join('')}</a>` + name.split('~')[2]) : name;
+            skippedArr.push(`<div class="challenge noscroll skipped-challenge ${skill + '-challenge'}" onclick="showSkippedDetails('${encodeRFC5987ValueChars(name)}', '${skill}')"><b class="noscroll">[${level}] ${skill}</b>: ${taskDisplay} <span class="noscroll skipped-reason">[${reasonText}]</span></div>`);
+        });
+    });
+    if (skippedArr.length < 1) {
+        skippedArr.push('No tasks currently skipped by rules.');
+    }
+    return skippedArr;
 }
 
 // Removes a challenge from the backlog
