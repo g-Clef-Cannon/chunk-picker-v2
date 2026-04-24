@@ -997,7 +997,7 @@ const monsterStats = {
     "Zogre": {hp:71,def:35,al:20,mh:5,as:6},
     "Zoja": {hp:60,def:10,db:-21,al:10,mh:2},
     "Zombie (Entrana Dungeon)": {hp:30,def:21,db:10,al:19,ab:5,mh:3},
-    "Zombie (Kourend)": {hp:28,def:15,al:50,ab:5,mh:7,as:5},
+    "Zombie (Kourend)": {hp:50,def:47,db:0,al:50,ab:5,mh:7,as:5},
     "Zombie (Melzar's Maze)": {hp:30,def:16,db:10,al:19,ab:5,mh:3,as:5},
     "Zombie (Sepulchre of Death)": {hp:170,def:130,al:130,mh:14},
     "Zombie (Shayzien Crypts)": {hp:54,def:62,al:160,ab:30,mh:19,as:5},
