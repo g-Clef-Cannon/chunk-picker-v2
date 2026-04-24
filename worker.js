@@ -3053,6 +3053,9 @@ onmessage = function(e) {
                     let eqData = chunkInfo['equipment'][eq];
                     let slot = eqData.slot;
                     if (!armourSlots.includes(slot)) return;
+                    // Check Defence level requirement
+                    let reqs = eqData.requirements || {};
+                    if ((reqs['Defence'] || 0) > gatePlayerDefLevel) return;
                     let avgMeleeDef = ((eqData.defence_stab || 0) + (eqData.defence_slash || 0) + (eqData.defence_crush || 0)) / 3;
                     if (avgMeleeDef > (bestDefPerSlot[slot] || 0)) {
                         bestDefPerSlot[slot] = avgMeleeDef;
