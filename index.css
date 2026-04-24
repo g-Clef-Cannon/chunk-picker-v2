@@ -7106,14 +7106,16 @@ input#searchChunks {
 .rule-tags-container {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin-bottom: 8px;
+    gap: 8px;
+    margin-bottom: 10px;
 }
 
 .rule-entry {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    border-left: 2px solid var(--colorLink, #6ca0dc);
+    padding-left: 8px;
 }
 
 .rule-tag {
@@ -7129,11 +7131,12 @@ input#searchChunks {
 
 .rule-tag-detail {
     font-size: 11px;
-    font-style: italic;
     color: var(--colorText, #ccc);
-    opacity: 0.8;
-    padding-left: 4px;
+    opacity: 0.85;
+    padding-left: 2px;
+    line-height: 1.5;
     word-break: break-word;
+    font-family: monospace, monospace;
 }
 
 .addEquipment {

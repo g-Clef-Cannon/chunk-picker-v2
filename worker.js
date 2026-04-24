@@ -2569,6 +2569,67 @@ const estimateEffectiveKillTime = function(atkLevel, strLevel, weaponAtk, weapon
     return baseKillTime;
 };
 
+// Build a detailed multi-line breakdown of the kill time calculation
+const buildKillTimeBreakdown = function(monsterName, monsterHp, monsterDef, monsterDefBonus, monsterAtkLevel, monsterAtkBonus, monsterMaxHit, monsterAtkSpeed) {
+    let lines = [];
+    let atkLv = gatePlayerAtkLevel, strLv = gatePlayerStrLevel;
+    let wpnAtk = gatePlayerWeaponAtk, wpnStr = gatePlayerWeaponStr, wpnSpd = gatePlayerWeaponSpeed;
+    // Player offense
+    lines.push('<b>Player:</b> ATK ' + atkLv + ', STR ' + strLv + ', weapon: ' + gatePlayerWeaponName + ' (+' + wpnAtk + ' atk, +' + wpnStr + ' str, ' + wpnSpd + '-tick)');
+    let effectiveStr = strLv + 9;
+    let effectiveAtk = atkLv + 9;
+    let maxHit = Math.floor((effectiveStr * (wpnStr + 64) + 320) / 640);
+    if (maxHit < 1) maxHit = 1;
+    lines.push('eff_str=' + effectiveStr + ', eff_atk=' + effectiveAtk + ', max_hit=floor((' + effectiveStr + '×' + (wpnStr + 64) + '+320)/640)=' + maxHit);
+    let attackRoll = effectiveAtk * (wpnAtk + 64);
+    let defenceRoll = (monsterDef + 9) * (monsterDefBonus + 64);
+    lines.push('<b>Monster:</b> ' + monsterName + ' (HP ' + monsterHp + ', DEF ' + monsterDef + ', def_bonus +' + monsterDefBonus + ')');
+    lines.push('atk_roll=' + effectiveAtk + '×' + (wpnAtk + 64) + '=' + attackRoll + ', def_roll=' + (monsterDef + 9) + '×' + (monsterDefBonus + 64) + '=' + defenceRoll);
+    let accuracy;
+    if (attackRoll > defenceRoll) {
+        accuracy = 1 - (defenceRoll + 2) / (2 * (attackRoll + 1));
+        lines.push('atk_roll>def_roll → accuracy=1-(' + (defenceRoll + 2) + ')/(2×' + (attackRoll + 1) + ')=' + (accuracy * 100).toFixed(1) + '%');
+    } else {
+        accuracy = attackRoll / (2 * (defenceRoll + 1));
+        lines.push('atk_roll≤def_roll → accuracy=' + attackRoll + '/(2×' + (defenceRoll + 1) + ')=' + (accuracy * 100).toFixed(1) + '%');
+    }
+    if (accuracy < 0.01) accuracy = 0.01;
+    let avgDmg = (maxHit / 2) * accuracy;
+    let hitsNeeded = monsterHp / avgDmg;
+    let baseKillTime = hitsNeeded * wpnSpd * 0.6;
+    lines.push('avg_dmg/hit=' + avgDmg.toFixed(2) + ', hits_needed=' + hitsNeeded.toFixed(1) + ', base_kill_time=' + Math.round(baseKillTime) + 's');
+    // Flinch check
+    if (monsterMaxHit && monsterMaxHit > 0) {
+        let mAtkSpd = monsterAtkSpeed || 4;
+        let mAtkLv = monsterAtkLevel || 1;
+        let mAtkBon = monsterAtkBonus || 0;
+        lines.push('<b>Flinch check:</b> Player HP ' + gatePlayerHP + ', DEF ' + gatePlayerDefLevel + ', armour_def +' + gatePlayerArmourDef);
+        lines.push('Monster ATK ' + mAtkLv + ', atk_bonus +' + mAtkBon + ', max_hit ' + monsterMaxHit + ', speed ' + mAtkSpd + '-tick');
+        let mAttackRoll = (mAtkLv + 9) * (mAtkBon + 64);
+        let pDefenceRoll = (gatePlayerDefLevel + 9) * (gatePlayerArmourDef + 64);
+        let mAccuracy;
+        if (mAttackRoll > pDefenceRoll) {
+            mAccuracy = 1 - (pDefenceRoll + 2) / (2 * (mAttackRoll + 1));
+        } else {
+            mAccuracy = mAttackRoll / (2 * (pDefenceRoll + 1));
+        }
+        let mAvgDmg = (monsterMaxHit / 2) * mAccuracy;
+        let monsterTTK = mAvgDmg > 0 ? (gatePlayerHP / mAvgDmg) * mAtkSpd * 0.6 : Infinity;
+        lines.push('mon_atk_roll=' + mAttackRoll + ', plr_def_roll=' + pDefenceRoll + ', mon_accuracy=' + (mAccuracy * 100).toFixed(1) + '%');
+        lines.push('mon_avg_dmg=' + mAvgDmg.toFixed(2) + '/hit, mon_TTK=' + (monsterTTK === Infinity ? '∞' : Math.round(monsterTTK) + 's') + ' vs player_TTK=' + Math.round(baseKillTime) + 's');
+        if (monsterTTK < baseKillTime) {
+            let flinchEff = wpnSpd / FLINCH_CYCLE_TICKS;
+            let effectiveKillTime = baseKillTime / flinchEff;
+            lines.push('→ <b>Must flinch</b> (monster kills faster). Efficiency=' + wpnSpd + '/' + FLINCH_CYCLE_TICKS + '=' + (flinchEff * 100).toFixed(1) + '%, effective_kill_time=' + Math.round(effectiveKillTime) + 's');
+        } else {
+            lines.push('→ <b>No flinch</b> (player survives). Kill time stays ' + Math.round(baseKillTime) + 's');
+        }
+    } else {
+        lines.push('No monster offense data → no flinch check. Kill time: ' + Math.round(baseKillTime) + 's');
+    }
+    return lines.join('<br>');
+};
+
 // Monster Power Gate: module-level state (computed once per recalc)
 let monsterGateActive = false;
 let gatePlayerAtkLevel = 1;
@@ -2576,6 +2637,7 @@ let gatePlayerStrLevel = 1;
 let gatePlayerWeaponAtk = 0;
 let gatePlayerWeaponStr = 0;
 let gatePlayerWeaponSpeed = 4;
+let gatePlayerWeaponName = 'Unarmed';
 // Flinch detection state
 let gatePlayerHP = 10;
 let gatePlayerDefLevel = 1;
@@ -2659,10 +2721,12 @@ const passesMonsterGate = function(itemName, itemSources, combatContext) {
                 if (srcSkill && processingSkill[srcSkill]) return;
             }
             hasReasonableSource = true;
-            bestDetail = 'Non-drop source available — auto-pass';
+            bestDetail = 'Non-drop source available (' + sourceVal + ') — auto-pass';
         } else {
             let ms = monsterStats[source] || {hp: 10, def: 1, db: 0};
-            let killTime = estimateEffectiveKillTime(gatePlayerAtkLevel, gatePlayerStrLevel, gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed, ms.hp || 10, ms.def || 1, ms.db || 0, ms.al || 0, ms.ab || 0, ms.mh || 0, ms.as || 4);
+            let mHp = ms.hp || 10, mDef = ms.def || 1, mDb = ms.db || 0;
+            let mAl = ms.al || 0, mAb = ms.ab || 0, mMh = ms.mh || 0, mAs = ms.as || 4;
+            let killTime = estimateEffectiveKillTime(gatePlayerAtkLevel, gatePlayerStrLevel, gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed, mHp, mDef, mDb, mAl, mAb, mMh, mAs);
             let avgKills = 128;
             let rateStr = '1/128';
             if (dropRatesGlobal[source] && dropRatesGlobal[source][itemName]) {
@@ -2679,7 +2743,9 @@ const passesMonsterGate = function(itemName, itemSources, combatContext) {
             let totalHours = (killTime * avgKills) / 3600;
             if (totalHours <= bisMonsterGateHours) {
                 hasReasonableSource = true;
-                bestDetail = source + ': ~' + Math.round(killTime) + 's/kill, rate ' + rateStr + ', ~' + totalHours.toFixed(1) + 'h to farm (threshold: ' + bisMonsterGateHours + 'h)';
+                // Full calculation breakdown
+                let breakdown = buildKillTimeBreakdown(source, mHp, mDef, mDb, mAl, mAb, mMh, mAs);
+                bestDetail = breakdown + '<br><b>Drop:</b> rate ' + rateStr + ', avg_kills=' + avgKills + ', total=' + Math.round(killTime) + 's×' + avgKills + '/3600=<b>' + totalHours.toFixed(1) + 'h</b> (threshold: ' + bisMonsterGateHours + 'h) ✓';
             }
         }
     });
@@ -2694,6 +2760,9 @@ const passesShopCostGate = function(itemName, itemSources) {
     let hasShopSource = false;
     let hasNonShopSource = false;
     let lowestPrice = Infinity;
+    let lowestShopName = '';
+    let lowestMarkup = 1.3;
+    let lowestBasePrice = 0;
     Object.keys(itemSources).forEach((source) => {
         let sourceVal = itemSources[source];
         if (sourceVal === 'shop') {
@@ -2702,7 +2771,12 @@ const passesShopCostGate = function(itemName, itemSources) {
             if (basePrice > 0) {
                 let markup = shopMarkups[source] || 1.3;
                 let actualPrice = Math.floor(basePrice * markup);
-                if (actualPrice < lowestPrice) lowestPrice = actualPrice;
+                if (actualPrice < lowestPrice) {
+                    lowestPrice = actualPrice;
+                    lowestShopName = source;
+                    lowestMarkup = markup;
+                    lowestBasePrice = basePrice;
+                }
             }
         } else {
             hasNonShopSource = true;
@@ -2716,7 +2790,12 @@ const passesShopCostGate = function(itemName, itemSources) {
     let hoursToFarm = lowestPrice / bestCoinsPerHour;
     let result = hoursToFarm <= shopCostGateHours;
     if (result) {
-        shopGateDetails[itemName] = itemName + ': ' + lowestPrice.toLocaleString() + 'gp, best coins/hr ' + bestCoinsPerHour.toFixed(1) + (bestCoinsMonsterName ? ' (' + bestCoinsMonsterName + ')' : '') + ', ~' + hoursToFarm.toFixed(1) + 'h to earn (threshold: ' + shopCostGateHours + 'h)';
+        let lines = [];
+        lines.push('<b>Shop:</b> ' + itemName + ' from ' + lowestShopName);
+        lines.push('Base price: ' + lowestBasePrice.toLocaleString() + 'gp × ' + lowestMarkup.toFixed(1) + ' markup = ' + lowestPrice.toLocaleString() + 'gp');
+        lines.push('<b>Coin source:</b> best ' + bestCoinsPerHour.toFixed(1) + ' coins/hr from ' + (bestCoinsMonsterName || '?'));
+        lines.push('Time to earn: ' + lowestPrice.toLocaleString() + '/' + bestCoinsPerHour.toFixed(1) + '=<b>' + hoursToFarm.toFixed(1) + 'h</b> (threshold: ' + shopCostGateHours + 'h) ✓');
+        shopGateDetails[itemName] = lines.join('<br>');
     }
     return result;
 };
@@ -2921,6 +3000,7 @@ onmessage = function(e) {
         gatePlayerWeaponAtk = 0;
         gatePlayerWeaponStr = 0;
         gatePlayerWeaponSpeed = 4;
+        gatePlayerWeaponName = 'Unarmed';
         gatePlayerHP = 10;
         gatePlayerDefLevel = 1;
         gatePlayerArmourDef = 0;
@@ -2934,10 +3014,20 @@ onmessage = function(e) {
             if (!hasPrimaryRanged && !hasPrimaryMagic) {
                 monsterGateActive = true;
                 needRerun = true;
+                // Scan weapons: determine ATK/STR levels and pick best weapon stats
+                let bestWeaponStr = -1;
                 Object.keys(chunkInfo['equipment']).filter(eq => !!baseChunkData['items'][eq] && (chunkInfo['equipment'][eq].slot === 'weapon' || chunkInfo['equipment'][eq].slot === '2h')).forEach((eq) => {
                     let reqs = chunkInfo['equipment'][eq].requirements || {};
                     if (reqs['Attack'] && reqs['Attack'] > gatePlayerAtkLevel) gatePlayerAtkLevel = reqs['Attack'];
                     if (reqs['Strength'] && reqs['Strength'] > gatePlayerStrLevel) gatePlayerStrLevel = reqs['Strength'];
+                    let wpnStr = chunkInfo['equipment'][eq].melee_strength || 0;
+                    if (wpnStr > bestWeaponStr) {
+                        bestWeaponStr = wpnStr;
+                        gatePlayerWeaponStr = wpnStr;
+                        gatePlayerWeaponAtk = Math.max(chunkInfo['equipment'][eq].attack_stab || 0, chunkInfo['equipment'][eq].attack_slash || 0, chunkInfo['equipment'][eq].attack_crush || 0);
+                        gatePlayerWeaponSpeed = chunkInfo['equipment'][eq].attack_speed || 4;
+                        gatePlayerWeaponName = eq;
+                    }
                 });
                 // If no Strength requirement found from weapons, assume STR ≈ ATK
                 if (gatePlayerStrLevel <= 1 && gatePlayerAtkLevel > 1) {
