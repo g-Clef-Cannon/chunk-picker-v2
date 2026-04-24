@@ -8470,10 +8470,28 @@ let calcBIS = function(completedOnly) {
             // BiS Monster Power Gate: check if item can be reasonably farmed
             if (validWearable && !completedOnly && !passesMonsterGate(equip, baseChunkData['items'][equip], true)) {
                 validWearable = false;
+                let gateDetail = monsterGateDetails[equip] || 'Monster too difficult to farm';
+                if (!globalRuleSkippedTasks['BiS']) globalRuleSkippedTasks['BiS'] = {};
+                let bisArticle = vowels.includes(equip.toLowerCase().charAt(0)) ? ' an ' : ' a ';
+                bisArticle = (equip.toLowerCase().charAt(equip.toLowerCase().length - 1) === 's' || (equip.toLowerCase().charAt(equip.toLowerCase().length - 1) === ')' && equip.toLowerCase().split('(')[0].trim().charAt(equip.toLowerCase().split('(')[0].trim().length - 1) === 's')) ? ' ' : bisArticle;
+                let taskName = 'Obtain' + bisArticle + '~|' + formatEquip(equip) + '|~';
+                if (!globalRuleSkippedTasks['BiS'][taskName]) globalRuleSkippedTasks['BiS'][taskName] = { level: skill + ' BiS', reasons: [] };
+                if (!globalRuleSkippedTasks['BiS'][taskName].reasons.some(r => r.label === 'Monster Gate')) {
+                    globalRuleSkippedTasks['BiS'][taskName].reasons.push({ label: 'Monster Gate', detail: gateDetail });
+                }
             }
             // Shop Cost Gate: check if item can be reasonably purchased
             if (validWearable && !completedOnly && !passesShopCostGate(equip, baseChunkData['items'][equip])) {
                 validWearable = false;
+                let gateDetail = shopGateDetails[equip] || 'Too expensive to purchase';
+                if (!globalRuleSkippedTasks['BiS']) globalRuleSkippedTasks['BiS'] = {};
+                let bisArticle = vowels.includes(equip.toLowerCase().charAt(0)) ? ' an ' : ' a ';
+                bisArticle = (equip.toLowerCase().charAt(equip.toLowerCase().length - 1) === 's' || (equip.toLowerCase().charAt(equip.toLowerCase().length - 1) === ')' && equip.toLowerCase().split('(')[0].trim().charAt(equip.toLowerCase().split('(')[0].trim().length - 1) === 's')) ? ' ' : bisArticle;
+                let taskName = 'Obtain' + bisArticle + '~|' + formatEquip(equip) + '|~';
+                if (!globalRuleSkippedTasks['BiS'][taskName]) globalRuleSkippedTasks['BiS'][taskName] = { level: skill + ' BiS', reasons: [] };
+                if (!globalRuleSkippedTasks['BiS'][taskName].reasons.some(r => r.label === 'Shop Gate')) {
+                    globalRuleSkippedTasks['BiS'][taskName].reasons.push({ label: 'Shop Gate', detail: gateDetail });
+                }
             }
             let bestAmmo = null;
             Object.keys(chunkInfo['codeItems']['ammoTools']).filter(ammo => { return chunkInfo['codeItems']['ammoTools'][ammo].hasOwnProperty(equip) }).forEach((ammo) => {
