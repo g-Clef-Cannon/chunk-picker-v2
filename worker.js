@@ -2563,8 +2563,8 @@ const estimateEffectiveKillTime = function(atkLevel, strLevel, weaponAtk, weapon
     if (monsterAvgDmg <= 0) return baseKillTime;
     // Monster time-to-kill player
     let monsterTTK = (gatePlayerHP / monsterAvgDmg) * mAtkSpeed * 0.6;
-    // If monster kills player before player kills monster, must corner flinch
-    if (monsterTTK < baseKillTime) {
+    // If monster deals >50% of player HP before kill, must corner flinch
+    if (monsterTTK < baseKillTime * 2) {
         // Unflinchable monsters (Ranged/Magic) = unkillable without prayer
         if (isUnflinchable) return Infinity;
         let flinchEfficiency = weaponSpeed / FLINCH_CYCLE_TICKS;
@@ -2624,18 +2624,19 @@ const buildKillTimeBreakdown = function(monsterName, monsterHp, monsterDef, mons
         }
         let mAvgDmg = (monsterMaxHit / 2) * mAccuracy;
         let monsterTTK = mAvgDmg > 0 ? (gatePlayerHP / mAvgDmg) * mAtkSpd * 0.6 : Infinity;
+        let dmgTakenPct = monsterTTK === Infinity ? 0 : (baseKillTime / monsterTTK * 100);
         lines.push('mon_atk_roll=' + mAttackRoll + ', plr_def_roll=' + pDefenceRoll + ', mon_accuracy=' + (mAccuracy * 100).toFixed(1) + '%');
-        lines.push('mon_avg_dmg=' + mAvgDmg.toFixed(2) + '/hit, mon_TTK=' + (monsterTTK === Infinity ? '∞' : Math.round(monsterTTK) + 's') + ' vs player_TTK=' + Math.round(baseKillTime) + 's');
-        if (monsterTTK < baseKillTime) {
+        lines.push('mon_avg_dmg=' + mAvgDmg.toFixed(2) + '/hit, mon_TTK=' + (monsterTTK === Infinity ? '∞' : Math.round(monsterTTK) + 's') + ' vs player_TTK=' + Math.round(baseKillTime) + 's (dmg_taken=' + dmgTakenPct.toFixed(0) + '% of HP)');
+        if (monsterTTK < baseKillTime * 2) {
             if (isUnflinchable) {
-                lines.push('→ <b>UNKILLABLE</b> — monster has Ranged/Magic attacks (cannot corner-flinch) and kills player first. No path to success without protection prayers.');
+                lines.push('→ <b>UNKILLABLE</b> — monster has Ranged/Magic attacks (cannot corner-flinch) and deals ' + dmgTakenPct.toFixed(0) + '% HP damage. No path to success without protection prayers.');
             } else {
                 let flinchEff = wpnSpd / FLINCH_CYCLE_TICKS;
                 let effectiveKillTime = baseKillTime / flinchEff;
-                lines.push('→ <b>Must flinch</b> (monster kills faster). Efficiency=' + wpnSpd + '/' + FLINCH_CYCLE_TICKS + '=' + (flinchEff * 100).toFixed(1) + '%, effective_kill_time=' + Math.round(effectiveKillTime) + 's');
+                lines.push('→ <b>Must flinch</b> (takes >' + '50% HP). Efficiency=' + wpnSpd + '/' + FLINCH_CYCLE_TICKS + '=' + (flinchEff * 100).toFixed(1) + '%, effective_kill_time=' + Math.round(effectiveKillTime) + 's');
             }
         } else {
-            lines.push('→ <b>No flinch</b> (player survives). Kill time stays ' + Math.round(baseKillTime) + 's');
+            lines.push('→ <b>No flinch</b> (takes ' + dmgTakenPct.toFixed(0) + '% HP). Kill time stays ' + Math.round(baseKillTime) + 's');
         }
     } else {
         lines.push('No monster offense data → no flinch check. Kill time: ' + Math.round(baseKillTime) + 's');
