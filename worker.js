@@ -347,7 +347,7 @@ const monsterStats = {
     "Dark energy core": {hp:25,def:20,db:10,al:1,mh:13,as:2},
     "Dark warrior#Level 145": {hp:165,def:55,db:118,al:75,ab:80,mh:18},
     "Dark warrior#Level 8": {hp:17,def:5,db:78,al:5,ab:20,mh:2},
-    "Dark warrior#Zeah": {hp:15,def:8,al:5,ab:20,mh:2},
+    "Dark warrior#Zeah": {hp:50,def:20,db:40,al:30,mh:4},
     "Dark wizard#Higher level": {hp:25,def:12,al:5,mh:2,uf:1},
     "Dark wizard#Lower level": {hp:12,def:5,al:5,mh:2,uf:1},
     "Deadly red spider": {hp:35,def:30,db:13,al:30,mh:3},
