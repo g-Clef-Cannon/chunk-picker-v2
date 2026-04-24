@@ -3192,6 +3192,15 @@ onmessage = function(e) {
                 gatePlayerWeaponAtk = Math.max(eqData.attack_stab || 0, eqData.attack_slash || 0, eqData.attack_crush || 0);
                 gatePlayerWeaponSpeed = eqData.attack_speed || 4;
                 gatePlayerWeaponName = bestBisWeapon;
+                // Derive ATK/STR levels from BiS weapon requirements, not max of all weapons
+                let bisReqs = eqData.requirements || {};
+                let bisAtkReq = bisReqs['Attack'] || 1;
+                let bisStrReq = bisReqs['Strength'] || 1;
+                if (bisStrReq <= 1 && bisAtkReq > 1) bisStrReq = bisAtkReq;
+                gatePlayerAtkLevel = bisAtkReq;
+                gatePlayerStrLevel = bisStrReq;
+                gatePlayerHP = bisAtkReq + 9;
+                gatePlayerDefLevel = bisAtkReq;
                 needRerun = true;
             }
             // Update armour defence from BiS
