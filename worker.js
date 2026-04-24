@@ -3014,12 +3014,20 @@ onmessage = function(e) {
             if (!hasPrimaryRanged && !hasPrimaryMagic) {
                 monsterGateActive = true;
                 needRerun = true;
-                // Scan weapons: determine ATK/STR levels and pick best weapon stats
-                let bestWeaponStr = -1;
-                Object.keys(chunkInfo['equipment']).filter(eq => !!baseChunkData['items'][eq] && (chunkInfo['equipment'][eq].slot === 'weapon' || chunkInfo['equipment'][eq].slot === '2h')).forEach((eq) => {
+                // Pass 1: determine ATK/STR levels from all available weapon requirements
+                let availableWeapons = Object.keys(chunkInfo['equipment']).filter(eq => !!baseChunkData['items'][eq] && (chunkInfo['equipment'][eq].slot === 'weapon' || chunkInfo['equipment'][eq].slot === '2h'));
+                availableWeapons.forEach((eq) => {
                     let reqs = chunkInfo['equipment'][eq].requirements || {};
                     if (reqs['Attack'] && reqs['Attack'] > gatePlayerAtkLevel) gatePlayerAtkLevel = reqs['Attack'];
                     if (reqs['Strength'] && reqs['Strength'] > gatePlayerStrLevel) gatePlayerStrLevel = reqs['Strength'];
+                });
+                // Pass 2: pick best weapon the player can wield (by melee_strength)
+                let bestWeaponStr = -1;
+                availableWeapons.forEach((eq) => {
+                    let reqs = chunkInfo['equipment'][eq].requirements || {};
+                    let reqAtk = reqs['Attack'] || 0;
+                    let reqStr = reqs['Strength'] || 0;
+                    if (reqAtk > gatePlayerAtkLevel || reqStr > gatePlayerStrLevel) return;
                     let wpnStr = chunkInfo['equipment'][eq].melee_strength || 0;
                     if (wpnStr > bestWeaponStr) {
                         bestWeaponStr = wpnStr;
