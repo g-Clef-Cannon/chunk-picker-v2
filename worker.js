@@ -2876,6 +2876,7 @@ let craftedBisOverrideLinking = {};
 let bisOverrideMinLevel = {};
 let readdedCraftedBisTasks = {};
 let didRestart = false;
+let didWeaponRestart = false;
 let bisUpgrades = {};
 let globalValidsBoosts = {};
 let bringAlongTasks = {};
@@ -3004,6 +3005,7 @@ onmessage = function(e) {
         gatePlayerHP = 10;
         gatePlayerDefLevel = 1;
         gatePlayerArmourDef = 0;
+        didWeaponRestart = false;
         type === 'current' && postMessage({ type: 'loading-update', percentage: '5%' });
         globalValids = calcChallenges(chunks, baseChunkData);
         // Now that globalValids is computed, set up Monster Power Gate using proper safespot check
@@ -3039,63 +3041,7 @@ onmessage = function(e) {
                     }
                 });
                 gatePlayerArmourDef = Math.round(Object.values(bestDefPerSlot).reduce((a, b) => a + b, 0));
-                // Step 3: iterative weapon upgrade — start unarmed, only upgrade to
-                // weapons that are actually obtainable with current gear
-                let sortedWeapons = availableWeapons
-                    .filter(eq => {
-                        let reqs = chunkInfo['equipment'][eq].requirements || {};
-                        return (reqs['Attack'] || 0) <= gatePlayerAtkLevel && (reqs['Strength'] || 0) <= gatePlayerStrLevel;
-                    })
-                    .map(eq => ({ name: eq, str: chunkInfo['equipment'][eq].melee_strength || 0 }))
-                    .sort((a, b) => a.str - b.str);
-                sortedWeapons.forEach(({ name: eq }) => {
-                    let wpnStr = chunkInfo['equipment'][eq].melee_strength || 0;
-                    if (wpnStr <= gatePlayerWeaponStr) return; // not an upgrade
-                    let wpnAtk = Math.max(chunkInfo['equipment'][eq].attack_stab || 0, chunkInfo['equipment'][eq].attack_slash || 0, chunkInfo['equipment'][eq].attack_crush || 0);
-                    let wpnSpeed = chunkInfo['equipment'][eq].attack_speed || 4;
-                    // Check if this weapon is obtainable with current gear
-                    let sources = baseChunkData['items'][eq];
-                    let obtainable = false;
-                    Object.keys(sources).forEach((source) => {
-                        if (obtainable) return;
-                        let sourceVal = sources[source];
-                        if (sourceVal === 'shop') {
-                            // Shop weapons: allow if price is reasonable (conservative check)
-                            let basePrice = shopPrices[eq] || 0;
-                            if (basePrice <= 0 || basePrice < 1000) { obtainable = true; return; }
-                            // Can't check coins/hr yet, so allow if price is moderate
-                            if (basePrice < 5000) obtainable = true;
-                        } else if (!sourceVal.includes('drop')) {
-                            obtainable = true; // skill source, spawn, etc.
-                        } else {
-                            // Monster drop: check if killable with CURRENT weapon
-                            let ms = monsterStats[source] || {hp: 10, def: 1, db: 0};
-                            let killTime = estimateEffectiveKillTime(
-                                gatePlayerAtkLevel, gatePlayerStrLevel,
-                                gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed,
-                                ms.hp || 10, ms.def || 1, ms.db || 0,
-                                ms.al || 0, ms.ab || 0, ms.mh || 0, ms.as || 4
-                            );
-                            let avgKills = 128;
-                            if (dropRatesGlobal[source] && dropRatesGlobal[source][eq]) {
-                                let rateStr = dropRatesGlobal[source][eq];
-                                if (rateStr === 'Always') { avgKills = 1; }
-                                else {
-                                    let parts = rateStr.split('/');
-                                    if (parts.length === 2) avgKills = Math.ceil(parseFloat(parts[1]) / parseFloat(parts[0]));
-                                }
-                            }
-                            let totalHours = (killTime * avgKills) / 3600;
-                            if (totalHours <= bisMonsterGateHours) obtainable = true;
-                        }
-                    });
-                    if (obtainable) {
-                        gatePlayerWeaponAtk = wpnAtk;
-                        gatePlayerWeaponStr = wpnStr;
-                        gatePlayerWeaponSpeed = wpnSpeed;
-                        gatePlayerWeaponName = eq;
-                    }
-                });
+                // Weapon stays unarmed for first pass — will be updated from BiS result after calcBIS()
             }
         }
         // Set up Shop Cost Gate — uses same player combat estimates as monster gate
@@ -3156,6 +3102,48 @@ onmessage = function(e) {
         type === 'current' && postMessage({ type: 'loading-update', percentage: '95%' });
         highestOverall = calcBIS();
 
+        // Extract BiS melee weapon and re-run gates if it's an upgrade from unarmed
+        if (monsterGateActive && !didWeaponRestart && globalValids['BiS']) {
+            // Build reverse lookup: formatted_name → equipment key
+            let fmtToKey = {};
+            Object.keys(chunkInfo['equipment']).forEach(eq => {
+                let fmt = chunkInfo['equipment'][eq].formatted_name || eq.toLowerCase();
+                fmtToKey[fmt] = eq;
+            });
+            // Scan BiS entries for weapon/2h slots
+            let bestBisWeapon = null;
+            let bestBisStr = 0;
+            Object.keys(globalValids['BiS']).forEach(taskName => {
+                let slotStr = globalValids['BiS'][taskName];
+                if (!slotStr.includes(' weapon') && !slotStr.includes(' 2h')) return;
+                let match = taskName.match(/\|([^|]+)\|/);
+                if (!match) return;
+                let fmtName = match[1];
+                let eqKey = fmtToKey[fmtName];
+                if (!eqKey || !chunkInfo['equipment'][eqKey]) return;
+                let eqData = chunkInfo['equipment'][eqKey];
+                let str = eqData.melee_strength || 0;
+                if (str > bestBisStr) {
+                    bestBisStr = str;
+                    bestBisWeapon = eqKey;
+                }
+            });
+            if (bestBisWeapon && bestBisStr > gatePlayerWeaponStr) {
+                let eqData = chunkInfo['equipment'][bestBisWeapon];
+                gatePlayerWeaponStr = bestBisStr;
+                gatePlayerWeaponAtk = Math.max(eqData.attack_stab || 0, eqData.attack_slash || 0, eqData.attack_crush || 0);
+                gatePlayerWeaponSpeed = eqData.attack_speed || 4;
+                gatePlayerWeaponName = bestBisWeapon;
+                // Recalc coins/hr with new weapon if shop gate is active
+                if (shopCostGateActive) {
+                    bestCoinsPerHour = calcBestCoinsPerHour(gatePlayerAtkLevel, gatePlayerStrLevel, gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed);
+                }
+                didWeaponRestart = true;
+                // Re-run challenges and BiS with updated weapon
+                globalValids = calcChallenges(chunks, baseChunkData);
+                highestOverall = calcBIS();
+            }
+        }
         let restartCalcs = false;
         let toManuallyAdd = {};
         if (rules['Wield Crafted Items Override'] && !didRestart) {
