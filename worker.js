@@ -3044,24 +3044,10 @@ onmessage = function(e) {
                 if (gatePlayerStrLevel <= 1 && gatePlayerAtkLevel > 1) {
                     gatePlayerStrLevel = gatePlayerAtkLevel;
                 }
-                // Step 2: set up player HP/DEF/armour (needed for flinch checks during weapon selection)
+                // Step 2: set up player HP/DEF
                 gatePlayerHP = gatePlayerAtkLevel + 9;
                 gatePlayerDefLevel = gatePlayerAtkLevel;
-                let armourSlots = ['head', 'body', 'legs', 'shield', 'feet', 'hands', 'cape', 'neck', 'ring'];
-                let bestDefPerSlot = {};
-                Object.keys(chunkInfo['equipment']).filter(eq => !!baseChunkData['items'][eq]).forEach((eq) => {
-                    let eqData = chunkInfo['equipment'][eq];
-                    let slot = eqData.slot;
-                    if (!armourSlots.includes(slot)) return;
-                    // Check Defence level requirement
-                    let reqs = eqData.requirements || {};
-                    if ((reqs['Defence'] || 0) > gatePlayerDefLevel) return;
-                    let avgMeleeDef = ((eqData.defence_stab || 0) + (eqData.defence_slash || 0) + (eqData.defence_crush || 0)) / 3;
-                    if (avgMeleeDef > (bestDefPerSlot[slot] || 0)) {
-                        bestDefPerSlot[slot] = avgMeleeDef;
-                    }
-                });
-                gatePlayerArmourDef = Math.round(Object.values(bestDefPerSlot).reduce((a, b) => a + b, 0));
+                // Armour starts at 0 — will be populated from BiS result after calcBIS()
                 // Weapon stays unarmed for first pass — will be updated from BiS result after calcBIS()
                 // Prayer bypass: check if player has access to useful bones
                 const usefulBones = ['Big bones', 'Babydragon bones', 'Dragon bones', 'Wyvern bones',
@@ -3148,7 +3134,7 @@ onmessage = function(e) {
         type === 'current' && postMessage({ type: 'loading-update', percentage: '95%' });
         highestOverall = calcBIS();
 
-        // Extract BiS melee weapon and re-run gates if it's an upgrade from unarmed
+        // Extract BiS weapon + armour from calcBIS results and re-run if changed
         if (monsterGateActive && !didWeaponRestart && globalValids['BiS']) {
             // Build reverse lookup: formatted_name → equipment key
             let fmtToKey = {};
@@ -3156,30 +3142,52 @@ onmessage = function(e) {
                 let fmt = chunkInfo['equipment'][eq].formatted_name || eq.toLowerCase();
                 fmtToKey[fmt] = eq;
             });
-            // Scan BiS entries for weapon/2h slots
+            let armourSlots = ['head', 'body', 'legs', 'shield', 'feet', 'hands', 'cape', 'neck', 'ring'];
             let bestBisWeapon = null;
             let bestBisStr = 0;
+            let bisArmourDef = 0;
+            let bisArmourNames = [];
             Object.keys(globalValids['BiS']).forEach(taskName => {
                 let slotStr = globalValids['BiS'][taskName];
-                if (!slotStr.includes(' weapon') && !slotStr.includes(' 2h')) return;
                 let match = taskName.match(/\|([^|]+)\|/);
                 if (!match) return;
                 let fmtName = match[1];
                 let eqKey = fmtToKey[fmtName];
                 if (!eqKey || !chunkInfo['equipment'][eqKey]) return;
                 let eqData = chunkInfo['equipment'][eqKey];
-                let str = eqData.melee_strength || 0;
-                if (str > bestBisStr) {
-                    bestBisStr = str;
-                    bestBisWeapon = eqKey;
+                // Weapon/2h extraction
+                if (slotStr.includes(' weapon') || slotStr.includes(' 2h')) {
+                    let str = eqData.melee_strength || 0;
+                    if (str > bestBisStr) {
+                        bestBisStr = str;
+                        bestBisWeapon = eqKey;
+                    }
+                }
+                // Armour extraction — sum avg melee defence from assigned BiS armour slots
+                let eqSlot = eqData.slot;
+                if (armourSlots.includes(eqSlot)) {
+                    let avgDef = ((eqData.defence_stab || 0) + (eqData.defence_slash || 0) + (eqData.defence_crush || 0)) / 3;
+                    bisArmourDef += avgDef;
+                    bisArmourNames.push(eqKey + ' (+' + Math.round(avgDef) + ')');
                 }
             });
+            let newArmourDef = Math.round(bisArmourDef);
+            let needRerun = false;
+            // Update weapon if BiS has a better one
             if (bestBisWeapon && bestBisStr > gatePlayerWeaponStr) {
                 let eqData = chunkInfo['equipment'][bestBisWeapon];
                 gatePlayerWeaponStr = bestBisStr;
                 gatePlayerWeaponAtk = Math.max(eqData.attack_stab || 0, eqData.attack_slash || 0, eqData.attack_crush || 0);
                 gatePlayerWeaponSpeed = eqData.attack_speed || 4;
                 gatePlayerWeaponName = bestBisWeapon;
+                needRerun = true;
+            }
+            // Update armour defence from BiS
+            if (newArmourDef !== gatePlayerArmourDef) {
+                gatePlayerArmourDef = newArmourDef;
+                needRerun = true;
+            }
+            if (needRerun) {
                 // Recalc coins/hr with new weapon if shop gate is active
                 if (shopCostGateActive) {
                     bestCoinsPerHour = calcBestCoinsPerHour(gatePlayerAtkLevel, gatePlayerStrLevel, gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed);
@@ -3204,7 +3212,7 @@ onmessage = function(e) {
                     }
                 }
                 didWeaponRestart = true;
-                // Re-run challenges and BiS with updated weapon
+                // Re-run challenges and BiS with updated weapon + armour
                 globalValids = calcChallenges(chunks, baseChunkData);
                 highestOverall = calcBIS();
             }
