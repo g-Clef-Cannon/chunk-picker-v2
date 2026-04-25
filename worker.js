@@ -7747,6 +7747,27 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                     delete valids[skill][name];
                 }
             });
+
+            // Add synthetic training task referencing the lowest skipped task
+            let skippedInSkill = ruleSkippedTasks[skill] ? Object.keys(ruleSkippedTasks[skill]).filter(
+                (n) => ruleSkippedTasks[skill][n].reasons.some((r) => r.label === 'Method Cap')
+            ) : [];
+            if (skippedInSkill.length > 0) {
+                let lowestSkipped = skippedInSkill.reduce((best, n) => {
+                    let lv = ruleSkippedTasks[skill][n].level;
+                    return (!best || lv < best.level) ? { name: n, level: lv } : best;
+                }, null);
+                let targetLabel = lowestSkipped.name.includes('|') ? lowestSkipped.name.split('|')[1] : lowestSkipped.name;
+                let syntheticName = 'Train to efficient cap towards ~|' + targetLabel + '|~';
+                valids[skill][syntheticName] = cap;
+                if (!chunkInfo['challenges'][skill][syntheticName]) {
+                    chunkInfo['challenges'][skill][syntheticName] = {
+                        Level: cap,
+                        NoBoost: true,
+                        Synthetic: true
+                    };
+                }
+            }
         });
     }
 

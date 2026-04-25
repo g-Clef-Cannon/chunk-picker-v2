@@ -326,7 +326,8 @@ async function runTests() {
         // Test 1: fried onions should NOT be in globalValids for Cooking
         const cookingValids = gv['Cooking'] || {};
         const friedOnionsInValids = Object.keys(cookingValids).some(name =>
-            name.toLowerCase().includes('fried onion') || name.toLowerCase().includes('cooked onion')
+            (name.toLowerCase().includes('fried onion') || name.toLowerCase().includes('cooked onion'))
+            && !name.startsWith('Train to')
         );
         assert('Fried onions NOT in globalValids (Cooking)',
             !friedOnionsInValids,
@@ -353,8 +354,8 @@ async function runTests() {
             assert('Active Cooking challenge within cap (≤30)',
                 cookLevel <= 30,
                 'Active: "' + taskName + '" level=' + cookLevel);
-            assert('Active Cooking challenge is NOT fried onions',
-                !taskName.toLowerCase().includes('fried onion'),
+            assert('Active Cooking challenge is NOT fried onions (the actual task)',
+                !taskName.toLowerCase().includes('fried onion') || taskName.startsWith('Train to'),
                 'Got: ' + taskName);
         } else {
             assert('Active Cooking challenge within cap (≤30)', true, 'No cooking challenge assigned');
@@ -383,9 +384,26 @@ async function runTests() {
 
         // Test 5: Check the specific task ID t_1080 (fried onions)
         const t1080inValids = cookingValids.hasOwnProperty('Cook ~|fried onions|~') ||
-            Object.keys(cookingValids).some(n => n.includes('fried onion'));
+            Object.keys(cookingValids).some(n => n.includes('fried onion') && !n.includes('Train to'));
         assert('Task t_1080 (fried onions) NOT in Cooking valids', !t1080inValids,
             t1080inValids ? 'Still present!' : '');
+
+        // Test 6: Synthetic training task should exist in Cooking valids
+        const syntheticTask = Object.keys(cookingValids).find(n => n.startsWith('Train to efficient cap towards'));
+        assert('Synthetic training task exists in Cooking valids',
+            !!syntheticTask,
+            syntheticTask ? 'Found: ' + syntheticTask : 'No synthetic task found');
+
+        // Test 7: Synthetic task references fried onions (lowest skipped)
+        assert('Synthetic task references fried onions',
+            syntheticTask && syntheticTask.includes('fried onions'),
+            syntheticTask ? 'Task: ' + syntheticTask : 'No synthetic task');
+
+        // Test 8: Synthetic task level equals the cap
+        const syntheticLevel = syntheticTask ? parseInt(cookingValids[syntheticTask]) : 0;
+        assert('Synthetic task level equals cap (30)',
+            syntheticLevel === 30,
+            'Level: ' + syntheticLevel);
 
     } else if (workerResult && workerResult.type === 'error') {
         console.log('  Worker returned error:', workerResult.err);
