@@ -3148,41 +3148,27 @@ onmessage = function(e) {
         highestOverall = calcBIS();
 
         // Extract BiS weapon + armour from calcBIS results and re-run if changed
-        if (monsterGateActive && !didWeaponRestart && globalValids['BiS']) {
-            // Build reverse lookup: formatted_name → equipment key
-            let fmtToKey = {};
-            Object.keys(chunkInfo['equipment']).forEach(eq => {
-                let fmt = chunkInfo['equipment'][eq].formatted_name || eq.toLowerCase();
-                fmtToKey[fmt] = eq;
-            });
+        if (monsterGateActive && !didWeaponRestart) {
             let armourSlots = ['head', 'body', 'legs', 'shield', 'feet', 'hands', 'cape', 'neck', 'ring'];
             let bestBisWeapon = null;
             let bestBisStr = 0;
             let bisArmourDef = 0;
             let bisArmourNames = [];
-            Object.keys(globalValids['BiS']).forEach(taskName => {
-                let slotStr = globalValids['BiS'][taskName];
-                let match = taskName.match(/\|([^|]+)\|/);
-                if (!match) return;
-                let fmtName = match[1];
-                let eqKey = fmtToKey[fmtName];
+            // Read weapon from calcBIS Melee result (respects gating, backlog, completed tasks)
+            let meleeWeaponKey = highestOverall['Melee-weapon'] || highestOverall['Melee-2h'];
+            if (meleeWeaponKey && chunkInfo['equipment'][meleeWeaponKey]) {
+                let eqData = chunkInfo['equipment'][meleeWeaponKey];
+                bestBisStr = eqData.melee_strength || 0;
+                bestBisWeapon = meleeWeaponKey;
+            }
+            // Read armour from calcBIS Melee result — best per slot
+            armourSlots.forEach(slot => {
+                let eqKey = highestOverall['Melee-' + slot];
                 if (!eqKey || !chunkInfo['equipment'][eqKey]) return;
                 let eqData = chunkInfo['equipment'][eqKey];
-                // Weapon/2h extraction
-                if (slotStr.includes(' weapon') || slotStr.includes(' 2h')) {
-                    let str = eqData.melee_strength || 0;
-                    if (str > bestBisStr) {
-                        bestBisStr = str;
-                        bestBisWeapon = eqKey;
-                    }
-                }
-                // Armour extraction — sum avg melee defence from assigned BiS armour slots
-                let eqSlot = eqData.slot;
-                if (armourSlots.includes(eqSlot)) {
-                    let avgDef = ((eqData.defence_stab || 0) + (eqData.defence_slash || 0) + (eqData.defence_crush || 0)) / 3;
-                    bisArmourDef += avgDef;
-                    bisArmourNames.push(eqKey + ' (+' + Math.round(avgDef) + ')');
-                }
+                let avgDef = ((eqData.defence_stab || 0) + (eqData.defence_slash || 0) + (eqData.defence_crush || 0)) / 3;
+                bisArmourDef += avgDef;
+                bisArmourNames.push(eqKey + ' (+' + Math.round(avgDef) + ')');
             });
             let newArmourDef = Math.round(bisArmourDef);
             let needRerun = false;

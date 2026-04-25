@@ -405,6 +405,14 @@ async function runTests() {
             syntheticLevel === 30,
             'Level: ' + syntheticLevel);
 
+        // Test 9: Monster gate BiS weapon should NOT be Steel sword (gated item)
+        const ho = workerResult.highestOverall || {};
+        const meleeWeapon = ho['Melee-weapon'] || ho['Melee-2h'] || 'none';
+        console.log('\n  INFO: Melee BiS weapon = ' + meleeWeapon);
+        assert('Gate BiS weapon is NOT Steel sword (gated drop)',
+            meleeWeapon !== 'Steel sword',
+            'Got: ' + meleeWeapon);
+
     } else if (workerResult && workerResult.type === 'error') {
         console.log('  Worker returned error:', workerResult.err);
         failed++;
