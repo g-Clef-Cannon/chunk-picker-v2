@@ -1,0 +1,402 @@
+/**
+ * Test: Method-Based Cap should prevent fried onions (lv42 Cooking) from appearing
+ * when the user's highest Cooking primary method is level 20 (nettle tea → cap=30).
+ *
+ * Loads real Firebase data for map "iwil" and runs the worker calc in Node.js.
+ */
+
+const https = require('https');
+const http = require('http');
+const path = require('path');
+const fs = require('fs');
+const vm = require('vm');
+
+// ── Hardcoded constants (from index.js) ──────────────────────────────────────
+
+const skillNames = [
+    "Slayer","Thieving","Attack","Defence","Strength","Hitpoints","Ranged",
+    "Prayer","Magic","Farming","Herblore","Hunter","Cooking","Woodcutting",
+    "Firemaking","Fletching","Fishing","Mining","Runecraft","Sailing",
+    "Smithing","Crafting","Agility","Construction","Combat"
+];
+
+const combatSkills = ['Attack','Strength','Defence','Hitpoints','Ranged','Magic','Prayer'];
+
+const f2pSkills = [
+    'Attack','Strength','Defence','Ranged','Prayer','Magic','Runecraft',
+    'Hitpoints','Crafting','Mining','Smithing','Fishing','Cooking',
+    'Firemaking','Woodcutting'
+];
+
+const maybePrimary = ["Normal Farming","Sulphurous Fertiliser","Shortcut","InsidePOH Primary"];
+
+const processingSkill = {
+    "Slayer":false,"Thieving":false,"Attack":false,"Defence":false,
+    "Strength":false,"Hitpoints":false,"Ranged":false,"Prayer":false,
+    "Runecraft":true,"Sailing":false,"Magic":true,"Farming":false,
+    "Herblore":true,"Hunter":false,"Cooking":true,"Woodcutting":false,
+    "Firemaking":true,"Fletching":true,"Fishing":false,"Mining":false,
+    "Smithing":true,"Crafting":true,"Agility":false,"Construction":true,
+    "Combat":false,"Quest":false,"Diary":false,"Nonskill":false,
+    "Extra":false,"BiS":false
+};
+
+const universalPrimary = {
+    "Slayer":["Primary[+]"],"Thieving":["Primary[+]"],
+    "Attack":["Monster[+]"],"Defence":["Monster[+]"],
+    "Strength":["Monster[+]"],"Hitpoints":["Monster[+]"],
+    "Ranged":["Ranged[+]"],"Prayer":["Primary[+]","Bones[+]"],
+    "Runecraft":["Primary[+]"],"Sailing":["Primary[+]"],
+    "Magic":["Primary[+]"],"Farming":["Primary[+]"],
+    "Herblore":["Primary[+]"],"Hunter":["Primary[+]"],
+    "Cooking":["Primary[+]"],"Woodcutting":["Primary[+]"],
+    "Firemaking":["Primary[+]"],"Fletching":["Primary[+]"],
+    "Fishing":["Primary[+]"],"Mining":["Primary[+]"],
+    "Smithing":["Primary[+]"],"Crafting":["Primary[+]"],
+    "Agility":["Primary[+]"],"Construction":["Primary[+]"],
+    "Combat":["Combat[+]"]
+};
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function fetchJSON(url) {
+    return new Promise((resolve, reject) => {
+        const client = url.startsWith('https') ? https : http;
+        client.get(url, (res) => {
+            let data = '';
+            res.on('data', (chunk) => data += chunk);
+            res.on('end', () => {
+                try { resolve(JSON.parse(data)); }
+                catch(e) { reject(new Error('JSON parse failed: ' + e.message)); }
+            });
+        }).on('error', reject);
+    });
+}
+
+function computeHighestCurrent(completedChallenges, chunkInfo) {
+    let highest = {};
+    if (!completedChallenges) return highest;
+    Object.keys(completedChallenges).forEach(skill => {
+        let maxLevel = 0;
+        let maxName = '';
+        Object.keys(completedChallenges[skill]).forEach(taskId => {
+            if (chunkInfo.challenges[skill]) {
+                Object.keys(chunkInfo.challenges[skill]).forEach(name => {
+                    const task = chunkInfo.challenges[skill][name];
+                    if (task.TaskId === taskId || ('t_' + task.TaskId) === taskId) {
+                        const lv = parseInt(task.Level) || 0;
+                        if (lv > maxLevel) { maxLevel = lv; maxName = name; }
+                    }
+                });
+            }
+        });
+        if (maxName) highest[skill] = maxName;
+    });
+    return highest;
+}
+
+// ── Main test ────────────────────────────────────────────────────────────────
+
+async function runTests() {
+    console.log('=== Method-Based Cap Test Suite ===\n');
+
+    // 1. Load static chunkInfo
+    console.log('Loading chunkInfo...');
+    const chunkInfoPath = path.join(__dirname, '..', 'chunkpicker-chunkinfo-export.json');
+    const chunkInfo = JSON.parse(fs.readFileSync(chunkInfoPath, 'utf8'));
+
+    // 2. Fetch Firebase data
+    console.log('Fetching Firebase data for map "iwil"...');
+    const fb = await fetchJSON('https://chunkpicker.firebaseio.com/maps/iwil.json');
+    if (!fb || !fb.rules) {
+        console.error('FAIL: Could not fetch Firebase data');
+        process.exit(1);
+    }
+
+    const ci = fb.chunkinfo || {};
+    const rules = fb.rules;
+
+    // Force Method-Based Cap on for this test
+    rules['Method-Based Cap'] = true;
+
+    // 3. Extract codeItems
+    const codeItems = chunkInfo.codeItems || {};
+
+    // 4. Build unlocked chunks list (must use 'unlocked', not 'selected')
+    const chunks = fb.chunks && fb.chunks.unlocked ? fb.chunks.unlocked : {};
+
+    // 5. Compute highestCurrent from completedChallenges
+    const completedChallenges = ci.completedChallenges || {};
+    const highestCurrent = computeHighestCurrent(completedChallenges, chunkInfo);
+
+    // 6. Build randomLoot (simplified — empty object is fine for cap testing)
+    const randomLoot = {};
+
+    // 7. Construct worker message
+    const workerData = {
+        type: 'current',
+        chunks,
+        rules,
+        chunkInfo,
+        skillNames,
+        processingSkill,
+        maybePrimary,
+        combatSkills,
+        monstersPlus: codeItems.monstersPlus || {},
+        objectsPlus: codeItems.objectsPlus || {},
+        chunksPlus: codeItems.chunksPlus || {},
+        itemsPlus: codeItems.itemsPlus || {},
+        mixPlus: codeItems.mixPlus || {},
+        npcsPlus: codeItems.npcsPlus || {},
+        tasksPlus: codeItems.tasksPlus || {},
+        tools: codeItems.tools || {},
+        elementalRunes: codeItems.elementalRunes || {},
+        manualTasks: ci.manualTasks || {},
+        completedChallenges,
+        backlog: ci.backlog || {},
+        rareDropNum: "1/" + (rules['Rare Drop Amount'] || '128'),
+        universalPrimary,
+        elementalStaves: codeItems.elementalStaves || {},
+        rangedItems: codeItems.rangedItems || {},
+        boneItems: codeItems.boneItems || {},
+        highestCurrent,
+        dropTables: codeItems.dropTables || {},
+        possibleAreas: ci.possibleAreas || {},
+        randomLoot,
+        magicTools: codeItems.magicTools || {},
+        bossLogs: codeItems.bossLogs || {},
+        bossMonsters: codeItems.bossMonsters || {},
+        minigameShops: codeItems.minigameShops || {},
+        manualEquipment: ci.manualEquipment || {},
+        checkedChallenges: ci.checkedChallenges || {},
+        backloggedSources: ci.backloggedSources || {},
+        altChallenges: ci.altChallenges || {},
+        manualMonsters: ci.manualMonsters || {},
+        slayerLocked: ci.slayerLocked || {},
+        passiveSkill: ci.passiveSkill || {},
+        f2pSkills,
+        assignedXpRewards: ci.assignedXpRewards || {},
+        isDiary2Tier: false,
+        manualAreas: ci.manualAreas || {},
+        secondaryPrimaryNum: "1/" + (rules['Secondary Primary Amount'] || '2'),
+        toolGatingThreshold: parseInt(rules['Strict Tool Gating Amount'] || '100') / 100,
+        skillTaskCap: rules['Skill Task Cap'] || 'off',
+        skillTaskCapAmount: parseInt(rules['Skill Task Cap Amount'] || '50'),
+        bisMonsterGateHours: parseInt(rules['BiS Monster Power Gate Amount'] || '4'),
+        shopCostGateHours: parseInt(rules['Shop Cost Gate Amount'] || '4'),
+        constructionLocked: ci.constructionLocked || {},
+        isOnlyManualAreas: false,
+        manualSections: ci.manualSections || {},
+        optOutSections: (fb.settings && fb.settings.optOutSections) || {},
+        optOutSectionsWater: (fb.settings && fb.settings.optOutSectionsWater) || {},
+        maxSkill: ci.maxSkill || {},
+        userTasks: fb.userTasks || {},
+        manualPrimary: fb.manualPrimary || {},
+        updateLevel: 'maintenance-mode'
+    };
+
+    // 8. Load lodash for the worker
+    console.log('Loading lodash...');
+    const lodashPath = path.join(__dirname, '..', 'node_modules', 'lodash', 'lodash.min.js');
+    let lodashCode;
+    if (fs.existsSync(lodashPath)) {
+        lodashCode = fs.readFileSync(lodashPath, 'utf8');
+    } else {
+        // Try to download it
+        console.log('Lodash not found locally, downloading...');
+        lodashCode = await new Promise((resolve, reject) => {
+            https.get('https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js', (res) => {
+                let d = ''; res.on('data', c => d += c); res.on('end', () => resolve(d));
+            }).on('error', reject);
+        });
+    }
+
+    // 9. Load worker source
+    console.log('Loading worker.js...');
+    const workerPath = path.join(__dirname, '..', 'worker.js');
+    let workerCode = fs.readFileSync(workerPath, 'utf8');
+    // Remove the importScripts line (we load lodash separately)
+    workerCode = workerCode.replace(/^importScripts\(.*?\);?\s*$/m, '');
+
+    // 10. Create sandbox and run worker
+    console.log('Setting up worker sandbox...');
+
+    let workerResult = null;
+    let workerError = null;
+
+    const sandbox = {
+        // Web Worker API stubs
+        importScripts: function() {},
+        postMessage: function(data) {
+            workerResult = data;
+        },
+        self: {},
+        console: {
+            log: function(...args) {
+                const msg = args.join(' ');
+                // Only print debug lines relevant to our test
+                if (msg.includes('[DEBUG-BRING]') || msg.includes('[DEBUG-FINAL]') || msg.includes('[DEBUG-MCAP]') || msg.includes('[DEBUG-LOOP]')) {
+                    console.log('  [WORKER]', msg);
+                }
+            },
+            warn: console.warn,
+            error: console.error
+        },
+        setTimeout: setTimeout,
+        clearTimeout: clearTimeout,
+        Math: Math,
+        JSON: JSON,
+        Object: Object,
+        Array: Array,
+        String: String,
+        Number: Number,
+        Boolean: Boolean,
+        RegExp: RegExp,
+        Date: Date,
+        Error: Error,
+        TypeError: TypeError,
+        RangeError: RangeError,
+        Map: Map,
+        Set: Set,
+        Promise: Promise,
+        parseInt: parseInt,
+        parseFloat: parseFloat,
+        isNaN: isNaN,
+        isFinite: isFinite,
+        undefined: undefined,
+        NaN: NaN,
+        Infinity: Infinity,
+        encodeURIComponent: encodeURIComponent,
+        decodeURIComponent: decodeURIComponent
+    };
+    sandbox.self = sandbox;
+    sandbox.globalThis = sandbox;
+
+    const context = vm.createContext(sandbox);
+
+    // Load lodash into context
+    vm.runInContext(lodashCode, context, { filename: 'lodash.min.js' });
+
+    // Load worker code into context
+    try {
+        vm.runInContext(workerCode, context, { filename: 'worker.js', timeout: 10000 });
+    } catch(e) {
+        console.error('Error loading worker.js:', e.message);
+        process.exit(1);
+    }
+
+    // 11. Trigger onmessage
+    console.log('Triggering worker calculation...\n');
+    try {
+        const onmessageFn = vm.runInContext('onmessage', context);
+        onmessageFn({ data: workerData });
+    } catch(e) {
+        workerError = e;
+        console.error('Worker error:', e.message);
+        if (e.stack) {
+            // Show relevant part of stack
+            const lines = e.stack.split('\n').slice(0, 5);
+            lines.forEach(l => console.error('  ', l));
+        }
+    }
+
+    // 12. Run assertions
+    console.log('\n=== Test Results ===\n');
+    let passed = 0;
+    let failed = 0;
+
+    function assert(name, condition, detail) {
+        if (condition) {
+            console.log(`  PASS: ${name}`);
+            passed++;
+        } else {
+            console.log(`  FAIL: ${name}${detail ? ' — ' + detail : ''}`);
+            failed++;
+        }
+    }
+
+    // Check worker completed
+    assert('Worker completed without error', !workerError && workerResult !== null,
+        workerError ? workerError.message : 'No result returned');
+
+    if (workerResult && workerResult.type !== 'error') {
+        const gv = workerResult.globalValids || {};
+        const challenges = workerResult.tempChallengeArrSaved || {};
+
+        // Test 1: fried onions should NOT be in globalValids for Cooking
+        const cookingValids = gv['Cooking'] || {};
+        const friedOnionsInValids = Object.keys(cookingValids).some(name =>
+            name.toLowerCase().includes('fried onion') || name.toLowerCase().includes('cooked onion')
+        );
+        assert('Fried onions NOT in globalValids (Cooking)',
+            !friedOnionsInValids,
+            friedOnionsInValids ? 'Found: ' + Object.keys(cookingValids).filter(n =>
+                n.toLowerCase().includes('onion')).join(', ') : '');
+
+        // Test 2: No Cooking task above level 30 in globalValids (cap=30)
+        const cookingAboveCap = Object.entries(cookingValids)
+            .filter(([name, level]) => parseInt(level) > 30);
+        assert('No Cooking tasks above cap (30) in globalValids',
+            cookingAboveCap.length === 0,
+            cookingAboveCap.length > 0 ?
+                'Found ' + cookingAboveCap.length + ' tasks: ' +
+                cookingAboveCap.map(([n,l]) => n.substring(0,30) + ' (lv' + l + ')').join(', ') : '');
+
+        // Test 3: Check the active Cooking challenge is within cap
+        const cookingChallenge = challenges['Cooking'];
+        console.log('\n  INFO: tempChallengeArrSaved.Cooking =', JSON.stringify(cookingChallenge));
+        if (cookingChallenge) {
+            // tempChallengeArrSaved[skill] is a task name string (not an object)
+            const taskName = typeof cookingChallenge === 'string' ? cookingChallenge : '';
+            const taskData = taskName && chunkInfo.challenges.Cooking && chunkInfo.challenges.Cooking[taskName];
+            const cookLevel = taskData ? parseInt(taskData.Level) : 0;
+            assert('Active Cooking challenge within cap (≤30)',
+                cookLevel <= 30,
+                'Active: "' + taskName + '" level=' + cookLevel);
+            assert('Active Cooking challenge is NOT fried onions',
+                !taskName.toLowerCase().includes('fried onion'),
+                'Got: ' + taskName);
+        } else {
+            assert('Active Cooking challenge within cap (≤30)', true, 'No cooking challenge assigned');
+            assert('Active Cooking challenge is NOT fried onions', true, 'No cooking challenge');
+        }
+
+        // Test 4: Print Cooking valids for inspection
+        const cookCount = Object.keys(cookingValids).length;
+        console.log(`\n  INFO: ${cookCount} Cooking tasks in globalValids`);
+        if (cookCount > 0 && cookCount <= 20) {
+            Object.entries(cookingValids)
+                .sort((a,b) => parseInt(b[1]) - parseInt(a[1]))
+                .forEach(([name, level]) => {
+                    console.log(`    lv${level}: ${name}`);
+                });
+        } else if (cookCount > 20) {
+            // Just show top 10
+            Object.entries(cookingValids)
+                .sort((a,b) => parseInt(b[1]) - parseInt(a[1]))
+                .slice(0, 10)
+                .forEach(([name, level]) => {
+                    console.log(`    lv${level}: ${name}`);
+                });
+            console.log(`    ... and ${cookCount - 10} more`);
+        }
+
+        // Test 5: Check the specific task ID t_1080 (fried onions)
+        const t1080inValids = cookingValids.hasOwnProperty('Cook ~|fried onions|~') ||
+            Object.keys(cookingValids).some(n => n.includes('fried onion'));
+        assert('Task t_1080 (fried onions) NOT in Cooking valids', !t1080inValids,
+            t1080inValids ? 'Still present!' : '');
+
+    } else if (workerResult && workerResult.type === 'error') {
+        console.log('  Worker returned error:', workerResult.err);
+        failed++;
+    }
+
+    console.log(`\n=== Summary: ${passed} passed, ${failed} failed ===`);
+    process.exit(failed > 0 ? 1 : 0);
+}
+
+runTests().catch(err => {
+    console.error('Test runner error:', err);
+    process.exit(1);
+});

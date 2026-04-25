@@ -2909,6 +2909,7 @@ let didWeaponRestart = false;
 let bisUpgrades = {};
 let globalValidsBoosts = {};
 let bringAlongTasks = {};
+let globalSkillCaps = {}; // populated by method-based cap / skill task cap for bringAlongTasks filtering
 let globalEveryDropAltMap = {};
 let bankMemoryFormat = 'Item id	Item name	Item quantity\n';
 let unconnectedAreas = ['Zanaris', 'Puro-Puro', 'Player-owned house'];
@@ -3314,7 +3315,10 @@ onmessage = function(e) {
         });
         Object.keys(bringAlongTasks).filter((skill) => globalValids.hasOwnProperty(skill)).forEach((skill) => {
             Object.keys(bringAlongTasks[skill]).filter((name) => globalValids[skill].hasOwnProperty(name) && !globalValids[skill].hasOwnProperty(bringAlongTasks[skill][name])).forEach((name) => {
-                globalValids[skill][bringAlongTasks[skill][name]] = chunkInfo['challenges'][skill][bringAlongTasks[skill][name]]['Level'];
+                let bringLevel = chunkInfo['challenges'][skill][bringAlongTasks[skill][name]]['Level'];
+                // Don't bring along tasks that exceed active skill caps
+                if (globalSkillCaps[skill] && bringLevel > globalSkillCaps[skill]) return;
+                globalValids[skill][bringAlongTasks[skill][name]] = bringLevel;
             });
         });
         type === 'current' && postMessage({ type: 'loading-update', percentage: '100%' });
@@ -6376,7 +6380,20 @@ let calcChallenges = function(chunks, baseChunkData) {
             delete baseChunkData['items'][item];
         });
         globalValids = {...newValids};
-        //console.log(i);
+        // Re-apply method-based caps after post-processing may have re-added capped tasks
+        if (Object.keys(globalSkillCaps).length > 0) {
+            Object.keys(globalSkillCaps).forEach((skill) => {
+                if (!newValids[skill]) return;
+                Object.keys(newValids[skill]).forEach((name) => {
+                    let taskLevel = chunkInfo['challenges'][skill] && chunkInfo['challenges'][skill][name] ? (chunkInfo['challenges'][skill][name]['Level'] || 0) : 0;
+                    if (taskLevel > globalSkillCaps[skill]) {
+                        delete newValids[skill][name];
+                        if (valids[skill]) delete valids[skill][name];
+                    }
+                });
+            });
+            globalValids = {...newValids};
+        }
     } while ((Object.keys(diff(valids, newValids) || {}).length !== 0 && i < 15) || i < 3);
     valids = newValids;
     //console.log(baseChunkData);
@@ -7711,7 +7728,9 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                 }
             });
 
-            if (highestPrimaryLevel === 0) return;
+            if (highestPrimaryLevel === 0) {
+                return;
+            }
 
             let cap = calcLevelCap(highestPrimaryLevel);
             methodBasedCaps[skill] = cap;
@@ -7780,6 +7799,16 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             });
         });
     }
+
+    // Populate globalSkillCaps for bringAlongTasks filtering
+    globalSkillCaps = {};
+    skillNames.forEach((skill) => {
+        let caps = [];
+        if (methodBasedCaps[skill]) caps.push(methodBasedCaps[skill]);
+        if (skillTaskCapValues[skill]) caps.push(skillTaskCapValues[skill]);
+        if (caps.length > 0) globalSkillCaps[skill] = Math.min(...caps);
+    });
+
     if (rules['Kill X']) {
         if (!valids['Extra']) {
             valids['Extra'] = {};
