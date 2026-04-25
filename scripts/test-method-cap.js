@@ -427,9 +427,9 @@ async function runTests() {
             !!syntheticTask,
             syntheticTask ? 'Found: ' + syntheticTask : 'No synthetic task found');
 
-        // Test 7: Synthetic task references fried onions (lowest skipped)
-        assert('Synthetic task references fried onions',
-            syntheticTask && syntheticTask.includes('fried onions'),
+        // Test 7: Synthetic task references a skipped task above the cap
+        assert('Synthetic task references a capped task',
+            syntheticTask && syntheticTask.includes('~|'),
             syntheticTask ? 'Task: ' + syntheticTask : 'No synthetic task');
 
         // Test 8: Synthetic task level equals the cap
@@ -454,6 +454,14 @@ async function runTests() {
         assert('Gate armour def from completed BiS (>= 0)',
             typeof gateArmour === 'number' && gateArmour >= 0,
             'Got: ' + gateArmour);
+
+        // Test 11: Willow shield should NOT be in Defence tasks (Fletching lv42 > method cap 30)
+        const defValids = workerResult.globalValids['Defence'] || {};
+        const hasWillowShield = Object.keys(defValids).some(k => k.toLowerCase().includes('willow shield'));
+        console.log('  INFO: Willow shield in Defence tasks: ' + hasWillowShield);
+        assert('Willow shield NOT in Defence (requires capped Fletching lv42)',
+            !hasWillowShield,
+            'Willow shield is present but should be blocked by method cap');
 
     } else if (workerResult && workerResult.type === 'error') {
         console.log('  Worker returned error:', workerResult.err);

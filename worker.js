@@ -6381,6 +6381,25 @@ let calcChallenges = function(chunks, baseChunkData) {
                 });
             });
             globalValids = {...newValids};
+            // Also remove outputs of capped tasks from baseChunkData.items
+            // to prevent them leaking into the next iteration
+            Object.keys(globalSkillCaps).forEach((skill) => {
+                let cap = globalSkillCaps[skill];
+                if (!chunkInfo['challenges'][skill]) return;
+                Object.keys(chunkInfo['challenges'][skill]).forEach(taskName => {
+                    let task = chunkInfo['challenges'][skill][taskName];
+                    if (!task || !task['Output'] || !task['Level'] || task['Level'] <= cap) return;
+                    let output = task['Output'];
+                    [output, output + '*', output + '*^', output + '*^^'].forEach(key => {
+                        if (baseChunkData['items'] && baseChunkData['items'][key] && baseChunkData['items'][key][taskName]) {
+                            delete baseChunkData['items'][key][taskName];
+                            if (Object.keys(baseChunkData['items'][key]).length === 0) {
+                                delete baseChunkData['items'][key];
+                            }
+                        }
+                    });
+                });
+            });
         }
     } while ((Object.keys(diff(valids, newValids) || {}).length !== 0 && i < 15) || i < 3);
     valids = newValids;
@@ -6465,7 +6484,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
     craftedBisOverrideLinking = {};
     rules['Multi Step Processing'] && Object.keys(oldTempItemSkill).filter(skill => checkPrimaryMethod(skill, globalValids, baseChunkData)).forEach((skill) => {
         !!oldTempItemSkill[skill] && Object.keys(oldTempItemSkill[skill]).forEach((item) => {
-            !!oldTempItemSkill[skill][item] && oldTempItemSkill[skill][item].filter(task => !!chunkInfo['challenges'][skill][task] && chunkInfo['challenges'][skill][task].hasOwnProperty('Output') && (!items.hasOwnProperty(chunkInfo['challenges'][skill][task]['Output']) || !items[chunkInfo['challenges'][skill][task]['Output']].hasOwnProperty(task))).forEach((task) => {
+            !!oldTempItemSkill[skill][item] && oldTempItemSkill[skill][item].filter(task => !!chunkInfo['challenges'][skill][task] && chunkInfo['challenges'][skill][task].hasOwnProperty('Output') && (!items.hasOwnProperty(chunkInfo['challenges'][skill][task]['Output']) || !items[chunkInfo['challenges'][skill][task]['Output']].hasOwnProperty(task)) && (!globalSkillCaps[skill] || !chunkInfo['challenges'][skill][task]['Level'] || chunkInfo['challenges'][skill][task]['Level'] <= globalSkillCaps[skill])).forEach((task) => {
                 if (!items[chunkInfo['challenges'][skill][task]['Output']]) {
                     items[chunkInfo['challenges'][skill][task]['Output']] = {};
                 }
@@ -7757,9 +7776,27 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                 }
             }
         });
-    }
 
-    // Skill Task Cap: cap skill tasks based on quest/diary requirements or custom level
+        // Remove outputs of capped tasks from baseChunkData.items
+        // so downstream tasks (e.g. Defence "Wield X") don't see unreachable items
+        Object.keys(methodBasedCaps).forEach(skill => {
+            let cap = methodBasedCaps[skill];
+            if (!chunkInfo['challenges'][skill]) return;
+            Object.keys(chunkInfo['challenges'][skill]).forEach(taskName => {
+                let task = chunkInfo['challenges'][skill][taskName];
+                if (!task || !task['Output'] || !task['Level'] || task['Level'] <= cap) return;
+                let output = task['Output'];
+                [output, output + '*', output + '*^', output + '*^^'].forEach(key => {
+                    if (baseChunkData['items'] && baseChunkData['items'][key] && baseChunkData['items'][key][taskName]) {
+                        delete baseChunkData['items'][key][taskName];
+                        if (Object.keys(baseChunkData['items'][key]).length === 0) {
+                            delete baseChunkData['items'][key];
+                        }
+                    }
+                });
+            });
+        });
+    }
     let skillTaskCapValues = {}; // saved for task rule info
     if (skillTaskCap && skillTaskCap !== 'none') {
         let capPerSkill = {};
