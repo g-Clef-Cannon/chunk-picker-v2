@@ -141,6 +141,9 @@ async function runTests() {
 
     // Force Method-Based Cap on for this test
     rules['Method-Based Cap'] = true;
+    // Enable Primary Drop Monster Gate for testing
+    rules['Primary Drop Monster Gate'] = true;
+    rules['Primary Drop Monster Gate Amount'] = '3';
 
     // 3. Build tasksMap reverse lookup (task ID → task name)
     const tasksMapPath = path.join(__dirname, '..', 'tasksMap.json');
@@ -217,6 +220,7 @@ async function runTests() {
         skillTaskCapAmount: parseInt(rules['Skill Task Cap Amount'] || '50'),
         bisMonsterGateHours: parseInt(rules['BiS Monster Power Gate Amount'] || '4'),
         shopCostGateHours: parseInt(rules['Shop Cost Gate Amount'] || '4'),
+        primaryDropGateMinutes: parseInt(rules['Primary Drop Monster Gate Amount'] || '3'),
         constructionLocked: ci.constructionLocked || {},
         isOnlyManualAreas: false,
         manualSections: ci.manualSections || {},
@@ -482,6 +486,27 @@ async function runTests() {
         assert('Catacombs monsters present in baseChunkData',
             hasTwistedBanshee && hasDeviantSpectre,
             'Twisted Banshee: ' + (hasTwistedBanshee || 'missing') + ', Deviant spectre: ' + (hasDeviantSpectre || 'missing'));
+
+        // Primary Drop Monster Gate: bronze bar from Bronze dragon should be downgraded
+        const bronzeBarSources = bd.items && bd.items['Bronze bar'];
+        let bronzeDragonSource = null;
+        if (bronzeBarSources) {
+            Object.keys(bronzeBarSources).forEach(src => {
+                if (src.toLowerCase().includes('bronze dragon')) {
+                    bronzeDragonSource = { name: src, type: bronzeBarSources[src] };
+                }
+            });
+        }
+        assert('Primary Drop Gate: bronze bar from Bronze dragon downgraded to secondary',
+            bronzeDragonSource ? bronzeDragonSource.type === 'secondary-drop' : true,
+            bronzeDragonSource
+                ? 'Bronze dragon source: ' + bronzeDragonSource.type
+                : 'No Bronze dragon source for bronze bar (may not be in accessible chunks)');
+
+        // Primary Drop Gate is active
+        assert('Primary Drop Gate active when monster gate active',
+            workerResult.primaryDropGateActive === true,
+            'primaryDropGateActive: ' + workerResult.primaryDropGateActive);
 
     } else if (workerResult && workerResult.type === 'error') {
         console.log('  Worker returned error:', workerResult.err);

@@ -2669,6 +2669,9 @@ let gateHasPrayerBypass = false; // true if player has farmable bones → protec
 let shopCostGateActive = false;
 let bestCoinsPerHour = 0;
 let bestCoinsMonsterName = '';
+// Primary Drop Monster Gate: module-level state
+let primaryDropGateActive = false;
+let primaryDropGateSeconds = 180; // default 3 minutes
 let globalTaskRuleInfo = {};
 let globalRuleSkippedTasks = {};
 let monsterGateDetails = {};
@@ -2835,7 +2838,41 @@ const passesShopCostGate = function(itemName, itemSources) {
     return result;
 };
 
-let type;
+// Primary Drop Monster Gate: downgrade primary-drop sources from monsters too hard to farm
+const applyPrimaryDropGate = function(bcd) {
+    if (!primaryDropGateActive) return;
+    let items = bcd['items'];
+    if (!items) return;
+    Object.keys(items).forEach((itemName) => {
+        let sources = items[itemName];
+        Object.keys(sources).forEach((source) => {
+            if (sources[source] !== 'primary-drop') return;
+            let ms = monsterStats[source];
+            if (!ms) return; // not a known monster, leave as-is
+            let mHp = ms.hp || 10, mDef = ms.def || 1, mDb = ms.db || 0;
+            let mAl = ms.al || 0, mAb = ms.ab || 0, mMh = ms.mh || 0, mAs = ms.as || 4;
+            let killTime = estimateEffectiveKillTime(
+                gatePlayerAtkLevel, gatePlayerStrLevel,
+                gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed,
+                mHp, mDef, mDb, mAl, mAb, mMh, mAs, ms.uf
+            );
+            let avgKills = 1;
+            if (dropRatesGlobal[source] && dropRatesGlobal[source][itemName]) {
+                let rateStr = dropRatesGlobal[source][itemName];
+                if (rateStr !== 'Always') {
+                    let parts = rateStr.split('/');
+                    if (parts.length === 2) {
+                        avgKills = Math.ceil(parseFloat(parts[1]) / parseFloat(parts[0]));
+                    }
+                }
+            }
+            let timePerItem = killTime * avgKills;
+            if (timePerItem > primaryDropGateSeconds) {
+                sources[source] = 'secondary-drop';
+            }
+        });
+    });
+};
 let chunks;
 let baseChunkData;
 let rules;
@@ -2974,6 +3011,7 @@ onmessage = function(e) {
             skillTaskCapAmount,
             bisMonsterGateHours,
             shopCostGateHours,
+            primaryDropGateMinutes,
             constructionLocked,
             isOnlyManualAreas,
             manualSections,
@@ -3043,6 +3081,8 @@ onmessage = function(e) {
         gatePlayerArmourDef = 0;
         gateHasPrayerBypass = false;
         didWeaponRestart = false;
+        primaryDropGateActive = false;
+        primaryDropGateSeconds = (primaryDropGateMinutes || 3) * 60;
         type === 'current' && postMessage({ type: 'loading-update', percentage: '5%' });
         globalValids = calcChallenges(chunks, baseChunkData);
         // Now that globalValids is computed, set up Monster Power Gate using proper safespot check
@@ -3193,6 +3233,11 @@ onmessage = function(e) {
                     shopCostGateActive = false;
                 }
             }
+        }
+        // Primary Drop Monster Gate: activate if rule enabled and monster gate is active (melee-only stats available)
+        if (rules['Primary Drop Monster Gate'] && primaryDropGateSeconds > 0 && monsterGateActive) {
+            primaryDropGateActive = true;
+            needRerun = true;
         }
         if (needRerun) {
             globalValids = calcChallenges(chunks, baseChunkData);
@@ -3377,7 +3422,8 @@ onmessage = function(e) {
             globalTaskRuleInfo,
             globalRuleSkippedTasks,
             gatePlayerWeaponName,
-            gatePlayerArmourDef
+            gatePlayerArmourDef,
+            primaryDropGateActive
         });
     } catch (err) {
         postMessage({ type: 'error', err });
@@ -4168,6 +4214,7 @@ let calcChallenges = function(chunks, baseChunkData) {
         });
         valids = newValids;
         [newValids, tempItemSkill, tempMultiStepSkill, globalTaskRuleInfo, globalRuleSkippedTasks] = calcChallengesWork(chunks, baseChunkData, tempItemSkill);
+        applyPrimaryDropGate(baseChunkData);
         !!manualTasks && Object.keys(manualTasks).forEach((skill) => {
             skill !== 'BiS' && Object.keys(manualTasks[skill]).filter(challenge => !!chunkInfo['challenges'][skill] && !!chunkInfo['challenges'][skill][challenge]).forEach((challenge) => {
                 if (!valids[skill]) {
