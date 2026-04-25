@@ -508,6 +508,33 @@ async function runTests() {
             workerResult.primaryDropGateActive === true,
             'primaryDropGateActive: ' + workerResult.primaryDropGateActive);
 
+        // Recursive gate check: Rune hasta(p) should NOT be in BiS if Brutal red dragon is unkillable
+        const bisValids = workerResult.globalValids && workerResult.globalValids['BiS'];
+        let hastaInBiS = false;
+        if (bisValids) {
+            Object.keys(bisValids).forEach(task => {
+                if (task.toLowerCase().includes('rune hasta')) {
+                    hastaInBiS = true;
+                    console.log('    Found in BiS:', task);
+                }
+            });
+        }
+        // Also check rule-skipped tasks for the block reason
+        const skippedBiS = workerResult.globalRuleSkippedTasks && workerResult.globalRuleSkippedTasks['BiS'];
+        let hastaSkipped = false;
+        if (skippedBiS) {
+            Object.keys(skippedBiS).forEach(task => {
+                if (task.toLowerCase().includes('rune hasta')) {
+                    hastaSkipped = true;
+                    console.log('    Skipped BiS:', task, skippedBiS[task].reasons.map(r => r.label).join(', '));
+                }
+            });
+        }
+        assert('Recursive gate: Rune hasta(p) NOT in BiS (brutal red dragon unkillable)',
+            !hastaInBiS,
+            hastaInBiS ? 'Rune hasta(p) found in BiS (should be blocked)' : 'Rune hasta(p) correctly absent from BiS' +
+            (hastaSkipped ? ' (rule-skipped)' : ' (may not exist in chunks)'));
+
     } else if (workerResult && workerResult.type === 'error') {
         console.log('  Worker returned error:', workerResult.err);
         failed++;

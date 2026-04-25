@@ -2733,8 +2733,11 @@ const calcBestCoinsPerHour = function(atkLevel, strLevel, weaponAtk, weaponStr, 
 
 // Check if an item's drop sources pass the monster gate
 // combatContext: if true, processing-skill sources (Smithing, Crafting, etc.) don't count as reasonable
-const passesMonsterGate = function(itemName, itemSources, combatContext) {
+const passesMonsterGate = function(itemName, itemSources, combatContext, visited) {
     if (!monsterGateActive) return true;
+    if (!visited) visited = new Set();
+    if (visited.has(itemName)) return true; // prevent infinite recursion
+    visited.add(itemName);
     let hasReasonableSource = false;
     let bestDetail = null;
     Object.keys(itemSources).forEach((source) => {
@@ -2744,6 +2747,35 @@ const passesMonsterGate = function(itemName, itemSources, combatContext) {
             if (combatContext && sourceVal.includes('-') && !rules['Wield Crafted Items']) {
                 let srcSkill = sourceVal.split('-')[1];
                 if (srcSkill && processingSkill[srcSkill]) return;
+            }
+            // Recursive check: if source is a task with inputs, verify input items are obtainable
+            if (sourceVal.includes('-')) {
+                let taskFound = false;
+                let inputsBlocked = false;
+                let blockedInput = '';
+                let skills = Object.keys(chunkInfo['challenges'] || {});
+                for (let sk of skills) {
+                    let task = chunkInfo['challenges'][sk] && chunkInfo['challenges'][sk][source];
+                    if (task && task.Items) {
+                        taskFound = true;
+                        for (let inputItem of task.Items) {
+                            let cleanItem = inputItem.replace(/\*/g, '').replace(/\[\+\]/g, '');
+                            if (!cleanItem || !baseChunkData || !baseChunkData['items'] || !baseChunkData['items'][cleanItem]) continue;
+                            if (!passesMonsterGate(cleanItem, baseChunkData['items'][cleanItem], combatContext, visited)) {
+                                inputsBlocked = true;
+                                blockedInput = cleanItem;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+                if (taskFound && inputsBlocked) {
+                    if (!bestDetail) {
+                        bestDetail = 'Process source (' + source + ') blocked: input item ' + blockedInput + ' fails gate';
+                    }
+                    return; // skip this source
+                }
             }
             hasReasonableSource = true;
             bestDetail = 'Non-drop source available (' + sourceVal + ') — auto-pass';
