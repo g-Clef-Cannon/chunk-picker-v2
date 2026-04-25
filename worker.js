@@ -3518,6 +3518,13 @@ let calcChallenges = function(chunks, baseChunkData) {
     let tempItemSkill = {};
     let tempMultiStepSkill = {};
     let i = 0;
+    // Ensure baseChunkData includes monsters/items from named areas already in chunks
+    // (On re-runs, areas are already in chunks but gatherChunksInfo won't re-run
+    //  because areasAdded is empty, so we must gather here)
+    if (!!chunks) {
+        let areaGatherResult = gatherChunksInfo(chunks);
+        baseChunkData = combineJSONs(baseChunkData, areaGatherResult);
+    }
     !!manualTasks && !!manualTasks['Quest'] && Object.keys(manualTasks['Quest']).forEach((name) => {
         let manualOff = false;
         let i = 0;

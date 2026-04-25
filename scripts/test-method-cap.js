@@ -268,7 +268,7 @@ async function runTests() {
             log: function(...args) {
                 const msg = args.join(' ');
                 // Only print debug lines relevant to our test
-                if (msg.includes('[DEBUG-BRING]') || msg.includes('[DEBUG-FINAL]') || msg.includes('[DEBUG-MCAP]') || msg.includes('[DEBUG-LOOP]')) {
+                if (msg.includes('[DEBUG-BRING]') || msg.includes('[DEBUG-FINAL]') || msg.includes('[DEBUG-MCAP]') || msg.includes('[DEBUG-LOOP]') || msg.includes('[DEBUG-CAT]')) {
                     console.log('  [WORKER]', msg);
                 }
             },
@@ -474,6 +474,14 @@ async function runTests() {
         assert('Caged dark wizard drops blocked without Telegrab',
             !staffFromDarkWiz && !robeFromDarkWiz,
             'Staff: ' + (staffFromDarkWiz || 'none') + ', Black robe: ' + (robeFromDarkWiz || 'none'));
+
+        // Catacombs monster assertion
+        const bd = workerResult.baseChunkData;
+        const hasTwistedBanshee = bd.monsters && bd.monsters['Twisted Banshee'] && bd.monsters['Twisted Banshee']['Catacombs of Kourend'];
+        const hasDeviantSpectre = bd.monsters && bd.monsters['Deviant spectre'] && bd.monsters['Deviant spectre']['Catacombs of Kourend'];
+        assert('Catacombs monsters present in baseChunkData',
+            hasTwistedBanshee && hasDeviantSpectre,
+            'Twisted Banshee: ' + (hasTwistedBanshee || 'missing') + ', Deviant spectre: ' + (hasDeviantSpectre || 'missing'));
 
     } else if (workerResult && workerResult.type === 'error') {
         console.log('  Worker returned error:', workerResult.err);
