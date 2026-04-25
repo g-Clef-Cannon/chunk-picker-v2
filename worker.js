@@ -3047,16 +3047,39 @@ onmessage = function(e) {
             if (!hasPrimaryRanged && !hasPrimaryMagic) {
                 monsterGateActive = true;
                 needRerun = true;
-                // Step 1: determine ATK/STR levels from all available weapon requirements
-                let availableWeapons = Object.keys(chunkInfo['equipment']).filter(eq => !!baseChunkData['items'][eq] && (chunkInfo['equipment'][eq].slot === 'weapon' || chunkInfo['equipment'][eq].slot === '2h'));
-                availableWeapons.forEach((eq) => {
-                    let reqs = chunkInfo['equipment'][eq].requirements || {};
-                    if (reqs['Attack'] && reqs['Attack'] > gatePlayerAtkLevel) gatePlayerAtkLevel = reqs['Attack'];
-                    if (reqs['Strength'] && reqs['Strength'] > gatePlayerStrLevel) gatePlayerStrLevel = reqs['Strength'];
-                });
-                if (gatePlayerStrLevel <= 1 && gatePlayerAtkLevel > 1) {
-                    gatePlayerStrLevel = gatePlayerAtkLevel;
+                // Step 1: Best weapon from completed BiS tasks
+                if (completedChallenges['BiS']) {
+                    Object.keys(completedChallenges['BiS']).forEach(taskName => {
+                        let match = taskName.match(/\|([^|]+)\|/);
+                        if (!match) return;
+                        let fmtName = match[1];
+                        let eqName = Object.keys(chunkInfo['equipment']).find(
+                            eq => (chunkInfo['equipment'][eq].formatted_name || eq.toLowerCase()) === fmtName.toLowerCase()
+                        );
+                        if (!eqName) return;
+                        let eqData = chunkInfo['equipment'][eqName];
+                        if (eqData.slot !== 'weapon' && eqData.slot !== '2h') return;
+                        let str = eqData.melee_strength || 0;
+                        if (str > gatePlayerWeaponStr) {
+                            gatePlayerWeaponStr = str;
+                            gatePlayerWeaponAtk = Math.max(eqData.attack_stab || 0, eqData.attack_slash || 0, eqData.attack_crush || 0);
+                            gatePlayerWeaponSpeed = eqData.attack_speed || 4;
+                            gatePlayerWeaponName = eqName;
+                        }
+                    });
                 }
+                // Step 2: ATK level = highest completed Attack task level
+                // (equip tasks prove the player trained to that level)
+                if (completedChallenges['Attack']) {
+                    Object.keys(completedChallenges['Attack']).forEach(taskName => {
+                        let task = chunkInfo['challenges']['Attack'] && chunkInfo['challenges']['Attack'][taskName];
+                        if (task && task['Level'] && task['Level'] > gatePlayerAtkLevel) {
+                            gatePlayerAtkLevel = task['Level'];
+                        }
+                    });
+                }
+                // STR mirrors ATK (melee training keeps them roughly equal)
+                gatePlayerStrLevel = gatePlayerAtkLevel;
                 // Step 2: set up player HP/DEF
                 gatePlayerHP = gatePlayerAtkLevel + 9;
                 gatePlayerDefLevel = gatePlayerAtkLevel;
@@ -3147,53 +3170,39 @@ onmessage = function(e) {
         type === 'current' && postMessage({ type: 'loading-update', percentage: '95%' });
         highestOverall = calcBIS();
 
-        // Extract BiS weapon + armour from calcBIS results and re-run if changed
+        // Check completed BiS for armour upgrades and re-run if improved
+        // (weapon is already set from completed BiS in initial setup above)
         if (monsterGateActive && !didWeaponRestart) {
             let armourSlots = ['head', 'body', 'legs', 'shield', 'feet', 'hands', 'cape', 'neck', 'ring'];
-            let bestBisWeapon = null;
-            let bestBisStr = 0;
-            let bisArmourDef = 0;
-            let bisArmourNames = [];
-            // Read weapon from calcBIS Melee result (respects gating, backlog, completed tasks)
-            let meleeWeaponKey = highestOverall['Melee-weapon'] || highestOverall['Melee-2h'];
-            if (meleeWeaponKey && chunkInfo['equipment'][meleeWeaponKey]) {
-                let eqData = chunkInfo['equipment'][meleeWeaponKey];
-                bestBisStr = eqData.melee_strength || 0;
-                bestBisWeapon = meleeWeaponKey;
+            let bestArmourPerSlot = {};
+
+            // Completed BiS armour only — player actually has these items
+            if (completedChallenges['BiS']) {
+                Object.keys(completedChallenges['BiS']).forEach(taskName => {
+                    let match = taskName.match(/\|([^|]+)\|/);
+                    if (!match) return;
+                    let eqName = Object.keys(chunkInfo['equipment']).find(
+                        eq => (chunkInfo['equipment'][eq].formatted_name || eq.toLowerCase()) === match[1].toLowerCase()
+                    );
+                    if (!eqName || !chunkInfo['equipment'][eqName]) return;
+                    let eqData = chunkInfo['equipment'][eqName];
+                    if (armourSlots.includes(eqData.slot)) {
+                        let avgDef = ((eqData.defence_stab || 0) + (eqData.defence_slash || 0) + (eqData.defence_crush || 0)) / 3;
+                        if (!bestArmourPerSlot[eqData.slot] || avgDef > bestArmourPerSlot[eqData.slot].def) {
+                            bestArmourPerSlot[eqData.slot] = { name: eqName, def: avgDef };
+                        }
+                    }
+                });
             }
-            // Read armour from calcBIS Melee result — best per slot
-            armourSlots.forEach(slot => {
-                let eqKey = highestOverall['Melee-' + slot];
-                if (!eqKey || !chunkInfo['equipment'][eqKey]) return;
-                let eqData = chunkInfo['equipment'][eqKey];
-                let avgDef = ((eqData.defence_stab || 0) + (eqData.defence_slash || 0) + (eqData.defence_crush || 0)) / 3;
-                bisArmourDef += avgDef;
-                bisArmourNames.push(eqKey + ' (+' + Math.round(avgDef) + ')');
+
+            let bisArmourDef = 0;
+            Object.keys(bestArmourPerSlot).forEach(slot => {
+                bisArmourDef += bestArmourPerSlot[slot].def;
             });
             let newArmourDef = Math.round(bisArmourDef);
-            let needRerun = false;
-            // Update weapon if BiS has a better one
-            if (bestBisWeapon && bestBisStr > gatePlayerWeaponStr) {
-                let eqData = chunkInfo['equipment'][bestBisWeapon];
-                gatePlayerWeaponStr = bestBisStr;
-                gatePlayerWeaponAtk = Math.max(eqData.attack_stab || 0, eqData.attack_slash || 0, eqData.attack_crush || 0);
-                gatePlayerWeaponSpeed = eqData.attack_speed || 4;
-                gatePlayerWeaponName = bestBisWeapon;
-                // Derive ATK/STR levels from BiS weapon requirements, not max of all weapons
-                let bisReqs = eqData.requirements || {};
-                let bisAtkReq = bisReqs['Attack'] || 1;
-                let bisStrReq = bisReqs['Strength'] || 1;
-                if (bisStrReq <= 1 && bisAtkReq > 1) bisStrReq = bisAtkReq;
-                gatePlayerAtkLevel = bisAtkReq;
-                gatePlayerStrLevel = bisStrReq;
-                gatePlayerHP = bisAtkReq + 9;
-                gatePlayerDefLevel = bisAtkReq;
-                needRerun = true;
-            }
-            // Update armour defence from BiS
+            let needRerun = newArmourDef !== gatePlayerArmourDef;
             if (newArmourDef !== gatePlayerArmourDef) {
                 gatePlayerArmourDef = newArmourDef;
-                needRerun = true;
             }
             if (needRerun) {
                 // Recalc coins/hr with new weapon if shop gate is active
@@ -3369,7 +3378,8 @@ onmessage = function(e) {
             globalValidsBoosts,
             globalEveryDropAltMap,
             globalTaskRuleInfo,
-            globalRuleSkippedTasks
+            globalRuleSkippedTasks,
+            gatePlayerWeaponName
         });
     } catch (err) {
         postMessage({ type: 'error', err });

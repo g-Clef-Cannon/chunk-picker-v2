@@ -95,6 +95,29 @@ function computeHighestCurrent(completedChallenges, chunkInfo) {
     return highest;
 }
 
+// Decode Firebase task IDs to task names (mimics frontend decodeObject)
+function decodeFirebaseObject(obj, tasksMapReverse) {
+    if (!obj || typeof obj !== 'object') return obj;
+    let out = {};
+    Object.keys(obj).forEach(key => {
+        let newKey = key;
+        if (newKey.startsWith('t_') && tasksMapReverse[newKey]) {
+            newKey = tasksMapReverse[newKey];
+        }
+        if (newKey.includes('*fb*_')) newKey = newKey.split('*fb*_')[1];
+        newKey = decodeURIComponent(newKey.replace(/-_-20/g, '%20').replace(/-_-/g, '%'));
+        let val = obj[key];
+        if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
+            out[newKey] = decodeFirebaseObject(val, tasksMapReverse);
+        } else if (typeof val === 'string' && val.startsWith('t_') && tasksMapReverse[val]) {
+            out[newKey] = tasksMapReverse[val];
+        } else {
+            out[newKey] = val;
+        }
+    });
+    return out;
+}
+
 // ── Main test ────────────────────────────────────────────────────────────────
 
 async function runTests() {
@@ -119,15 +142,25 @@ async function runTests() {
     // Force Method-Based Cap on for this test
     rules['Method-Based Cap'] = true;
 
-    // 3. Extract codeItems
+    // 3. Build tasksMap reverse lookup (task ID → task name)
+    const tasksMapPath = path.join(__dirname, '..', 'tasksMap.json');
+    const tasksMap = JSON.parse(fs.readFileSync(tasksMapPath, 'utf8'));
+    const tasksMapReverse = {};
+    Object.entries(tasksMap).forEach(([name, id]) => { tasksMapReverse[id] = name; });
+
+    // 4. Extract codeItems
     const codeItems = chunkInfo.codeItems || {};
 
-    // 4. Build unlocked chunks list (must use 'unlocked', not 'selected')
+    // 5. Build unlocked chunks list (must use 'unlocked', not 'selected')
     const chunks = fb.chunks && fb.chunks.unlocked ? fb.chunks.unlocked : {};
 
-    // 5. Compute highestCurrent from completedChallenges
-    const completedChallenges = ci.completedChallenges || {};
-    const highestCurrent = computeHighestCurrent(completedChallenges, chunkInfo);
+    // 6. Decode Firebase data (task IDs → task names, like frontend decodeObject)
+    const completedChallenges = decodeFirebaseObject(ci.completedChallenges || {}, tasksMapReverse);
+    const backlog = decodeFirebaseObject(ci.backlog || {}, tasksMapReverse);
+    const checkedChallenges = decodeFirebaseObject(ci.checkedChallenges || {}, tasksMapReverse);
+    const altChallenges = decodeFirebaseObject(ci.altChallenges || {}, tasksMapReverse);
+    const manualEquipment = decodeFirebaseObject(ci.manualEquipment || {}, tasksMapReverse);
+    const highestCurrent = computeHighestCurrent(ci.completedChallenges || {}, chunkInfo);
 
     // 6. Build randomLoot (simplified — empty object is fine for cap testing)
     const randomLoot = {};
@@ -153,7 +186,7 @@ async function runTests() {
         elementalRunes: codeItems.elementalRunes || {},
         manualTasks: ci.manualTasks || {},
         completedChallenges,
-        backlog: ci.backlog || {},
+        backlog,
         rareDropNum: "1/" + (rules['Rare Drop Amount'] || '128'),
         universalPrimary,
         elementalStaves: codeItems.elementalStaves || {},
@@ -167,10 +200,10 @@ async function runTests() {
         bossLogs: codeItems.bossLogs || {},
         bossMonsters: codeItems.bossMonsters || {},
         minigameShops: codeItems.minigameShops || {},
-        manualEquipment: ci.manualEquipment || {},
-        checkedChallenges: ci.checkedChallenges || {},
+        manualEquipment,
+        checkedChallenges,
         backloggedSources: ci.backloggedSources || {},
-        altChallenges: ci.altChallenges || {},
+        altChallenges,
         manualMonsters: ci.manualMonsters || {},
         slayerLocked: ci.slayerLocked || {},
         passiveSkill: ci.passiveSkill || {},
@@ -405,13 +438,15 @@ async function runTests() {
             syntheticLevel === 30,
             'Level: ' + syntheticLevel);
 
-        // Test 9: Monster gate BiS weapon should NOT be Steel sword (gated item)
-        const ho = workerResult.highestOverall || {};
-        const meleeWeapon = ho['Melee-weapon'] || ho['Melee-2h'] || 'none';
-        console.log('\n  INFO: Melee BiS weapon = ' + meleeWeapon);
-        assert('Gate BiS weapon is NOT Steel sword (gated drop)',
-            meleeWeapon !== 'Steel sword',
-            'Got: ' + meleeWeapon);
+        // Test 9: Monster gate weapon should NOT be Steel sword (gated drop)
+        const gateWeapon = workerResult.gatePlayerWeaponName || 'Unarmed';
+        console.log('\n  INFO: Gate weapon = ' + gateWeapon);
+        assert('Gate weapon is NOT Steel sword (gated drop)',
+            gateWeapon !== 'Steel sword',
+            'Got: ' + gateWeapon);
+        assert('Gate weapon is Adamant pickaxe (completed BiS)',
+            gateWeapon === 'Adamant pickaxe',
+            'Got: ' + gateWeapon);
 
     } else if (workerResult && workerResult.type === 'error') {
         console.log('  Worker returned error:', workerResult.err);
