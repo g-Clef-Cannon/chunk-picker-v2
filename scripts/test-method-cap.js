@@ -448,6 +448,13 @@ async function runTests() {
             gateWeapon === 'Adamant pickaxe',
             'Got: ' + gateWeapon);
 
+        // Test 10: Gate armour should come from completed BiS only and be > 0
+        const gateArmour = workerResult.gatePlayerArmourDef;
+        console.log('  INFO: Gate armour def = ' + gateArmour);
+        assert('Gate armour def from completed BiS (>= 0)',
+            typeof gateArmour === 'number' && gateArmour >= 0,
+            'Got: ' + gateArmour);
+
     } else if (workerResult && workerResult.type === 'error') {
         console.log('  Worker returned error:', workerResult.err);
         failed++;

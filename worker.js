@@ -3078,12 +3078,37 @@ onmessage = function(e) {
                         }
                     });
                 }
+                // Step 3: Best armour from completed BiS tasks
+                let armourSlots = ['head', 'body', 'legs', 'shield', 'feet', 'hands', 'cape', 'neck', 'ring'];
+                let bestArmourPerSlot = {};
+                if (completedChallenges['BiS']) {
+                    Object.keys(completedChallenges['BiS']).forEach(taskName => {
+                        let match = taskName.match(/\|([^|]+)\|/);
+                        if (!match) return;
+                        let eqName = Object.keys(chunkInfo['equipment']).find(
+                            eq => (chunkInfo['equipment'][eq].formatted_name || eq.toLowerCase()) === match[1].toLowerCase()
+                        );
+                        if (!eqName || !chunkInfo['equipment'][eqName]) return;
+                        let eqData = chunkInfo['equipment'][eqName];
+                        if (armourSlots.includes(eqData.slot)) {
+                            let avgDef = ((eqData.defence_stab || 0) + (eqData.defence_slash || 0) + (eqData.defence_crush || 0)) / 3;
+                            if (!bestArmourPerSlot[eqData.slot] || avgDef > bestArmourPerSlot[eqData.slot].def) {
+                                bestArmourPerSlot[eqData.slot] = { name: eqName, def: avgDef };
+                            }
+                        }
+                    });
+                }
+                let bisArmourDef = 0;
+                Object.keys(bestArmourPerSlot).forEach(slot => {
+                    bisArmourDef += bestArmourPerSlot[slot].def;
+                });
+                gatePlayerArmourDef = Math.round(bisArmourDef);
+
                 // STR mirrors ATK (melee training keeps them roughly equal)
                 gatePlayerStrLevel = gatePlayerAtkLevel;
-                // Step 2: set up player HP/DEF
+                // Set up player HP/DEF (DEF mirrors ATK)
                 gatePlayerHP = gatePlayerAtkLevel + 9;
                 gatePlayerDefLevel = gatePlayerAtkLevel;
-                // Armour starts at 0 — will be populated from BiS result after calcBIS()
                 // Weapon stays unarmed for first pass — will be updated from BiS result after calcBIS()
                 // Prayer bypass: check if player has access to useful bones
                 const usefulBones = ['Big bones', 'Babydragon bones', 'Dragon bones', 'Wyvern bones',
@@ -3170,69 +3195,35 @@ onmessage = function(e) {
         type === 'current' && postMessage({ type: 'loading-update', percentage: '95%' });
         highestOverall = calcBIS();
 
-        // Check completed BiS for armour upgrades and re-run if improved
-        // (weapon is already set from completed BiS in initial setup above)
+        // Post-calcBIS: recheck prayer bypass and shop gate with final weapon/armour
         if (monsterGateActive && !didWeaponRestart) {
-            let armourSlots = ['head', 'body', 'legs', 'shield', 'feet', 'hands', 'cape', 'neck', 'ring'];
-            let bestArmourPerSlot = {};
-
-            // Completed BiS armour only — player actually has these items
-            if (completedChallenges['BiS']) {
-                Object.keys(completedChallenges['BiS']).forEach(taskName => {
-                    let match = taskName.match(/\|([^|]+)\|/);
-                    if (!match) return;
-                    let eqName = Object.keys(chunkInfo['equipment']).find(
-                        eq => (chunkInfo['equipment'][eq].formatted_name || eq.toLowerCase()) === match[1].toLowerCase()
-                    );
-                    if (!eqName || !chunkInfo['equipment'][eqName]) return;
-                    let eqData = chunkInfo['equipment'][eqName];
-                    if (armourSlots.includes(eqData.slot)) {
-                        let avgDef = ((eqData.defence_stab || 0) + (eqData.defence_slash || 0) + (eqData.defence_crush || 0)) / 3;
-                        if (!bestArmourPerSlot[eqData.slot] || avgDef > bestArmourPerSlot[eqData.slot].def) {
-                            bestArmourPerSlot[eqData.slot] = { name: eqName, def: avgDef };
-                        }
-                    }
-                });
+            didWeaponRestart = true;
+            // Recalc coins/hr if shop gate is active
+            if (shopCostGateActive) {
+                bestCoinsPerHour = calcBestCoinsPerHour(gatePlayerAtkLevel, gatePlayerStrLevel, gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed);
             }
-
-            let bisArmourDef = 0;
-            Object.keys(bestArmourPerSlot).forEach(slot => {
-                bisArmourDef += bestArmourPerSlot[slot].def;
-            });
-            let newArmourDef = Math.round(bisArmourDef);
-            let needRerun = newArmourDef !== gatePlayerArmourDef;
-            if (newArmourDef !== gatePlayerArmourDef) {
-                gatePlayerArmourDef = newArmourDef;
-            }
-            if (needRerun) {
-                // Recalc coins/hr with new weapon if shop gate is active
-                if (shopCostGateActive) {
-                    bestCoinsPerHour = calcBestCoinsPerHour(gatePlayerAtkLevel, gatePlayerStrLevel, gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed);
-                }
-                // Recheck prayer bypass with upgraded weapon
-                if (!gateHasPrayerBypass) {
-                    const usefulBones = ['Big bones', 'Babydragon bones', 'Dragon bones', 'Wyvern bones',
-                        'Lava dragon bones', 'Superior dragon bones', 'Dagannoth bones', 'Ourg bones', 'Hydra bones'];
-                    for (let boneName of usefulBones) {
-                        if (gateHasPrayerBypass) break;
-                        if (!baseChunkData['items'] || !baseChunkData['items'][boneName]) continue;
-                        let sources = baseChunkData['items'][boneName];
-                        for (let source of Object.keys(sources)) {
-                            let sourceVal = sources[source];
-                            if (!sourceVal.includes('drop')) { gateHasPrayerBypass = true; break; }
-                            let ms = monsterStats[source] || {hp: 10, def: 1, db: 0};
-                            let ttk = estimateKillTime(gatePlayerAtkLevel, gatePlayerStrLevel,
-                                gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed,
-                                ms.hp || 10, ms.def || 1, ms.db || 0);
-                            if (ttk <= 60) { gateHasPrayerBypass = true; break; }
-                        }
+            // Recheck prayer bypass with final weapon
+            if (!gateHasPrayerBypass) {
+                const usefulBones = ['Big bones', 'Babydragon bones', 'Dragon bones', 'Wyvern bones',
+                    'Lava dragon bones', 'Superior dragon bones', 'Dagannoth bones', 'Ourg bones', 'Hydra bones'];
+                for (let boneName of usefulBones) {
+                    if (gateHasPrayerBypass) break;
+                    if (!baseChunkData['items'] || !baseChunkData['items'][boneName]) continue;
+                    let sources = baseChunkData['items'][boneName];
+                    for (let source of Object.keys(sources)) {
+                        let sourceVal = sources[source];
+                        if (!sourceVal.includes('drop')) { gateHasPrayerBypass = true; break; }
+                        let ms = monsterStats[source] || {hp: 10, def: 1, db: 0};
+                        let ttk = estimateKillTime(gatePlayerAtkLevel, gatePlayerStrLevel,
+                            gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed,
+                            ms.hp || 10, ms.def || 1, ms.db || 0);
+                        if (ttk <= 60) { gateHasPrayerBypass = true; break; }
                     }
                 }
-                didWeaponRestart = true;
-                // Re-run challenges and BiS with updated weapon + armour
-                globalValids = calcChallenges(chunks, baseChunkData);
-                highestOverall = calcBIS();
             }
+            // Re-run challenges and BiS with gate weapon + armour fully set
+            globalValids = calcChallenges(chunks, baseChunkData);
+            highestOverall = calcBIS();
         }
         let restartCalcs = false;
         let toManuallyAdd = {};
@@ -3379,7 +3370,8 @@ onmessage = function(e) {
             globalEveryDropAltMap,
             globalTaskRuleInfo,
             globalRuleSkippedTasks,
-            gatePlayerWeaponName
+            gatePlayerWeaponName,
+            gatePlayerArmourDef
         });
     } catch (err) {
         postMessage({ type: 'error', err });
