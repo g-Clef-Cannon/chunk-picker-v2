@@ -1018,6 +1018,12 @@ const monsterStats = {
     "Zombie#Level 24": {hp:22,def:10,al:8,mh:3},
     "Zulrah": {hp:500,def:300,al:1,mh:41,as:3},
 };
+// Monsters in cages/behind barriers — drops require Telegrab to loot
+const telegrabMonsters = {
+    "Dark wizard#Higher level": { "6457": true },
+    "Dark wizard#Lower level": { "6457": true },
+    "Lesser demon": { "6457": true }
+};
 const shopPrices = {
     'Abyssal dagger imbue scroll': 10000,
     'Achey tree logs': 4,
@@ -3745,6 +3751,49 @@ let calcChallenges = function(chunks, baseChunkData) {
             }
         });
     });
+    // Remove drops from caged/behind-barrier monsters when Telegrab isn't available
+    const hasTelegrab = telegrabTask && newValids['Magic'] && newValids['Magic'].hasOwnProperty('Cast ~|telekinetic grab|~') &&
+        (!backlog['Magic'] || !backlog['Magic'].hasOwnProperty('Cast ~|telekinetic grab|~'));
+    Object.keys(telegrabMonsters).forEach((monster) => {
+        Object.keys(telegrabMonsters[monster]).forEach((chunk) => {
+            if (!hasTelegrab && baseChunkData['monsters'][monster] && baseChunkData['monsters'][monster][chunk]) {
+                let dropsObj = chunkInfo['drops'][monster];
+                !!dropsObj && Object.keys(dropsObj).forEach((drop) => {
+                    if (!!dropTables[drop] && ((drop !== 'RareDropTable+' && drop !== 'GemDropTable+') || rules['RDT'])) {
+                        Object.keys(dropTables[drop]).forEach((item) => {
+                            !!baseChunkData['items'][item] && delete baseChunkData['items'][item][monster];
+                            if (!!baseChunkData['items'][item] && Object.keys(baseChunkData['items'][item]).length <= 0) {
+                                delete baseChunkData['items'][item];
+                            }
+                            !!dropRatesGlobal[monster] && delete dropRatesGlobal[monster][item];
+                            if (!!dropRatesGlobal[monster] && Object.keys(dropRatesGlobal[monster]).length <= 0) {
+                                delete dropRatesGlobal[monster];
+                            }
+                            !!dropTablesGlobal[monster] && delete dropTablesGlobal[monster][item];
+                            if (!!dropTablesGlobal[monster] && Object.keys(dropTablesGlobal[monster]).length <= 0) {
+                                delete dropTablesGlobal[monster];
+                            }
+                        });
+                    } else {
+                        if (!!baseChunkData['items'][drop]) {
+                            delete baseChunkData['items'][drop][monster];
+                        }
+                        if (!!baseChunkData['items'][drop] && Object.keys(baseChunkData['items'][drop]).length <= 0) {
+                            delete baseChunkData['items'][drop];
+                        }
+                        !!dropRatesGlobal[monster] && delete dropRatesGlobal[monster][drop];
+                        if (!!dropRatesGlobal[monster] && Object.keys(dropRatesGlobal[monster]).length <= 0) {
+                            delete dropRatesGlobal[monster];
+                        }
+                        !!dropTablesGlobal[monster] && delete dropTablesGlobal[monster][drop];
+                        if (!!dropTablesGlobal[monster] && Object.keys(dropTablesGlobal[monster]).length <= 0) {
+                            delete dropTablesGlobal[monster];
+                        }
+                    }
+                });
+            }
+        });
+    });
     !!chunkInfo && !!chunkInfo['taskUnlocks'] && !!chunkInfo['taskUnlocks']['NPCs'] && Object.keys(chunkInfo['taskUnlocks']['NPCs']).forEach((npc) => {
         Object.keys(chunkInfo['taskUnlocks']['NPCs'][npc]).forEach((chunk) => {
             let tempValid = !(newValids && !(chunkInfo['taskUnlocks']['NPCs'][npc][chunk].filter((task) => { return newValids[Object.values(task)[0]] && newValids[Object.values(task)[0]].hasOwnProperty(Object.keys(task)[0]) && (!backlog[Object.values(task)[0]] || (!backlog[Object.values(task)[0]].hasOwnProperty(Object.keys(task)[0]) && !backlog[Object.values(task)[0]].hasOwnProperty(Object.keys(task)[0].replaceAll('#', '/')))) }).length === chunkInfo['taskUnlocks']['NPCs'][npc][chunk].length));
@@ -5257,6 +5306,49 @@ let calcChallenges = function(chunks, baseChunkData) {
                                 dropTablesGlobal[monster][drop][quantity] = (chunkInfo['drops'][monster][drop][quantity].split('/').length <= 1) ? chunkInfo['drops'][monster][drop][quantity] : findFraction(parseFloat(chunkInfo['drops'][monster][drop][quantity].split('/')[0].replaceAll('~', '')) / parseFloat(chunkInfo['drops'][monster][drop][quantity].split('/')[1].replaceAll('~', '')));
                             }
                         });
+                    });
+                }
+            });
+        });
+        // Remove drops from caged/behind-barrier monsters when Telegrab isn't available
+        const hasTelegrab2 = telegrabTask && newValids['Magic'] && newValids['Magic'].hasOwnProperty('Cast ~|telekinetic grab|~') &&
+            (!backlog['Magic'] || !backlog['Magic'].hasOwnProperty('Cast ~|telekinetic grab|~'));
+        Object.keys(telegrabMonsters).forEach((monster) => {
+            Object.keys(telegrabMonsters[monster]).forEach((chunk) => {
+                if (!hasTelegrab2 && baseChunkData['monsters'][monster] && baseChunkData['monsters'][monster][chunk]) {
+                    let dropsObj = chunkInfo['drops'][monster];
+                    !!dropsObj && Object.keys(dropsObj).forEach((drop) => {
+                        if (!!dropTables[drop] && ((drop !== 'RareDropTable+' && drop !== 'GemDropTable+') || rules['RDT'])) {
+                            Object.keys(dropTables[drop]).forEach((item) => {
+                                !!baseChunkData['items'][item] && delete baseChunkData['items'][item][monster];
+                                if (!!baseChunkData['items'][item] && Object.keys(baseChunkData['items'][item]).length <= 0) {
+                                    delete baseChunkData['items'][item];
+                                }
+                                !!dropRatesGlobal[monster] && delete dropRatesGlobal[monster][item];
+                                if (!!dropRatesGlobal[monster] && Object.keys(dropRatesGlobal[monster]).length <= 0) {
+                                    delete dropRatesGlobal[monster];
+                                }
+                                !!dropTablesGlobal[monster] && delete dropTablesGlobal[monster][item];
+                                if (!!dropTablesGlobal[monster] && Object.keys(dropTablesGlobal[monster]).length <= 0) {
+                                    delete dropTablesGlobal[monster];
+                                }
+                            });
+                        } else {
+                            if (!!baseChunkData['items'][drop]) {
+                                delete baseChunkData['items'][drop][monster];
+                            }
+                            if (!!baseChunkData['items'][drop] && Object.keys(baseChunkData['items'][drop]).length <= 0) {
+                                delete baseChunkData['items'][drop];
+                            }
+                            !!dropRatesGlobal[monster] && delete dropRatesGlobal[monster][drop];
+                            if (!!dropRatesGlobal[monster] && Object.keys(dropRatesGlobal[monster]).length <= 0) {
+                                delete dropRatesGlobal[monster];
+                            }
+                            !!dropTablesGlobal[monster] && delete dropTablesGlobal[monster][drop];
+                            if (!!dropTablesGlobal[monster] && Object.keys(dropTablesGlobal[monster]).length <= 0) {
+                                delete dropTablesGlobal[monster];
+                            }
+                        }
                     });
                 }
             });

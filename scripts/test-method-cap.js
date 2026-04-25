@@ -463,6 +463,18 @@ async function runTests() {
             !hasWillowShield,
             'Willow shield is present but should be blocked by method cap');
 
+        // Test 12: Caged monster drops (dark wizard in 6457) should NOT be in items without Telegrab
+        const items = workerResult.baseChunkData && workerResult.baseChunkData['items'] || {};
+        const staffSources = items['Staff'] || {};
+        const blackRobeSources = items['Black robe'] || {};
+        const staffFromDarkWiz = staffSources['Dark wizard#Higher level'] || staffSources['Dark wizard#Lower level'];
+        const robeFromDarkWiz = blackRobeSources['Dark wizard#Higher level'] || blackRobeSources['Dark wizard#Lower level'];
+        console.log('\n  INFO: Staff from dark wizard: ' + (staffFromDarkWiz || 'none'));
+        console.log('  INFO: Black robe from dark wizard: ' + (robeFromDarkWiz || 'none'));
+        assert('Caged dark wizard drops blocked without Telegrab',
+            !staffFromDarkWiz && !robeFromDarkWiz,
+            'Staff: ' + (staffFromDarkWiz || 'none') + ', Black robe: ' + (robeFromDarkWiz || 'none'));
+
     } else if (workerResult && workerResult.type === 'error') {
         console.log('  Worker returned error:', workerResult.err);
         failed++;
