@@ -3146,7 +3146,9 @@ onmessage = function(e) {
                 }
                 hasCombatMagic = hasCatalyst && hasElemental;
             }
-            if (!hasPrimaryRanged && !hasCombatMagic) {
+            let hasProtectionPrayers = !!rules['Has Protection Prayers'];
+            let canBypassMonsterGate = (hasPrimaryRanged || hasCombatMagic) && hasProtectionPrayers;
+            if (!canBypassMonsterGate) {
                 monsterGateActive = true;
                 needRerun = true;
                 // Step 1: Best weapon from completed BiS tasks
