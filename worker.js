@@ -2610,7 +2610,7 @@ const buildKillTimeBreakdown = function(monsterName, monsterHp, monsterDef, mons
     lines.push('avg_dmg/hit=' + avgDmg.toFixed(2) + ', hits_needed=' + hitsNeeded.toFixed(1) + ', base_kill_time=' + Math.round(baseKillTime) + 's');
     // Prayer bypass check
     if (gateHasPrayerBypass) {
-        lines.push('<b>Prayer bypass:</b> Player has access to useful bones → protection prayers assumed. Kill time: ' + Math.round(baseKillTime) + 's');
+        lines.push('<b>Prayer bypass:</b> Player can gain ≥' + PRAYER_XP_THRESHOLD + ' prayer xp/hr from bone drops → protection prayers assumed. Kill time: ' + Math.round(baseKillTime) + 's');
         return lines.join('<br>');
     }
     // Flinch check
@@ -2663,7 +2663,41 @@ let gatePlayerHP = 10;
 let gatePlayerDefLevel = 1;
 let gatePlayerArmourDef = 0;
 const FLINCH_CYCLE_TICKS = 14; // measured corner-flinch cycle in game ticks
-let gateHasPrayerBypass = false; // true if player has farmable bones → protection prayers assumed
+let gateHasPrayerBypass = false; // true if player can gain >= 2k prayer xp/hr from bone drops
+
+// Prayer XP from burying each bone type
+const boneXpValues = {
+    'Big bones': 15, 'Babydragon bones': 30, 'Dragon bones': 72,
+    'Wyvern bones': 72, 'Lava dragon bones': 85, 'Superior dragon bones': 150,
+    'Dagannoth bones': 125, 'Ourg bones': 140, 'Hydra bones': 110
+};
+const PRAYER_XP_THRESHOLD = 2000; // xp/hr needed to assume prayer access
+
+// Calculate best prayer XP/hr from available bone sources
+const calcBestPrayerXpPerHour = function(baseChunkData) {
+    let bestXpPerHour = 0;
+    for (let boneName of Object.keys(boneXpValues)) {
+        if (!baseChunkData['items'] || !baseChunkData['items'][boneName]) continue;
+        let boneXp = boneXpValues[boneName];
+        let sources = baseChunkData['items'][boneName];
+        for (let source of Object.keys(sources)) {
+            let sourceVal = sources[source];
+            if (!sourceVal.includes('drop')) {
+                return Infinity;
+            }
+            let ms = monsterStats[source] || {hp: 10, def: 1, db: 0};
+            let ttk = estimateKillTime(gatePlayerAtkLevel, gatePlayerStrLevel,
+                gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed,
+                ms.hp || 10, ms.def || 1, ms.db || 0);
+            if (ttk > 0 && ttk !== Infinity) {
+                let killsPerHour = 3600 / ttk;
+                let xpPerHour = killsPerHour * boneXp;
+                if (xpPerHour > bestXpPerHour) bestXpPerHour = xpPerHour;
+            }
+        }
+    }
+    return bestXpPerHour;
+};
 
 // Shop Cost Gate: module-level state
 let shopCostGateActive = false;
@@ -3121,8 +3155,32 @@ onmessage = function(e) {
         let needRerun = false;
         if (rules['BiS Monster Power Gate'] && bisMonsterGateHours > 0) {
             let hasPrimaryRanged = checkPrimaryMethod('Ranged', globalValids, baseChunkData) || (!!manualTasks['Ranged'] && Object.keys(manualTasks['Ranged']).length > 0);
+            // Magic combat requires: primary Magic method + catalyst runes (mind/chaos/death) + elemental runes or staves
             let hasPrimaryMagic = checkPrimaryMethod('Magic', globalValids, baseChunkData) || (!!manualTasks['Magic'] && Object.keys(manualTasks['Magic']).length > 0);
-            if (!hasPrimaryRanged && !hasPrimaryMagic) {
+            let hasCombatMagic = false;
+            if (hasPrimaryMagic && baseChunkData['items']) {
+                let catalystRunes = ['Mind rune', 'Chaos rune', 'Death rune'];
+                let hasCatalyst = catalystRunes.some(r => {
+                    let src = baseChunkData['items'][r];
+                    if (!src) return false;
+                    return Object.values(src).some(v => !v.includes('secondary'));
+                });
+                let hasElemental = false;
+                if (hasCatalyst) {
+                    hasElemental = elementalRunes.some(r => {
+                        let src = baseChunkData['items'][r];
+                        if (!src) return false;
+                        return Object.values(src).some(v => !v.includes('secondary'));
+                    });
+                    if (!hasElemental) {
+                        hasElemental = Object.keys(elementalStaves).some(staff => {
+                            return !!baseChunkData['items'][staff];
+                        });
+                    }
+                }
+                hasCombatMagic = hasCatalyst && hasElemental;
+            }
+            if (!hasPrimaryRanged && !hasCombatMagic) {
                 monsterGateActive = true;
                 needRerun = true;
                 // Step 1: Best weapon from completed BiS tasks
@@ -3188,31 +3246,8 @@ onmessage = function(e) {
                 gatePlayerHP = gatePlayerAtkLevel + 9;
                 gatePlayerDefLevel = gatePlayerAtkLevel;
                 // Weapon stays unarmed for first pass — will be updated from BiS result after calcBIS()
-                // Prayer bypass: check if player has access to useful bones
-                const usefulBones = ['Big bones', 'Babydragon bones', 'Dragon bones', 'Wyvern bones',
-                    'Lava dragon bones', 'Superior dragon bones', 'Dagannoth bones', 'Ourg bones', 'Hydra bones'];
-                for (let boneName of usefulBones) {
-                    if (gateHasPrayerBypass) break;
-                    if (!baseChunkData['items'] || !baseChunkData['items'][boneName]) continue;
-                    let sources = baseChunkData['items'][boneName];
-                    for (let source of Object.keys(sources)) {
-                        let sourceVal = sources[source];
-                        if (!sourceVal.includes('drop')) {
-                            // Spawn, shop, or skill source — free bones
-                            gateHasPrayerBypass = true;
-                            break;
-                        }
-                        // Monster drop — check if farmable (TTK < 60s)
-                        let ms = monsterStats[source] || {hp: 10, def: 1, db: 0};
-                        let ttk = estimateKillTime(gatePlayerAtkLevel, gatePlayerStrLevel,
-                            gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed,
-                            ms.hp || 10, ms.def || 1, ms.db || 0);
-                        if (ttk <= 60) {
-                            gateHasPrayerBypass = true;
-                            break;
-                        }
-                    }
-                }
+                // Prayer bypass: check if player can gain enough prayer xp/hr from bone drops
+                gateHasPrayerBypass = calcBestPrayerXpPerHour(baseChunkData) >= PRAYER_XP_THRESHOLD;
             }
         }
         // Set up Shop Cost Gate — uses same player combat estimates as monster gate
@@ -3286,24 +3321,7 @@ onmessage = function(e) {
                 bestCoinsPerHour = calcBestCoinsPerHour(gatePlayerAtkLevel, gatePlayerStrLevel, gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed);
             }
             // Recheck prayer bypass with final weapon
-            if (!gateHasPrayerBypass) {
-                const usefulBones = ['Big bones', 'Babydragon bones', 'Dragon bones', 'Wyvern bones',
-                    'Lava dragon bones', 'Superior dragon bones', 'Dagannoth bones', 'Ourg bones', 'Hydra bones'];
-                for (let boneName of usefulBones) {
-                    if (gateHasPrayerBypass) break;
-                    if (!baseChunkData['items'] || !baseChunkData['items'][boneName]) continue;
-                    let sources = baseChunkData['items'][boneName];
-                    for (let source of Object.keys(sources)) {
-                        let sourceVal = sources[source];
-                        if (!sourceVal.includes('drop')) { gateHasPrayerBypass = true; break; }
-                        let ms = monsterStats[source] || {hp: 10, def: 1, db: 0};
-                        let ttk = estimateKillTime(gatePlayerAtkLevel, gatePlayerStrLevel,
-                            gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed,
-                            ms.hp || 10, ms.def || 1, ms.db || 0);
-                        if (ttk <= 60) { gateHasPrayerBypass = true; break; }
-                    }
-                }
-            }
+            gateHasPrayerBypass = calcBestPrayerXpPerHour(baseChunkData) >= PRAYER_XP_THRESHOLD;
             // Re-run challenges and BiS with gate weapon + armour fully set
             globalValids = calcChallenges(chunks, baseChunkData);
             highestOverall = calcBIS();
@@ -7908,7 +7926,10 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                 let accessible = taskLevel === 1
                     || (!!passiveSkill && passiveSkill.hasOwnProperty(skill) && passiveSkill[skill] >= taskLevel)
                     || (!!skillQuestXp && skillQuestXp.hasOwnProperty(skill) && skillQuestXp[skill]['level'] >= taskLevel);
-                if (accessible && taskLevel > highestPrimaryLevel) {
+                if (!accessible) return;
+                // Arceuus Library scales with level — treat as effective lv55 for cap purposes
+                if (name.includes('Arceuus Library') && task['Level'] === 1) taskLevel = 55;
+                if (taskLevel > highestPrimaryLevel) {
                     highestPrimaryLevel = taskLevel;
                 }
             });
