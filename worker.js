@@ -2664,6 +2664,7 @@ let gatePlayerDefLevel = 1;
 let gatePlayerArmourDef = 0;
 const FLINCH_CYCLE_TICKS = 14; // measured corner-flinch cycle in game ticks
 let gateHasPrayerBypass = false; // true when player flags 'Has Protection Prayers'
+let gateHasRangedOrMagicCombat = false; // true when player can safely flinch/safespot flinchable monsters
 
 // Shop Cost Gate: module-level state
 let shopCostGateActive = false;
@@ -2783,6 +2784,11 @@ const passesMonsterGate = function(itemName, itemSources, combatContext, visited
             let ms = monsterStats[source] || {hp: 10, def: 1, db: 0};
             let mHp = ms.hp || 10, mDef = ms.def || 1, mDb = ms.db || 0;
             let mAl = ms.al || 0, mAb = ms.ab || 0, mMh = ms.mh || 0, mAs = ms.as || 4;
+            if (gateHasRangedOrMagicCombat && !ms.uf) {
+                hasReasonableSource = true;
+                bestDetail = '<b>Ranged/Magic access:</b> Flinchable monster — auto-pass without DPS/hour check';
+                return;
+            }
             let killTime = estimateEffectiveKillTime(gatePlayerAtkLevel, gatePlayerStrLevel, gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed, mHp, mDef, mDb, mAl, mAb, mMh, mAs, ms.uf);
             let avgKills = 128;
             let rateStr = '1/128';
@@ -3112,6 +3118,7 @@ onmessage = function(e) {
         gatePlayerDefLevel = 1;
         gatePlayerArmourDef = 0;
         gateHasPrayerBypass = false;
+        gateHasRangedOrMagicCombat = false;
         didWeaponRestart = false;
         primaryDropGateActive = false;
         primaryDropGateSeconds = (primaryDropGateMinutes || 3) * 60;
@@ -3147,7 +3154,8 @@ onmessage = function(e) {
                 hasCombatMagic = hasCatalyst && hasElemental;
             }
             let hasProtectionPrayers = !!rules['Has Protection Prayers'];
-            let canBypassMonsterGate = (hasPrimaryRanged || hasCombatMagic) && hasProtectionPrayers;
+            gateHasRangedOrMagicCombat = hasPrimaryRanged || hasCombatMagic;
+            let canBypassMonsterGate = gateHasRangedOrMagicCombat && hasProtectionPrayers;
             if (!canBypassMonsterGate) {
                 monsterGateActive = true;
                 needRerun = true;
