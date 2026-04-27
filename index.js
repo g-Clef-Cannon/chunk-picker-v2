@@ -367,6 +367,7 @@ let rules = {
     "BiS Respect Skill Caps": false,
     "BiS Monster Power Gate": false,
     "BiS Monster Power Gate Amount": "5",
+    "Has Protection Prayers": false,
     "Shop Cost Gate": false,
     "Shop Cost Gate Amount": "5",
     "Primary Drop Monster Gate": false,
@@ -483,6 +484,7 @@ let ruleNames = {
     "Show Best in Slot Tasks": "Show Best in Slot (Accuracy + Strength, or secondarily Defence) Tasks",
     "BiS Respect Skill Caps": "BiS tasks respect skill task level caps (skip equipment you can't realistically train to craft/obtain)",
     "BiS Monster Power Gate": "Skip combat tasks requiring drops from monsters too difficult to farm. Block if estimated farming time exceeds X-hours hours",
+    "Has Protection Prayers": "Check if you have access to protection prayers (Protect from Melee/Ranged/Magic). When enabled, the Monster Power Gate assumes you can safely kill any monster",
     "Shop Cost Gate": "Skip tasks requiring shop items too expensive for current coin income. Block if coin farming time exceeds X-hours hours",
     "Primary Drop Monster Gate": "Downgrade drops from monsters too difficult to farm regularly to secondary. Downgrade if time-per-item exceeds X-minutes minutes",
     "Show Best in Slot Prayer Tasks": "Show Best in Slot Tasks for Prayer-boosting gear",
@@ -769,6 +771,7 @@ let ruleStructure = {
     "Combat": {
         "HigherLander": true,
         "BiS Monster Power Gate": true,
+        "Has Protection Prayers": true,
         "Shop Cost Gate": true,
         "Primary Drop Monster Gate": true
     },

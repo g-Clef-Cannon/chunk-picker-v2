@@ -2610,7 +2610,7 @@ const buildKillTimeBreakdown = function(monsterName, monsterHp, monsterDef, mons
     lines.push('avg_dmg/hit=' + avgDmg.toFixed(2) + ', hits_needed=' + hitsNeeded.toFixed(1) + ', base_kill_time=' + Math.round(baseKillTime) + 's');
     // Prayer bypass check
     if (gateHasPrayerBypass) {
-        lines.push('<b>Prayer bypass:</b> Player can gain ≥' + PRAYER_XP_THRESHOLD + ' prayer xp/hr from bone drops → protection prayers assumed. Kill time: ' + Math.round(baseKillTime) + 's');
+        lines.push('<b>Prayer bypass:</b> Player has protection prayers → safe kill assumed. Kill time: ' + Math.round(baseKillTime) + 's');
         return lines.join('<br>');
     }
     // Flinch check
@@ -2663,41 +2663,7 @@ let gatePlayerHP = 10;
 let gatePlayerDefLevel = 1;
 let gatePlayerArmourDef = 0;
 const FLINCH_CYCLE_TICKS = 14; // measured corner-flinch cycle in game ticks
-let gateHasPrayerBypass = false; // true if player can gain >= 2k prayer xp/hr from bone drops
-
-// Prayer XP from burying each bone type
-const boneXpValues = {
-    'Big bones': 15, 'Babydragon bones': 30, 'Dragon bones': 72,
-    'Wyvern bones': 72, 'Lava dragon bones': 85, 'Superior dragon bones': 150,
-    'Dagannoth bones': 125, 'Ourg bones': 140, 'Hydra bones': 110
-};
-const PRAYER_XP_THRESHOLD = 2000; // xp/hr needed to assume prayer access
-
-// Calculate best prayer XP/hr from available bone sources
-const calcBestPrayerXpPerHour = function(baseChunkData) {
-    let bestXpPerHour = 0;
-    for (let boneName of Object.keys(boneXpValues)) {
-        if (!baseChunkData['items'] || !baseChunkData['items'][boneName]) continue;
-        let boneXp = boneXpValues[boneName];
-        let sources = baseChunkData['items'][boneName];
-        for (let source of Object.keys(sources)) {
-            let sourceVal = sources[source];
-            if (!sourceVal.includes('drop')) {
-                return Infinity;
-            }
-            let ms = monsterStats[source] || {hp: 10, def: 1, db: 0};
-            let ttk = estimateKillTime(gatePlayerAtkLevel, gatePlayerStrLevel,
-                gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed,
-                ms.hp || 10, ms.def || 1, ms.db || 0);
-            if (ttk > 0 && ttk !== Infinity) {
-                let killsPerHour = 3600 / ttk;
-                let xpPerHour = killsPerHour * boneXp;
-                if (xpPerHour > bestXpPerHour) bestXpPerHour = xpPerHour;
-            }
-        }
-    }
-    return bestXpPerHour;
-};
+let gateHasPrayerBypass = false; // true when player flags 'Has Protection Prayers'
 
 // Shop Cost Gate: module-level state
 let shopCostGateActive = false;
@@ -3247,7 +3213,7 @@ onmessage = function(e) {
                 gatePlayerDefLevel = gatePlayerAtkLevel;
                 // Weapon stays unarmed for first pass — will be updated from BiS result after calcBIS()
                 // Prayer bypass: check if player can gain enough prayer xp/hr from bone drops
-                gateHasPrayerBypass = calcBestPrayerXpPerHour(baseChunkData) >= PRAYER_XP_THRESHOLD;
+                gateHasPrayerBypass = !!rules['Has Protection Prayers'];
             }
         }
         // Set up Shop Cost Gate — uses same player combat estimates as monster gate
@@ -3321,7 +3287,7 @@ onmessage = function(e) {
                 bestCoinsPerHour = calcBestCoinsPerHour(gatePlayerAtkLevel, gatePlayerStrLevel, gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed);
             }
             // Recheck prayer bypass with final weapon
-            gateHasPrayerBypass = calcBestPrayerXpPerHour(baseChunkData) >= PRAYER_XP_THRESHOLD;
+            gateHasPrayerBypass = !!rules['Has Protection Prayers'];
             // Re-run challenges and BiS with gate weapon + armour fully set
             globalValids = calcChallenges(chunks, baseChunkData);
             highestOverall = calcBIS();
