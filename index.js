@@ -379,6 +379,7 @@ let rules = {
     "Show Best in Slot Melee Style Tasks": false,
     "Show Best in Slot 1H and 2H": false,
     "Consumable Primary BiS": false,
+    "Exclude Cape Dyeing Crafting Method": false,
     "Show Quest Tasks Complete": false,
     "Show Diary Tasks Complete": false,
     "Show Diary Tasks Any": false,
@@ -494,6 +495,7 @@ let ruleNames = {
     "Show Best in Slot Melee Style Tasks": "Show Best in Slot Tasks for stab/slash/crush instead of overall melee",
     "Show Best in Slot 1H and 2H": "Show Best in Slot Tasks for both 2-handed and 1-handed/shield, rather than just the better of the two",
     "Consumable Primary BiS": "For consumable items (arrows, darts, etc.), only count them as Best in Slot if you have primary access to them",
+    "Exclude Cape Dyeing Crafting Method": "Do not count dyeing capes as a primary Crafting training method",
     "Show Quest Tasks Complete": "Show Quest Tasks only when the whole quest is completable",
     "Show Diary Tasks Complete": "Show Diary Tasks only when the whole diary tier (easy, medium, etc.) is completable",
     "Show Diary Tasks Any": "Show all diary tasks possible, regardless of tier <span class='rule-asterisk noscroll'>*</span>",
@@ -784,6 +786,9 @@ let ruleStructure = {
     },
     "Cooking": {
         "Fish Offcuts Valid Processing": true
+    },
+    "Crafting": {
+        "Exclude Cape Dyeing Crafting Method": true
     },
     "Farming": {
         "Normal Farming": true,

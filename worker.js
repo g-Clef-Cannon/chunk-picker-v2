@@ -7884,6 +7884,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
 
             let highestPrimaryLevel = 0;
             Object.keys(valids[skill]).forEach((name) => {
+                if (skill === 'Crafting' && rules['Exclude Cape Dyeing Crafting Method'] && name === 'Dye a ~|cape|~') return;
                 let task = chunkInfo['challenges'][skill][name];
                 if (!task) return;
                 let isPrimary = task['Primary'] && !task['Secondary'];
@@ -8472,6 +8473,7 @@ let checkPrimaryMethod = function(skill, valids, baseChunkData) {
         if (line === 'Primary[+]') {
             let primaryTasks = false;
             !!valids[skill] && Object.keys(valids[skill]).sort((a, b) => valids[skill][a] < valids[skill][b]).some((challenge) => {
+                if (skill === 'Crafting' && rules['Exclude Cape Dyeing Crafting Method'] && challenge === 'Dye a ~|cape|~') return false;
                 let bestBoost = 0;
                 if (rules["Boosting"] && chunkInfo['codeItems']['boostItems'].hasOwnProperty(skill) && !chunkInfo['challenges'][skill][challenge].hasOwnProperty('NoBoost')) {
                     let ownsCrystalSaw = false;
