@@ -144,6 +144,9 @@ async function runTests() {
     // Enable Primary Drop Monster Gate for testing
     rules['Primary Drop Monster Gate'] = true;
     rules['Primary Drop Monster Gate Amount'] = '3';
+    // Enable skilling BiS tool generation for regression coverage
+    rules['Show Best in Slot Tasks'] = true;
+    rules['Show Best in Slot Skilling Tasks'] = true;
 
     // 3. Build tasksMap reverse lookup (task ID → task name)
     const tasksMapPath = path.join(__dirname, '..', 'tasksMap.json');
@@ -534,6 +537,21 @@ async function runTests() {
             !hastaInBiS,
             hastaInBiS ? 'Rune hasta(p) found in BiS (should be blocked)' : 'Rune hasta(p) correctly absent from BiS' +
             (hastaSkipped ? ' (rule-skipped)' : ' (may not exist in chunks)'));
+
+        // Skilling BiS: Mithril axe from King Sand Crab should generate a Woodcutting BiS tool task
+        const hasMithrilAxeBiS = bisValids && Object.keys(bisValids).some(task =>
+            task.toLowerCase().includes('mithril axe') &&
+            String(bisValids[task]).toLowerCase().includes('woodcutting bis tool')
+        );
+        console.log('  INFO: Mithril axe BiS task present: ' + !!hasMithrilAxeBiS);
+        if (bisValids) {
+            Object.keys(bisValids)
+                .filter(task => String(bisValids[task]).toLowerCase().includes('woodcutting bis tool'))
+                .forEach(task => console.log('    Woodcutting BiS tool:', task, '=>', bisValids[task]));
+        }
+        assert('Skilling BiS: Mithril axe task generated',
+            !!hasMithrilAxeBiS,
+            bisValids ? 'BiS tasks: ' + Object.keys(bisValids).filter(t => t.toLowerCase().includes('axe')).join(', ') : 'No BiS tasks');
 
     } else if (workerResult && workerResult.type === 'error') {
         console.log('  Worker returned error:', workerResult.err);
