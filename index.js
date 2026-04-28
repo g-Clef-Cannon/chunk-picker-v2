@@ -378,6 +378,7 @@ let rules = {
     "Show Best in Slot Weight Tasks": false,
     "Show Best in Slot Melee Style Tasks": false,
     "Show Best in Slot 1H and 2H": false,
+    "Show Best in Slot Skilling Tasks": false,
     "Consumable Primary BiS": false,
     "Exclude Cape Dyeing Crafting Method": false,
     "Show Quest Tasks Complete": false,
@@ -494,6 +495,7 @@ let ruleNames = {
     "Show Best in Slot Weight Tasks": "Show Best in Slot Tasks for weight-reducing gear (only pieces with negative weight)",
     "Show Best in Slot Melee Style Tasks": "Show Best in Slot Tasks for stab/slash/crush instead of overall melee",
     "Show Best in Slot 1H and 2H": "Show Best in Slot Tasks for both 2-handed and 1-handed/shield, rather than just the better of the two",
+    "Show Best in Slot Skilling Tasks": "Show Best in Slot Tasks for skilling tools that affect tool-gated skills",
     "Consumable Primary BiS": "For consumable items (arrows, darts, etc.), only count them as Best in Slot if you have primary access to them",
     "Exclude Cape Dyeing Crafting Method": "Do not count dyeing capes as a primary Crafting training method",
     "Show Quest Tasks Complete": "Show Quest Tasks only when the whole quest is completable",
@@ -752,7 +754,7 @@ let ruleStructure = {
         "Show Skill Tasks": ["Strict Tool Gating", "Method-Based Cap", "Skill Task Cap"],
         "Show Quest Tasks": ["Show Quest Tasks Complete"],
         "Show Diary Tasks": ["Show Diary Tasks Complete", "Show Diary Tasks Any", "Fossil Island Tasks", "Combat Diary Tasks", "Sea Charting"],
-        "Show Best in Slot Tasks": ["BiS Respect Skill Caps", "Show Best in Slot Prayer Tasks", "Show Best in Slot Defensive Tasks", "Show Best in Slot Flinching Tasks", "Show Best in Slot Weight Tasks", "Show Best in Slot Melee Style Tasks", "Show Best in Slot 1H and 2H", "Consumable Primary BiS"]
+        "Show Best in Slot Tasks": ["BiS Respect Skill Caps", "Show Best in Slot Prayer Tasks", "Show Best in Slot Defensive Tasks", "Show Best in Slot Flinching Tasks", "Show Best in Slot Weight Tasks", "Show Best in Slot Melee Style Tasks", "Show Best in Slot 1H and 2H", "Show Best in Slot Skilling Tasks", "Consumable Primary BiS"]
     },
     "Overall Skill": {
         "Starting Items": true,
@@ -890,6 +892,7 @@ let taskGeneratingRules = {
     "Show Best in Slot Weight Tasks": true,
     "Show Best in Slot Melee Style Tasks": true,
     "Show Best in Slot 1H and 2H": true,
+    "Show Best in Slot Skilling Tasks": true,
     "Show Quest Tasks Complete": true,
     "Show Diary Tasks Complete": true,
     "Show Diary Tasks Any": true,
@@ -12522,6 +12525,9 @@ let checkOffChallenge = function(skill, line, skip) {
             }
             toggleHiddenTasks(settings['hideChecked'] && actuallyHideChecked, false, subTabs);
             searchActiveTasksFunc();
+            if (skill === 'BiS') {
+                calcCurrentChallengesCanvas(true);
+            }
         }
     }
 }

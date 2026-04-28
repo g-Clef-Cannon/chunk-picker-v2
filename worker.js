@@ -149,6 +149,27 @@ const calcLevelCap = function(level) {
     return Math.max(30, level + Math.floor(10 - level * 0.10));
 };
 
+const getCompletedBiSTool = function(toolType) {
+    let bestToolName = '';
+    let bestToolLevel = 0;
+    if (!chunkInfo || !chunkInfo['toolLevels'] || !chunkInfo['toolLevels'][toolType]) return { name: '', level: 0 };
+    [completedChallenges['BiS'], checkedChallenges['BiS']].forEach((bisTasks) => {
+        if (!bisTasks) return;
+        Object.keys(bisTasks).forEach((taskName) => {
+            if (!taskName.includes('|')) return;
+            let itemName = taskName.split('|')[1];
+            let toolName = Object.keys(chunkInfo['toolLevels'][toolType]).find((tool) => tool.toLowerCase() === itemName.toLowerCase());
+            if (!toolName) return;
+            let toolLevel = chunkInfo['toolLevels'][toolType][toolName] || 0;
+            if (toolLevel > bestToolLevel) {
+                bestToolLevel = toolLevel;
+                bestToolName = toolName;
+            }
+        });
+    });
+    return { name: bestToolName, level: bestToolLevel };
+};
+
 const monsterStats = {
     "A Doubt": {hp:59,def:85,al:72,ab:18,mh:8,as:6},
     "Abyssal guardian": {hp:50,def:30,db:70,al:30,ab:15,mh:11,uf:1},
@@ -7849,7 +7870,14 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             let bestEfficiency = 0;
             let bestToolLevel = 0;
             let bestToolName = '';
+            let completedBiSTool = getCompletedBiSTool(toolType);
+            if (completedBiSTool.level > 0) {
+                bestToolLevel = completedBiSTool.level;
+                bestToolName = completedBiSTool.name;
+                bestEfficiency = (toolEfficiency[toolType] && toolEfficiency[toolType][bestToolName]) || 0;
+            }
             itemsPlus[toolType].forEach((toolName) => {
+                if (completedBiSTool.level > 0) return;
                 if (items[toolName] || items[toolName + '*']) {
                     let eff = (toolEfficiency[toolType] && toolEfficiency[toolType][toolName]) || 0;
                     if (eff > bestEfficiency) bestEfficiency = eff;
@@ -11736,6 +11764,49 @@ let calcBIS = function(completedOnly) {
         //console.log(bestEquipment);
     });
 
+    if (rules['Show Best in Slot Skilling Tasks'] && !!chunkInfo['toolLevels']) {
+        let skillingBiSTools = { 'Woodcutting': 'Axe[+]', 'Mining': 'Pickaxe[+]' };
+        Object.keys(skillingBiSTools).forEach((skill) => {
+            let toolType = skillingBiSTools[skill];
+            if (!itemsPlus[toolType] || !chunkInfo['toolLevels'][toolType]) return;
+            let bestToolName = '';
+            let bestToolLevel = 0;
+            if (completedOnly) {
+                let completedBiSTool = getCompletedBiSTool(toolType);
+                bestToolName = completedBiSTool.name;
+                bestToolLevel = completedBiSTool.level;
+            } else {
+                itemsPlus[toolType].forEach((toolName) => {
+                    if (!baseChunkData['items'] || !baseChunkData['items'][toolName]) return;
+                    if (!passesMonsterGate(toolName, baseChunkData['items'][toolName], true)) return;
+                    if (!passesShopCostGate(toolName, baseChunkData['items'][toolName])) return;
+                    let toolLevel = chunkInfo['toolLevels'][toolType][toolName] || 0;
+                    if (toolLevel > bestToolLevel) {
+                        bestToolLevel = toolLevel;
+                        bestToolName = toolName;
+                    }
+                });
+            }
+            if (!bestToolName) return;
+            highestOverallLocal[skill + '-tool'] = bestToolName;
+            let article = vowels.includes(bestToolName.toLowerCase().charAt(0)) ? ' an ' : ' a ';
+            article = (bestToolName.toLowerCase().charAt(bestToolName.toLowerCase().length - 1) === 's') ? ' ' : article;
+            let taskName = 'Obtain' + article + '~|' + formatEquip(bestToolName) + '|~';
+            let label = skill + ' BiS tool';
+            if (!chunkInfo['challenges']['BiS']) {
+                chunkInfo['challenges']['BiS'] = {};
+            }
+            chunkInfo['challenges']['BiS'][taskName] = {
+                'ItemsDetails': [bestToolName],
+                'Label': `<span class='noscroll ${skill}-bis-highlight'>` + skill + '</span> BiS tool'
+            };
+            if (!completedOnly) {
+                globalValids['BiS'][taskName] = label;
+            } else {
+                globalCompletedBiS[taskName] = label;
+            }
+        });
+    }
 
     let equipToAdd = {};
     !completedOnly && Object.keys(bestEquipmentAltsGlobal).forEach((label) => {
