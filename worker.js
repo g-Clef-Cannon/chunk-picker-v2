@@ -11777,9 +11777,11 @@ let calcBIS = function(completedOnly) {
                 bestToolLevel = completedBiSTool.level;
             } else {
                 itemsPlus[toolType].forEach((toolName) => {
-                    if (!baseChunkData['items'] || !baseChunkData['items'][toolName]) return;
-                    if (!passesMonsterGate(toolName, baseChunkData['items'][toolName], true)) return;
-                    if (!passesShopCostGate(toolName, baseChunkData['items'][toolName])) return;
+                    if (!baseChunkData['items']) return;
+                    let toolSources = baseChunkData['items'][toolName] || baseChunkData['items'][toolName + '*'];
+                    if (!toolSources) return;
+                    if (!passesMonsterGate(toolName, toolSources, true)) return;
+                    if (!passesShopCostGate(toolName, toolSources)) return;
                     let toolLevel = chunkInfo['toolLevels'][toolType][toolName] || 0;
                     if (toolLevel > bestToolLevel) {
                         bestToolLevel = toolLevel;
