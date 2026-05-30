@@ -12389,7 +12389,7 @@
 				"NoBoost": true
 			},
 			"Craft a ~|bird house|~": {
-				"Items": ["Chisel", "Hammer", "Logs*", "Clockwork*"],
+				"Items": ["Chisel", "Hammer", "Logs*", "Clockwork"],
 				"Level": 5,
 				"Output": "Bird house (item)",
 				"Primary": true,
@@ -13071,7 +13071,7 @@
 				"Not F2P": true
 			},
 			"Craft a ~|magic bird house|~": {
-				"Items": ["Chisel", "Hammer", "Magic logs*", "Clockwork*"],
+				"Items": ["Chisel", "Hammer", "Magic logs*", "Clockwork"],
 				"Level": 75,
 				"Output": "Magic bird house",
 				"Primary": true,
@@ -13088,7 +13088,7 @@
 				"Not F2P": true
 			},
 			"Craft a ~|mahogany bird house|~": {
-				"Items": ["Chisel", "Hammer", "Mahogany logs*", "Clockwork*"],
+				"Items": ["Chisel", "Hammer", "Mahogany logs*", "Clockwork"],
 				"Level": 50,
 				"Output": "Mahogany bird house",
 				"Primary": true,
@@ -13096,7 +13096,7 @@
 				"Not F2P": true
 			},
 			"Craft a ~|maple bird house|~": {
-				"Items": ["Chisel", "Hammer", "Maple logs*", "Clockwork*"],
+				"Items": ["Chisel", "Hammer", "Maple logs*", "Clockwork"],
 				"Level": 45,
 				"Output": "Maple bird house",
 				"Primary": true,
@@ -13137,7 +13137,7 @@
 				"Not F2P": true
 			},
 			"Craft a ~|redwood bird house|~": {
-				"Items": ["Chisel", "Hammer", "Redwood logs*", "Clockwork*"],
+				"Items": ["Chisel", "Hammer", "Redwood logs*", "Clockwork"],
 				"Level": 90,
 				"Output": "Redwood bird house",
 				"Primary": true,
@@ -13449,7 +13449,7 @@
 				"Not F2P": true
 			},
 			"Craft a ~|teak bird house|~": {
-				"Items": ["Chisel", "Hammer", "Teak logs*", "Clockwork*"],
+				"Items": ["Chisel", "Hammer", "Teak logs*", "Clockwork"],
 				"Level": 35,
 				"Output": "Teak bird house",
 				"Primary": true,
@@ -13549,7 +13549,7 @@
 				"Not F2P": true
 			},
 			"Craft a ~|willow bird house|~": {
-				"Items": ["Chisel", "Hammer", "Willow logs*", "Clockwork*"],
+				"Items": ["Chisel", "Hammer", "Willow logs*", "Clockwork"],
 				"Level": 25,
 				"Output": "Willow bird house",
 				"Primary": true,
@@ -13581,7 +13581,7 @@
 				"Not F2P": true
 			},
 			"Craft a ~|yew bird house|~": {
-				"Items": ["Chisel", "Hammer", "Yew logs*", "Clockwork*"],
+				"Items": ["Chisel", "Hammer", "Yew logs*", "Clockwork"],
 				"Level": 60,
 				"Output": "Yew bird house",
 				"Primary": true,
@@ -13763,7 +13763,7 @@
 				"Not F2P": true
 			},
 			"Craft an ~|oak bird house|~": {
-				"Items": ["Chisel", "Hammer", "Oak logs*", "Clockwork*"],
+				"Items": ["Chisel", "Hammer", "Oak logs*", "Clockwork"],
 				"Level": 15,
 				"Output": "Oak bird house",
 				"Primary": true,
@@ -27580,6 +27580,7 @@
 			"Mine a ~|gem rock|~ during Tai Bwo Wannai Cleanup": {
 				"Items": ["Pickaxe[+]"],
 				"Level": 40,
+				"Objects": ["TaiBwoJungle[+]"],
 				"Output": "Gem rocks",
 				"Tasks": {
 					"ChopJungle[+]": "Woodcutting"
@@ -27951,6 +27952,24 @@
 				"Level": 90,
 				"Output": "Stardust",
 				"Primary": true
+			},
+			"Obtain ~|coal|~ from blasted ore": {
+				"Items": ["Chisel", "Tinderbox", "Dynamite*"],
+				"Level": 43,
+				"Objects": ["Hard rock"],
+				"Output": "Coal",
+				"Primary": false,
+				"Priority": 3,
+				"Not F2P": true
+			},
+			"Obtain ~|gold ore|~ from blasted ore": {
+				"Items": ["Chisel", "Tinderbox", "Dynamite*"],
+				"Level": 43,
+				"Objects": ["Hard rock"],
+				"Output": "Gold ore",
+				"Primary": false,
+				"Priority": 3,
+				"Not F2P": true
 			},
 			"Obtain ~|adamantite ore|~ from blasted ore": {
 				"Items": ["Chisel", "Tinderbox", "Dynamite*"],
@@ -29039,12 +29058,14 @@
 			},
 			"Dig up a gout tuber*": {
 				"Items": ["Spade"],
+				"Objects": ["TaiBwoJungle[+]"],
 				"Tasks": {
 					"ChopJungle[+]": "Woodcutting"
 				},
 				"Output": "Gout tuber"
 			},
 			"Chop any type of jungle": {
+				"Objects": ["TaiBwoJungle[+]"],
 				"Tasks": {
 					"ChopJungle[+]": "Woodcutting"
 				}
@@ -48707,6 +48728,9 @@
 				"Chunks": ["7222-1"],
 				"NPCs": ["Bologa"],
 				"Items": ["Zamorak[+]"],
+				"Tasks": {
+					"Grow a ~|golovanova fruit|~": "Farming"
+				},
 				"Level": 50,
 				"Primary": false,
 				"Priority": 1,
@@ -61544,7 +61568,7 @@
 			},
 			"Participate in ~|Forestry events|~ while chopping arctic pine trees": {
 				"Category": ["Forestry"],
-				"Items": ["Axe[+]"],
+				"Items": ["Forestry kit", "Axe[+]"],
 				"Level": 54,
 				"Objects": ["Arctic pine tree"],
 				"Output": "Anima-infused bark",
@@ -61573,7 +61597,7 @@
 			},
 			"Participate in ~|Forestry events|~ while chopping blisterwood trees": {
 				"Category": ["Forestry"],
-				"Items": ["Axe[+]"],
+				"Items": ["Forestry kit", "Axe[+]"],
 				"Level": 62,
 				"Objects": ["Blisterwood Tree"],
 				"Output": "Anima-infused bark",
@@ -61605,7 +61629,7 @@
 			},
 			"Participate in ~|Forestry events|~ while chopping juniper trees": {
 				"Category": ["Forestry"],
-				"Items": ["Axe[+]"],
+				"Items": ["Forestry kit", "Axe[+]"],
 				"Level": 42,
 				"Objects": ["Mature juniper tree"],
 				"Output": "Anima-infused bark",
@@ -61694,7 +61718,7 @@
 			},
 			"Participate in ~|Forestry events|~ while chopping magic trees": {
 				"Category": ["Forestry"],
-				"Items": ["Axe[+]"],
+				"Items": ["Forestry kit", "Axe[+]"],
 				"Level": 75,
 				"Objects": ["Magic tree"],
 				"Output": "Anima-infused bark",
@@ -61713,7 +61737,7 @@
 			},
 			"Participate in ~|Forestry events|~ while chopping mahogany trees": {
 				"Category": ["Forestry"],
-				"Items": ["Axe[+]"],
+				"Items": ["Forestry kit", "Axe[+]"],
 				"Level": 50,
 				"Objects": ["Mahogany tree"],
 				"Output": "Anima-infused bark",
@@ -61732,7 +61756,7 @@
 			},
 			"Participate in ~|Forestry events|~ while chopping jatoba trees": {
 				"Category": ["Forestry"],
-				"Items": ["Axe[+]"],
+				"Items": ["Forestry kit", "Axe[+]"],
 				"Level": 40,
 				"Objects": ["Jatoba tree"],
 				"Output": "Anima-infused bark",
@@ -61751,7 +61775,7 @@
 			},
 			"Participate in ~|Forestry events|~ while chopping camphor trees": {
 				"Category": ["Forestry"],
-				"Items": ["Axe[+]"],
+				"Items": ["Forestry kit", "Axe[+]"],
 				"Level": 66,
 				"Objects": ["Camphor tree"],
 				"Output": "Anima-infused bark",
@@ -61770,7 +61794,7 @@
 			},
 			"Participate in ~|Forestry events|~ while chopping ironwood trees": {
 				"Category": ["Forestry"],
-				"Items": ["Axe[+]"],
+				"Items": ["Forestry kit", "Axe[+]"],
 				"Level": 80,
 				"Objects": ["Ironwood tree"],
 				"Output": "Anima-infused bark",
@@ -61789,7 +61813,7 @@
 			},
 			"Participate in ~|Forestry events|~ while chopping rosewood trees": {
 				"Category": ["Forestry"],
-				"Items": ["Axe[+]"],
+				"Items": ["Forestry kit", "Axe[+]"],
 				"Level": 92,
 				"Objects": ["Rosewood tree"],
 				"Output": "Anima-infused bark",
@@ -61815,7 +61839,7 @@
 			},
 			"Participate in ~|Forestry events|~ while chopping maple trees": {
 				"Category": ["Forestry"],
-				"Items": ["Axe[+]"],
+				"Items": ["Forestry kit", "Axe[+]"],
 				"Level": 45,
 				"Objects": ["Maple tree"],
 				"Output": "Anima-infused bark",
@@ -61859,7 +61883,7 @@
 			},
 			"Participate in ~|Forestry events|~ while chopping oak trees": {
 				"Category": ["Forestry"],
-				"Items": ["Axe[+]"],
+				"Items": ["Forestry kit", "Axe[+]"],
 				"Level": 15,
 				"Objects": ["Oak tree"],
 				"Output": "Anima-infused bark",
@@ -61885,7 +61909,7 @@
 			},
 			"Participate in ~|Forestry events|~ while chopping teak trees": {
 				"Category": ["Forestry"],
-				"Items": ["Axe[+]"],
+				"Items": ["Forestry kit", "Axe[+]"],
 				"Level": 35,
 				"Objects": ["Teak tree"],
 				"Output": "Anima-infused bark",
@@ -61911,7 +61935,7 @@
 			},
 			"Participate in ~|Forestry events|~ while chopping willow trees": {
 				"Category": ["Forestry"],
-				"Items": ["Axe[+]"],
+				"Items": ["Forestry kit", "Axe[+]"],
 				"Level": 30,
 				"Objects": ["Willow tree"],
 				"Output": "Anima-infused bark",
@@ -61928,7 +61952,7 @@
 			},
 			"Participate in ~|Forestry events|~ while chopping yew trees": {
 				"Category": ["Forestry"],
-				"Items": ["Axe[+]"],
+				"Items": ["Forestry kit", "Axe[+]"],
 				"Level": 60,
 				"Objects": ["Yew tree"],
 				"Output": "Yew logs",
@@ -87490,7 +87514,7 @@
 			},
 			"~|Karamja Diary#Easy|~ Task 8": {
 				"Description": "Collect 5 seaweed from anywhere on Karamja.",
-				"Chunks": ["KaramjaChunks[+]"],
+				"Chunks": ["KaramjaSeaweed[+]"],
 				"Items": ["Seaweed"],
 				"BaseQuest": "Karamja Diary",
 				"Not F2P": true
@@ -124252,6 +124276,9 @@
 					},
 					"Quest": {
 						"Getting Ahead": "step"
+					},
+					"Spawn": {
+						"Plank": 2
 					}
 				}
 			},
@@ -173321,6 +173348,7 @@
 			"FremmyHard3[+]": ["10296-1", "10297-1", "10297-2", "10552-1", "10553-1", "10554-1", "10808-1", "10809-1", "10809-2", "10809-3", "10809-4", "10809-5", "11064-1"],
 			"KandarinDiaryArea[+]": ["10806-1", "10806-2", "10806-3", "11061-1", "11062-1", "11062-4", "11317-1", "11318-1"],
 			"KaramjaChunks[+]": ["10801-1", "10802-1", "10802-2", "11053-1", "11054-1", "11054-2", "11055-1", "11055-2", "11056-1", "11057-1", "11058-1", "11309-1", "11310-1", "11310-2", "11310-3", "11310-4", "11310-5", "11311", "11312-1", "11312-1", "11313-1", "11565-1", "11566-1", "11566-2", "11566-3", "11567-1", "11567-2", "11568-1", "11568-2", "11569-1", "11821-1", "11822-1", "11822-2", "11823-1"],
+			"KaramjaSeaweed[+]": ["11054-1", "11055-1", "11056-1", "11310-1", "11313-1", "11568-2", "11822-1", "11823-1"],
 			"KaramjaMedium18[+]": ["8496-1", "8500-1", "10284-1", "10545-1", "11058-1", "11061-1", "11825-2", "12081-2", "14637", "14646-1"],
 			"KaramjaMedium19[+]": ["11056-1", "11310-1"],
 			"KKEasy1[+]": ["4923-2", "5179"],
@@ -173563,6 +173591,7 @@
 			"FremmyHard3[+]": "Any Fremennik chunk",
 			"KandarinDiaryArea[+]": "Any Kandarin chunk",
 			"KaramjaChunks[+]": "Any Karamja chunk",
+			"KaramjaSeaweed[+]": "Any Karamja chunk with seaweed",
 			"KaramjaMedium18[+]": "Any valid charter location chunk from the Shipyard",
 			"KaramjaMedium19[+]": "Any Karamjan chunk with a gem rock",
 			"KKEasy1[+]": "Any Mount Karuulm mine chunk",
@@ -175007,6 +175036,7 @@
 			"Swamp eel spot[+]": ["Fishing spot (frogspawn)", "Fishing spot (swamp)"],
 			"Tin[+]": ["Tin rocks", "Tin vein"],
 			"Tree[+]": ["Tree", "Dead tree", "Evergreen tree", "Dying tree", "Jungle tree"],
+			"TaiBwoJungle[+]": ["Dense Jungle", "Medium Jungle", "Light Jungle"],
 			"Water bucket[+]": ["Fountain", "Sink", "Sink (Player-owned House)", "Waterfall (Giants' Foundry)", "Water barrel", "Water Barrel", "Barrel (water)", "Waterpump", "Water pump", "Water tap", "Well#Ullek", "Well", "Fairy fountain", "Ancient fountainhead"],
 			"Water source[+]": ["Fountain", "Sink", "Sink (Player-owned House)", "Waterfall (Giants' Foundry)", "Water barrel", "Water Barrel", "Barrel (water)", "Waterpump", "Water pump", "Water tap", "Well#Ullek", "Fairy fountain", "Ancient fountainhead"],
 			"Evergreen[+]": ["Evergreen tree", "Tree"],
@@ -175057,6 +175087,7 @@
 			"Swamp eel spot[+]": "Any swamp eel fishing spot",
 			"Tin[+]": "Any tin rock",
 			"Tree[+]": "Any basic tree",
+			"TaiBwoJungle[+]": "Any Tai Bwo Wannai jungle",
 			"Water bucket[+]": "Any well",
 			"Water source[+]": "Any water source",
 			"Evergreen[+]": "Any evergreen-type tree",

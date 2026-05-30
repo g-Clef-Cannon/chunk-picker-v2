@@ -3057,6 +3057,8 @@
   "Mine a size-7 ~|shooting star|~": "t_2743",
   "Mine a size-8 ~|shooting star|~": "t_2744",
   "Mine a size-9 ~|shooting star|~": "t_2745",
+  "Obtain ~|coal|~ from blasted ore": "t_49611",
+  "Obtain ~|gold ore|~ from blasted ore": "t_49612",
   "Obtain ~|adamantite ore|~ from blasted ore": "t_2746",
   "Obtain ~|adamantite ore|~ from pay-dirt": "t_2747",
   "Obtain ~|mithril ore|~ from blasted ore": "t_2748",
@@ -49247,5 +49249,5 @@
   "Honest Jimmy's House of Stuff.: ~|Rum (Trouble Brewing)|~": "t_45427",
   "Honest Jimmy's House of Stuff.: ~|The stuff|~": "t_45428",
   "Honest Jimmy's House of Stuff.: ~|Treasure flag|~": "t_45429",
-  "currentNextIndex": 49611
+  "currentNextIndex": 49613
 }

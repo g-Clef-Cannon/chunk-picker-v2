@@ -1,0 +1,27 @@
+{
+  "aliases": {
+    "Bee swarm": "Bee Swarm",
+    "Chinchompa (Hunter)": "Chinchompa",
+    "Pirate (Thieving)": "Pirate"
+  },
+  "stats": {
+    "Forester": {
+      "hitpoints": 20,
+      "defence": 10,
+      "defence_stab": 0,
+      "defence_slash": 0,
+      "defence_crush": 0
+    },
+    "Bee swarm": {
+      "wiki_name": "Bee Swarm",
+      "hitpoints": 1,
+      "defence": 0,
+      "defence_stab": 0,
+      "defence_slash": 0,
+      "defence_crush": 0,
+      "defence_magic": 0,
+      "defence_ranged": 0,
+      "weakness": "Guaranteed max hit"
+    }
+  }
+}

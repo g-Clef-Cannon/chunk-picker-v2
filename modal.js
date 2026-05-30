@@ -155,6 +155,11 @@ const modalContents = {
         </div>
         <div id="searchchunks-data" class="searchchunks-data noscroll"></div>
     `,
+    'monsterTableModal': `
+        <i class="manual-close pic fa-solid fa-times noscrollhard" onclick="closeMonsterTable()"></i>
+        <div id="monstertable-title" class="monstertable-title noscroll">Monster Table</div>
+        <div id="monstertable-data" class="monstertable-data noscroll"></div>
+    `,
     'searchDetailsModal': `
         <span class="searchdetails-back"></span>
         <i class="manual-close pic fa-solid fa-times noscrollhard" onclick="closeSearchDetails()"></i>

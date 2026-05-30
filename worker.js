@@ -113,21 +113,21 @@ let outputTasks = {};
 let multiTasks = {};
 let intitalDataPosted = false;
 
-// Tool efficiency relative to best-in-slot (used by Strict Tool Gating rule)
+// Tool efficiency used by Strict Tool Gating. Axe values use OSRS Wiki relative log-cutting chances normalized to Rune axe.
 const toolEfficiency = {
     "Axe[+]": {
-        "Bronze axe": 0.52, "Bronze felling axe": 0.52,
-        "Iron axe": 0.52, "Iron felling axe": 0.52,
-        "Steel axe": 0.65, "Steel felling axe": 0.65,
-        "Black axe": 0.72, "Black felling axe": 0.72,
-        "Mithril axe": 0.765, "Mithril felling axe": 0.765,
-        "Adamant axe": 0.8125, "Adamant felling axe": 0.8125,
-        "Rune axe": 0.929, "Rune felling axe": 0.929,
-        "Gilded axe": 0.929,
-        "Dragon axe": 1.0, "Dragon felling axe": 1.0,
-        "3rd age axe": 1.0, "3rd age felling axe": 1.0,
-        "Infernal axe": 1.0,
-        "Crystal axe": 1.0, "Crystal felling axe": 1.0
+        "Bronze axe": 100 / 350, "Bronze felling axe": 100 / 350,
+        "Iron axe": 150 / 350, "Iron felling axe": 150 / 350,
+        "Steel axe": 200 / 350, "Steel felling axe": 200 / 350,
+        "Black axe": 225 / 350, "Black felling axe": 225 / 350,
+        "Mithril axe": 250 / 350, "Mithril felling axe": 250 / 350,
+        "Adamant axe": 300 / 350, "Adamant felling axe": 300 / 350,
+        "Rune axe": 1.0, "Rune felling axe": 1.0,
+        "Gilded axe": 1.0,
+        "Dragon axe": 385 / 350, "Dragon felling axe": 385 / 350,
+        "3rd age axe": 385 / 350, "3rd age felling axe": 385 / 350,
+        "Infernal axe": 385 / 350,
+        "Crystal axe": 402.5 / 350, "Crystal felling axe": 402.5 / 350
     },
     "Pickaxe[+]": {
         "Bronze pickaxe": 0.344,
@@ -144,9 +144,260 @@ const toolEfficiency = {
     }
 };
 
-// Buffer formula: cap = max(30, level + floor(10 - level * 0.10))
+// Conservative fallback buffer for generic skill/task caps.
 const calcLevelCap = function(level) {
     return Math.max(30, level + Math.floor(10 - level * 0.10));
+};
+
+const primarySpawnOverrideItems = new Set(['Needle', 'Thread']);
+
+const getItemSpawnSourceType = function(item) {
+    let cleanItem = (item || '').replaceAll(/\*/g, '');
+    return (rules && rules['Primary Spawns']) || primarySpawnOverrideItems.has(cleanItem) ? 'primary-spawn' : 'secondary-spawn';
+};
+
+const sourceMatches = function(sourceTaskName, fragments) {
+    let source = (sourceTaskName || '').toLowerCase();
+    return fragments.some((fragment) => source.includes(fragment));
+};
+const getMethodSourceProfile = function(skill, sourceTaskName) {
+    let profile = { capFloor: 0, priority: 0, label: 'fallback' };
+    if (skill === 'Woodcutting') {
+        if (sourceMatches(sourceTaskName, ['chop ~|oak logs|~', 'while chopping oak trees'])) profile = { capFloor: 35, priority: 50, label: 'oak trees', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['chop ~|willow logs|~', 'while chopping willow trees'])) profile = { capFloor: 60, priority: 80, label: 'willow trees', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['chop ~|teak logs|~', 'while chopping teak trees'])) profile = { capFloor: 60, priority: 75, label: 'teak trees', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['chop ~|maple logs|~', 'while chopping maple trees'])) profile = { capFloor: 75, priority: 60, label: 'maple trees', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['chop ~|mahogany logs|~', 'while chopping mahogany trees', 'chop ~|arctic pine logs|~'])) profile = { capFloor: 75, priority: 55, label: 'midgame trees', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['chop ~|yew logs|~', 'while chopping yew trees'])) profile = { capFloor: 90, priority: 60, label: 'yew trees', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['chop ~|magic logs|~', 'while chopping magic trees'])) profile = { capFloor: 99, priority: 60, label: 'magic trees', tier: 'classic', allowClosure: true };
+    } else if (skill === 'Firemaking') {
+        if (sourceMatches(sourceTaskName, ['burn ~|willow logs|~'])) profile = { capFloor: 60, priority: 70, label: 'willow logs', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['burn ~|teak logs|~', 'burn ~|arctic pine logs|~'])) profile = { capFloor: 60, priority: 60, label: 'midgame logs', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['burn ~|maple logs|~'])) profile = { capFloor: 75, priority: 70, label: 'maple logs', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['burn ~|mahogany logs|~'])) profile = { capFloor: 75, priority: 60, label: 'mahogany logs', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['burn ~|yew logs|~'])) profile = { capFloor: 90, priority: 70, label: 'yew logs', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['burn ~|magic logs|~'])) profile = { capFloor: 99, priority: 70, label: 'magic logs', tier: 'classic', allowClosure: true };
+    } else if (skill === 'Mining') {
+        if (sourceMatches(sourceTaskName, ['mine ~|iron ore|~'])) profile = { capFloor: 70, priority: 100, label: 'iron ore powermining', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mine ~|coal|~', 'mine ~|gold ore|~'])) profile = { capFloor: 55, priority: 55, label: 'classic ore mining', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mine ~|sandstone|~'])) profile = { capFloor: 60, priority: 60, label: 'sandstone mining', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mine ~|granite|~'])) profile = { capFloor: 85, priority: 95, label: 'granite mining', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mine ~|mithril ore|~'])) profile = { capFloor: 70, priority: 60, label: 'mithril ore mining', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mine ~|adamantite ore|~'])) profile = { capFloor: 85, priority: 60, label: 'adamantite ore mining', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mine ~|pay-dirt|~'])) profile = { capFloor: 70, priority: 80, label: 'Motherlode Mine', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mine a size-4 ~|shooting star|~', 'mine a size-5 ~|shooting star|~'])) profile = { capFloor: 70, priority: 70, label: 'shooting stars', tier: 'classic', allowClosure: true };
+    } else if (skill === 'Fishing') {
+        if (sourceMatches(sourceTaskName, ['catch ~|raw shrimps|~', 'catch ~|raw anchovies|~', 'catch a ~|raw sardine|~', 'catch a ~|raw herring|~'])) profile = { capFloor: 20, priority: 60, label: 'early net and bait fishing', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['catch junk loot from a ~|fishing spot (big net, harpoon)|~', 'catch a ~|raw mackerel|~', 'catch a ~|raw cod|~', 'catch a ~|raw bass|~'])) profile = { capFloor: 46, priority: 65, label: 'big net fishing', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['catch a ~|raw pike|~'])) profile = { capFloor: 35, priority: 65, label: 'bait fishing', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['catch a ~|raw trout|~', 'catch a ~|raw salmon|~'])) profile = { capFloor: 99, priority: 100, label: 'fly fishing', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['catch a ~|raw lobster|~'])) profile = { capFloor: 50, priority: 70, label: 'lobster fishing', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['catch a ~|raw tuna|~', 'catch a ~|raw swordfish|~'])) profile = { capFloor: 76, priority: 70, label: 'harpoon fishing', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['catch a ~|raw shark|~'])) profile = { capFloor: 90, priority: 65, label: 'shark fishing', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['catch fish at ~|tempoross|~'])) profile = { capFloor: 70, priority: 90, label: 'Tempoross', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['catch a ~|fish shoal|~'])) profile = { capFloor: 70, priority: 85, label: 'drift net fishing', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['catch a ~|leaping salmon|~', 'catch a ~|leaping sturgeon|~'])) profile = { capFloor: 70, priority: 85, label: 'Barbarian Fishing', tier: 'strong', allowClosure: true };
+    } else if (skill === 'Cooking') {
+        if (sourceMatches(sourceTaskName, ['cook a ~|cod|~', 'cook a ~|pike|~', 'cook a ~|mackerel|~'])) profile = { capFloor: 30, priority: 55, label: 'early fish', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['cook a ~|trout|~', 'cook a ~|salmon|~'])) profile = { capFloor: 30, priority: 60, label: 'fly-fished food', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['cook a ~|poison karambwan|~'])) profile = { capFloor: 30, priority: 100, label: 'poison karambwan', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['cook a ~|cooked karambwan|~'])) profile = { capFloor: 99, priority: 100, label: 'karambwan cooking', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['brew a ~|jug of wine|~'])) profile = { capFloor: 99, priority: 95, label: 'jugs of wine', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['cook a ~|tuna|~'])) profile = { capFloor: 40, priority: 70, label: 'tuna', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['cook a ~|bass|~'])) profile = { capFloor: 50, priority: 70, label: 'bass', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['cook a ~|lobster|~'])) profile = { capFloor: 68, priority: 75, label: 'lobsters', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['cook a ~|swordfish|~', 'cook a ~|monkfish|~'])) profile = { capFloor: 80, priority: 80, label: 'midgame fish', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['cook a ~|shark|~'])) profile = { capFloor: 84, priority: 75, label: 'sharks', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['cook an ~|anglerfish|~', 'cook a ~|manta ray|~'])) profile = { capFloor: 99, priority: 80, label: 'high-level fish', tier: 'classic', allowClosure: true };
+    } else if (skill === 'Crafting') {
+        if (sourceMatches(sourceTaskName, ['craft ~|leather gloves|~', 'craft ~|leather boots|~', 'craft a ~|leather cowl|~', 'craft ~|leather vambraces|~', 'craft a ~|leather body|~', 'craft ~|leather chaps|~'])) profile = { capFloor: 28, priority: 70, label: 'leather items', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|hardleather body|~'])) profile = { capFloor: 63, priority: 75, label: 'hardleather bodies', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|pot|~', 'craft a ~|pie dish|~', 'craft a ~|bowl|~'])) profile = { capFloor: 40, priority: 45, label: 'pottery', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|gold ring|~', 'craft a ~|gold necklace|~', 'craft a ~|gold bracelet|~', 'craft a ~|gold amulet (u)|~'])) profile = { capFloor: 23, priority: 55, label: 'gold jewellery', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|silver sickle|~', 'craft a ~|tiara|~', 'craft a ~|gold tiara|~'])) profile = { capFloor: 50, priority: 55, label: 'silver and tiara crafting', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|sapphire ring|~', 'craft a ~|sapphire necklace|~', 'craft a ~|sapphire bracelet|~', 'craft a ~|sapphire amulet (u)|~'])) profile = { capFloor: 27, priority: 65, label: 'sapphire jewellery', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft an ~|emerald ring|~', 'craft an ~|emerald necklace|~', 'craft an ~|emerald bracelet|~', 'craft an ~|emerald amulet (u)|~'])) profile = { capFloor: 34, priority: 65, label: 'emerald jewellery', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|ruby ring|~', 'craft a ~|ruby necklace|~', 'craft a ~|ruby bracelet|~', 'craft a ~|ruby amulet (u)|~'])) profile = { capFloor: 56, priority: 65, label: 'ruby jewellery', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|diamond ring|~', 'craft a ~|diamond necklace|~', 'craft a ~|diamond bracelet|~', 'craft a ~|diamond amulet (u)|~'])) profile = { capFloor: 70, priority: 65, label: 'diamond jewellery', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['cut a ~|sapphire|~'])) profile = { capFloor: 27, priority: 85, label: 'sapphire cutting', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['cut an ~|emerald|~'])) profile = { capFloor: 34, priority: 85, label: 'emerald cutting', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['cut a ~|ruby|~'])) profile = { capFloor: 55, priority: 85, label: 'ruby cutting', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['cut a ~|diamond|~'])) profile = { capFloor: 77, priority: 90, label: 'diamond cutting', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['cut a ~|dragonstone|~'])) profile = { capFloor: 77, priority: 80, label: 'dragonstone cutting', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|water battlestaff|~'])) profile = { capFloor: 58, priority: 80, label: 'water battlestaves', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft an ~|earth battlestaff|~'])) profile = { capFloor: 62, priority: 80, label: 'earth battlestaves', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|fire battlestaff|~'])) profile = { capFloor: 77, priority: 85, label: 'fire battlestaves', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft an ~|air battlestaff|~'])) profile = { capFloor: 99, priority: 85, label: 'air battlestaves', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ["craft a ~|green d'hide body|~"])) profile = { capFloor: 77, priority: 85, label: "green d'hide bodies", tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ["craft a ~|blue d'hide body|~"])) profile = { capFloor: 77, priority: 85, label: "blue d'hide bodies", tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ["craft a ~|red d'hide body|~"])) profile = { capFloor: 84, priority: 90, label: "red d'hide bodies", tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ["craft a ~|black d'hide body|~"])) profile = { capFloor: 99, priority: 95, label: "black d'hide bodies", tier: 'strong', allowClosure: true };
+    } else if (skill === 'Smithing') {
+        if (sourceMatches(sourceTaskName, ['smelt an ~|iron bar|~', 'smith an ~|iron platebody|~'])) profile = { capFloor: 48, priority: 70, label: 'classic iron smithing', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['smelt a ~|steel bar|~', 'smith a ~|steel platebody|~', 'smith a ~|steel warhammer|~'])) profile = { capFloor: 68, priority: 75, label: 'classic steel smithing', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['smelt a ~|mithril bar|~', 'smith a ~|mithril platebody|~'])) profile = { capFloor: 88, priority: 80, label: 'classic mithril smithing', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['smelt an ~|adamantite bar|~', 'smith an ~|adamant platebody|~'])) profile = { capFloor: 99, priority: 80, label: 'classic adamant smithing', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['smelt a ~|runite bar|~', 'smith a ~|rune platebody|~'])) profile = { capFloor: 99, priority: 70, label: 'classic rune smithing', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['forge a bronze ~|preform|~ in the giants', 'forge an iron ~|preform|~ in the giants'])) profile = { capFloor: 30, priority: 80, label: "Giants' Foundry bronze/iron", tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['forge a steel ~|preform|~ in the giants'])) profile = { capFloor: 50, priority: 85, label: "Giants' Foundry steel", tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['forge a mithril ~|preform|~ in the giants'])) profile = { capFloor: 70, priority: 90, label: "Giants' Foundry mithril", tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['forge an adamant ~|preform|~ in the giants'])) profile = { capFloor: 85, priority: 90, label: "Giants' Foundry adamant", tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['forge a rune ~|preform|~ in the giants'])) profile = { capFloor: 99, priority: 85, label: "Giants' Foundry rune", tier: 'strong', allowClosure: true };
+    } else if (skill === 'Herblore') {
+        if (sourceMatches(sourceTaskName, ['clean a ~|grimy guam leaf|~', 'clean a ~|grimy marrentill|~', 'clean a ~|grimy tarromin|~', 'clean a ~|grimy harralander|~', 'clean a ~|grimy ranarr weed|~'])) profile = { capFloor: 38, priority: 35, label: 'early herb cleaning', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['clean a ~|grimy irit leaf|~', 'clean a ~|grimy avantoe|~', 'clean a ~|grimy kwuarm|~', 'clean a ~|grimy snapdragon|~', 'clean a ~|grimy cadantine|~', 'clean a ~|grimy lantadyme|~', 'clean a ~|grimy dwarf weed|~', 'clean a ~|grimy torstol|~'])) profile = { capFloor: 81, priority: 35, label: 'midgame herb cleaning', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix a ~|strength potion|~'])) profile = { capFloor: 22, priority: 55, label: 'strength potions', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix a ~|restore potion|~'])) profile = { capFloor: 30, priority: 55, label: 'restore potions', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix a ~|defence potion|~'])) profile = { capFloor: 38, priority: 55, label: 'defence potions', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix a ~|prayer potion|~'])) profile = { capFloor: 45, priority: 70, label: 'prayer potions', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix a ~|super attack|~'])) profile = { capFloor: 55, priority: 70, label: 'super attack potions', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix a ~|super strength|~'])) profile = { capFloor: 63, priority: 70, label: 'super strength potions', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix a ~|super restore|~'])) profile = { capFloor: 72, priority: 75, label: 'super restores', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix a ~|ranging potion|~'])) profile = { capFloor: 81, priority: 75, label: 'ranging potions', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix a ~|magic potion|~', 'mix a ~|saradomin brew|~'])) profile = { capFloor: 99, priority: 75, label: 'high-level ordinary potions', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix a ~|guam tar|~'])) profile = { capFloor: 31, priority: 65, label: 'guam tar', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix a ~|marrentill tar|~'])) profile = { capFloor: 39, priority: 65, label: 'marrentill tar', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix a ~|tarromin tar|~'])) profile = { capFloor: 44, priority: 65, label: 'tarromin tar', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix a ~|harralander tar|~'])) profile = { capFloor: 55, priority: 65, label: 'harralander tar', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix an ~|irit tar|~'])) profile = { capFloor: 70, priority: 60, label: 'irit tar', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix a ~|stamina potion|~'])) profile = { capFloor: 99, priority: 90, label: 'stamina potions', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix an ~|extended antifire potion|~'])) profile = { capFloor: 98, priority: 85, label: 'extended antifires', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix an ~|anti-venom|~'])) profile = { capFloor: 94, priority: 85, label: 'anti-venoms', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['mix a ~|super combat potion|~', 'mix an ~|anti-venom+|~', 'mix an ~|extended anti-venom+|~', 'mix an ~|extended super antifire|~'])) profile = { capFloor: 99, priority: 85, label: 'high-level potions', tier: 'strong', allowClosure: true };
+    } else if (skill === 'Construction') {
+        if (sourceMatches(sourceTaskName, ['build a ~|wooden chair|~', 'build a ~|crude wooden chair|~', 'build a ~|wooden bookcase|~'])) profile = { capFloor: 33, priority: 50, label: 'plank furniture', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['build an ~|oak chair|~'])) profile = { capFloor: 33, priority: 65, label: 'oak furniture', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['build an ~|oak larder|~'])) profile = { capFloor: 74, priority: 85, label: 'oak larders', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['build an ~|oak door|~'])) profile = { capFloor: 99, priority: 80, label: 'oak doors', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['build a ~|mythical cape (mounted)|~'])) profile = { capFloor: 99, priority: 90, label: 'mounted mythical capes', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['build a ~|mahogany table|~'])) profile = { capFloor: 77, priority: 85, label: 'mahogany tables', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['build a ~|gnome bench|~'])) profile = { capFloor: 99, priority: 95, label: 'gnome benches', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['complete a beginner contract for ~|mahogany homes|~'])) profile = { capFloor: 20, priority: 75, label: 'beginner Mahogany Homes', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['complete a novice contract for ~|mahogany homes|~'])) profile = { capFloor: 50, priority: 80, label: 'novice Mahogany Homes', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['complete an adept contract for ~|mahogany homes|~'])) profile = { capFloor: 70, priority: 85, label: 'adept Mahogany Homes', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['complete an expert contract for ~|mahogany homes|~'])) profile = { capFloor: 99, priority: 90, label: 'expert Mahogany Homes', tier: 'strong', allowClosure: true };
+    } else if (skill === 'Hunter') {
+        if (sourceMatches(sourceTaskName, ['catch a ~|crimson swift|~', 'catch a ~|copper longtail|~', 'catch a ~|tropical wagtail|~'])) profile = { capFloor: 29, priority: 55, label: 'bird snaring', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['catch a ~|swamp lizard|~', 'catch a ~|orange salamander|~', 'catch a ~|red salamander|~', 'catch a ~|black salamander|~'])) profile = { capFloor: 80, priority: 70, label: 'salamanders', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['catch a ~|fish shoal|~'])) profile = { capFloor: 70, priority: 85, label: 'drift net fishing', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ["complete a novice ~|hunters' rumour|~"])) profile = { capFloor: 57, priority: 75, label: "novice Hunters' Rumours", tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ["complete an adept ~|hunters' rumour|~"])) profile = { capFloor: 72, priority: 80, label: "adept Hunters' Rumours", tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ["complete an expert ~|hunters' rumour|~"])) profile = { capFloor: 91, priority: 85, label: "expert Hunters' Rumours", tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ["complete a master ~|hunters' rumour|~"])) profile = { capFloor: 99, priority: 90, label: "master Hunters' Rumours", tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['catch a ~|chinchompa (hunter)|~'])) profile = { capFloor: 63, priority: 80, label: 'chinchompas', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['catch a ~|carnivorous chinchompa|~', 'catch a ~|black chinchompa|~'])) profile = { capFloor: 99, priority: 90, label: 'chinchompas', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['track a ~|herbiboar|~'])) profile = { capFloor: 99, priority: 90, label: 'Herbiboar', tier: 'strong', allowClosure: true };
+    } else if (skill === 'Agility') {
+        if (sourceMatches(sourceTaskName, ['access the ~|draynor village rooftop course|~', 'access the ~|al kharid rooftop course|~'])) profile = { capFloor: 30, priority: 70, label: 'early rooftop courses', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the ~|varrock rooftop course|~'])) profile = { capFloor: 40, priority: 75, label: 'Varrock Rooftop Course', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the ~|canafis rooftop course|~', 'access the ~|canifis rooftop course|~'])) profile = { capFloor: 50, priority: 80, label: 'Canifis Rooftop Course', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the ~|falador rooftop course|~'])) profile = { capFloor: 60, priority: 80, label: 'Falador Rooftop Course', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ["access the ~|seers' village rooftop course|~"])) profile = { capFloor: 70, priority: 85, label: "Seers' Rooftop Course", tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the ~|pollnivneach rooftop course|~'])) profile = { capFloor: 80, priority: 85, label: 'Pollnivneach Rooftop Course', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the ~|rellekka rooftop course|~'])) profile = { capFloor: 90, priority: 85, label: 'Rellekka Rooftop Course', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the ~|ardougne rooftop course|~'])) profile = { capFloor: 99, priority: 90, label: 'Ardougne Rooftop Course', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the medium-level obstacles at the ~|brimhaven agility arena|~', 'access the high-level obstacles at the ~|brimhaven agility arena|~'])) profile = { capFloor: 47, priority: 85, label: 'Brimhaven Agility Arena', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the ~|wilderness agility course|~', 'run the ~|wilderness agility course|~'])) profile = { capFloor: 62, priority: 85, label: 'Wilderness Agility Course', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the first floor of the ~|hallowed sepulchre|~', 'access the second floor of the ~|hallowed sepulchre|~'])) profile = { capFloor: 72, priority: 95, label: 'Hallowed Sepulchre lower floors', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the third floor of the ~|hallowed sepulchre|~'])) profile = { capFloor: 82, priority: 95, label: 'Hallowed Sepulchre floor 3', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the fourth floor of the ~|hallowed sepulchre|~'])) profile = { capFloor: 92, priority: 95, label: 'Hallowed Sepulchre floor 4', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the fifth floor of the ~|hallowed sepulchre|~'])) profile = { capFloor: 99, priority: 95, label: 'Hallowed Sepulchre floor 5', tier: 'strong', allowClosure: true };
+    } else if (skill === 'Thieving') {
+        if (sourceMatches(sourceTaskName, ['loot ~|cavern grubs|~ in the chambers of xeric'])) profile = { capFloor: 45, priority: 85, label: 'CoX thieving rooms', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['loot a ~|chest (aldarin villas)|~'])) profile = { capFloor: 45, priority: 85, label: 'Aldarin villas', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['pickpocket a ~|bandit (pollnivneach)#bearded|~'])) profile = { capFloor: 55, priority: 85, label: 'bearded blackjacking', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['pickpocket a ~|bandit (pollnivneach)#no beard|~'])) profile = { capFloor: 65, priority: 85, label: 'Pollnivnian blackjacking', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['pickpocket a ~|menaphite thug|~'])) profile = { capFloor: 84, priority: 90, label: 'Menaphite Thug blackjacking', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['steal artefacts for ~|captain khaled|~'])) profile = { capFloor: 65, priority: 85, label: 'stealing artefacts', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the first room of ~|pyramid plunder|~'])) profile = { capFloor: 31, priority: 75, label: 'Pyramid Plunder room 1', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the second room of ~|pyramid plunder|~'])) profile = { capFloor: 41, priority: 75, label: 'Pyramid Plunder room 2', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the third room of ~|pyramid plunder|~'])) profile = { capFloor: 51, priority: 75, label: 'Pyramid Plunder room 3', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the fourth room of ~|pyramid plunder|~'])) profile = { capFloor: 61, priority: 75, label: 'Pyramid Plunder room 4', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the fifth room of ~|pyramid plunder|~'])) profile = { capFloor: 71, priority: 75, label: 'Pyramid Plunder room 5', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the sixth room of ~|pyramid plunder|~'])) profile = { capFloor: 81, priority: 80, label: 'Pyramid Plunder room 6', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the seventh room of ~|pyramid plunder|~'])) profile = { capFloor: 91, priority: 85, label: 'Pyramid Plunder room 7', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['access the eighth room of ~|pyramid plunder|~'])) profile = { capFloor: 99, priority: 90, label: 'Pyramid Plunder room 8', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['steal from a ~|fruit stall|~'])) profile = { capFloor: 45, priority: 70, label: 'fruit stalls', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['pickpocket a ~|knight|~'])) profile = { capFloor: 82, priority: 80, label: 'knights', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['pickpocket a ~|vyre|~', 'pickpocket a lletya ~|elf|~', 'pickpocket a prifddinas ~|elf|~'])) profile = { capFloor: 99, priority: 90, label: 'high-level pickpocketing', tier: 'strong', allowClosure: true };
+    } else if (skill === 'Farming') {
+        if (sourceMatches(sourceTaskName, ['grow a ~|potato|~', 'grow a ~|cabbage|~', 'grow a ~|tomato|~', 'grow a ~|sweetcorn|~', 'grow a ~|strawberry|~', 'grow a ~|watermelon|~'])) profile = { capFloor: 47, priority: 50, label: 'allotment runs', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow a ~|grimy guam leaf|~', 'grow a ~|grimy marrentill|~', 'grow a ~|grimy tarromin|~', 'grow a ~|grimy harralander|~', 'grow a ~|grimy ranarr weed|~', 'grow a ~|grimy toadflax|~'])) profile = { capFloor: 44, priority: 55, label: 'early herb runs', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow a ~|grimy irit leaf|~', 'grow a ~|grimy avantoe|~', 'grow a ~|grimy kwuarm|~', 'grow a ~|grimy snapdragon|~', 'grow a ~|grimy cadantine|~', 'grow a ~|grimy lantadyme|~', 'grow a ~|grimy dwarf weed|~', 'grow a ~|grimy torstol|~'])) profile = { capFloor: 99, priority: 60, label: 'herb runs', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow an ~|oak tree|~', 'grow a ~|willow tree|~'])) profile = { capFloor: 45, priority: 85, label: 'early tree runs', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow a ~|maple tree|~'])) profile = { capFloor: 60, priority: 85, label: 'maple tree runs', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow a ~|yew tree|~'])) profile = { capFloor: 75, priority: 85, label: 'yew tree runs', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow a ~|magic tree|~'])) profile = { capFloor: 90, priority: 85, label: 'magic tree runs', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow a ~|redwood tree|~'])) profile = { capFloor: 99, priority: 85, label: 'redwood tree runs', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow an ~|apple tree|~', 'grow a ~|banana tree|~', 'grow an ~|orange tree|~', 'grow a ~|curry tree|~'])) profile = { capFloor: 51, priority: 80, label: 'early fruit tree runs', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow a ~|pineapple plant|~', 'grow a ~|papaya tree|~'])) profile = { capFloor: 68, priority: 80, label: 'midgame fruit tree runs', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow a ~|palm tree|~'])) profile = { capFloor: 81, priority: 80, label: 'palm tree runs', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow a ~|dragonfruit tree|~'])) profile = { capFloor: 99, priority: 85, label: 'dragonfruit tree runs', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow a ~|teak tree|~'])) profile = { capFloor: 55, priority: 80, label: 'teak tree runs', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow a ~|mahogany tree|~'])) profile = { capFloor: 80, priority: 80, label: 'mahogany tree runs', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow an ~|ironwood tree|~', 'grow a ~|rosewood tree|~'])) profile = { capFloor: 99, priority: 80, label: 'high-level hardwood runs', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow a ~|calquat tree|~'])) profile = { capFloor: 85, priority: 80, label: 'calquat tree runs', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow a ~|crystal tree|~'])) profile = { capFloor: 90, priority: 80, label: 'crystal tree runs', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['grow a ~|celastrus tree|~'])) profile = { capFloor: 99, priority: 80, label: 'celastrus tree runs', tier: 'strong', allowClosure: true };
+    } else if (skill === 'Sailing') {
+        if (sourceMatches(sourceTaskName, ['complete ~|courier tasks|~'])) profile = { capFloor: 30, priority: 70, label: 'courier tasks', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['salvage at a ~|small shipwreck|~', 'process some ~|small salvage|~'])) profile = { capFloor: 30, priority: 75, label: 'small shipwreck salvaging', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ["salvage at a ~|fisherman's shipwreck|~", 'process some ~|fishy salvage|~'])) profile = { capFloor: 35, priority: 75, label: 'fishy shipwreck salvaging', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['salvage at a ~|barracuda shipwreck|~', 'process some ~|barracuda salvage|~'])) profile = { capFloor: 53, priority: 75, label: 'barracuda shipwreck salvaging', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['salvage at a ~|large shipwreck|~', 'process some ~|large salvage|~'])) profile = { capFloor: 64, priority: 70, label: 'large shipwreck salvaging', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['salvage at a ~|mercenary shipwreck|~', 'process some ~|martial salvage|~'])) profile = { capFloor: 80, priority: 70, label: 'martial shipwreck salvaging', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['salvage at a ~|fremennik shipwreck|~', 'process some ~|fremennik salvage|~'])) profile = { capFloor: 87, priority: 70, label: 'fremennik shipwreck salvaging', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['salvage at a ~|merchant shipwreck|~', 'process some ~|opulent salvage|~'])) profile = { capFloor: 99, priority: 70, label: 'merchant shipwreck salvaging', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['complete ~|the tempor tantrum|~'])) profile = { capFloor: 55, priority: 95, label: 'Tempor Tantrum Barracuda Trial', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['complete ~|the jubbly jive|~'])) profile = { capFloor: 72, priority: 95, label: 'Jubbly Jive Barracuda Trial', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['complete ~|the gwenith glide|~'])) profile = { capFloor: 99, priority: 95, label: 'Gwenith Glide Barracuda Trial', tier: 'strong', allowClosure: true };
+    } else if (skill === 'Fletching') {
+        if (sourceMatches(sourceTaskName, ['fletch an ~|oak shortbow (u)|~', 'fletch an ~|oak longbow (u)|~'])) profile = { capFloor: 35, priority: 55, label: 'oak bows', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch a ~|willow shortbow (u)|~', 'fletch a ~|willow longbow (u)|~'])) profile = { capFloor: 50, priority: 60, label: 'willow bows', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch a ~|maple shortbow (u)|~', 'fletch a ~|maple longbow (u)|~'])) profile = { capFloor: 65, priority: 65, label: 'maple bows', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch a ~|yew shortbow (u)|~', 'fletch a ~|yew longbow (u)|~'])) profile = { capFloor: 80, priority: 70, label: 'yew bows', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch a ~|magic shortbow (u)|~', 'fletch a ~|magic longbow (u)|~'])) profile = { capFloor: 99, priority: 75, label: 'magic bows', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch ~|bronze bolts|~'])) profile = { capFloor: 39, priority: 50, label: 'bronze bolts', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch ~|iron bolts|~'])) profile = { capFloor: 46, priority: 55, label: 'iron bolts', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch ~|steel bolts|~'])) profile = { capFloor: 54, priority: 60, label: 'steel bolts', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch ~|mithril bolts|~'])) profile = { capFloor: 61, priority: 65, label: 'mithril bolts', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch ~|adamant bolts|~'])) profile = { capFloor: 69, priority: 70, label: 'adamant bolts', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch ~|runite bolts|~'])) profile = { capFloor: 99, priority: 70, label: 'runite bolts', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch an ~|iron dart|~'])) profile = { capFloor: 37, priority: 85, label: 'iron darts', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch a ~|steel dart|~'])) profile = { capFloor: 52, priority: 90, label: 'steel darts', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch a ~|mithril dart|~'])) profile = { capFloor: 67, priority: 95, label: 'mithril darts', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch an ~|adamant dart|~'])) profile = { capFloor: 81, priority: 95, label: 'adamant darts', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch a ~|rune dart|~'])) profile = { capFloor: 90, priority: 85, label: 'rune darts', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['fletch an ~|amethyst dart|~'])) profile = { capFloor: 95, priority: 95, label: 'amethyst darts', tier: 'strong', allowClosure: true };
+    } else if (skill === 'Runecraft') {
+        if (sourceMatches(sourceTaskName, ['craft an ~|air rune|~', 'craft a ~|mind rune|~', 'craft a ~|water rune|~'])) profile = { capFloor: 9, priority: 45, label: 'early altar runecrafting', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft an ~|earth rune|~'])) profile = { capFloor: 14, priority: 50, label: 'earth runecrafting', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|fire rune|~'])) profile = { capFloor: 20, priority: 50, label: 'fire runecrafting', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|body rune|~'])) profile = { capFloor: 99, priority: 65, label: 'body runecrafting', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|cosmic rune|~'])) profile = { capFloor: 35, priority: 55, label: 'cosmic runecrafting', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|chaos rune|~'])) profile = { capFloor: 44, priority: 55, label: 'chaos runecrafting', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|nature rune|~'])) profile = { capFloor: 54, priority: 55, label: 'nature runecrafting', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|law rune|~'])) profile = { capFloor: 65, priority: 55, label: 'law runecrafting', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|death rune|~'])) profile = { capFloor: 77, priority: 55, label: 'death runecrafting', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|blood rune|~'])) profile = { capFloor: 90, priority: 55, label: 'blood runecrafting', tier: 'classic', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|cosmic rune|~ with guardian essence'])) profile = { capFloor: 35, priority: 70, label: 'guardian essence cosmic runes', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|chaos rune|~ with guardian essence'])) profile = { capFloor: 44, priority: 70, label: 'guardian essence chaos runes', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|nature rune|~ with guardian essence'])) profile = { capFloor: 54, priority: 70, label: 'guardian essence nature runes', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|law rune|~ with guardian essence'])) profile = { capFloor: 65, priority: 70, label: 'guardian essence law runes', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|death rune|~ with guardian essence'])) profile = { capFloor: 77, priority: 70, label: 'guardian essence death runes', tier: 'strong', allowClosure: true };
+        if (sourceMatches(sourceTaskName, ['craft a ~|blood rune|~ with guardian essence'])) profile = { capFloor: 90, priority: 70, label: 'guardian essence blood runes', tier: 'strong', allowClosure: true };
+    }
+
+    return profile;
+};
+
+const calcMethodCap = function(skill, level, sourceTaskName, sourceIsEstablished) {
+    let cap = calcLevelCap(level);
+    let profile = getMethodSourceProfile(skill, sourceTaskName);
+    if (sourceIsEstablished || profile.allowClosure) {
+        if (profile.capFloor) cap = Math.max(cap, profile.capFloor);
+    }
+    return Math.min(99, cap);
 };
 
 const getCompletedBiSTool = function(toolType) {
@@ -2686,6 +2937,8 @@ let gatePlayerArmourDef = 0;
 const FLINCH_CYCLE_TICKS = 14; // measured corner-flinch cycle in game ticks
 let gateHasPrayerBypass = false; // true when player flags 'Has Protection Prayers'
 let gateHasRangedOrMagicCombat = false; // true when player can safely flinch/safespot flinchable monsters
+let dragonfireGateActive = false;
+let monsterGateStatsReady = false;
 
 // Shop Cost Gate: module-level state
 let shopCostGateActive = false;
@@ -2693,11 +2946,267 @@ let bestCoinsPerHour = 0;
 let bestCoinsMonsterName = '';
 // Primary Drop Monster Gate: module-level state
 let primaryDropGateActive = false;
+let dragonfirePrimaryDropGateActive = false;
 let primaryDropGateSeconds = 180; // default 3 minutes
 let globalTaskRuleInfo = {};
 let globalRuleSkippedTasks = {};
 let monsterGateDetails = {};
 let shopGateDetails = {};
+
+const dragonfireShieldItems = [
+    'Anti-dragon shield',
+    'Dragonfire shield',
+    'Dragonfire ward',
+    'Ancient wyvern shield'
+];
+
+const regularAntifireItems = [
+    'Antifire potion[+]',
+    'Extended antifire[+]',
+    'Antifire mix(1)',
+    'Antifire mix(2)',
+    'Extended antifire mix(1)',
+    'Extended antifire mix(2)'
+];
+
+const superAntifireItems = [
+    'Super antifire potion[+]',
+    'Extended super antifire[+]',
+    'Super antifire mix(1)',
+    'Super antifire mix(2)',
+    'Extended super antifire mix(1)',
+    'Extended super antifire mix(2)',
+    'Extended super antifire mix mix(2)'
+];
+
+const metalDragonfireMonsters = new Set([
+    'bronze dragon',
+    'iron dragon',
+    'steel dragon',
+    'mithril dragon',
+    'adamant dragon',
+    'rune dragon'
+]);
+
+const standardSafespottableDragonfireMonsters = new Set([
+    'green dragon',
+    'blue dragon',
+    'red dragon',
+    'black dragon',
+    'lava dragon',
+    'frost dragon'
+]);
+
+const bossDragonfireMonsters = new Set([
+    'king black dragon',
+    'vorkath',
+    'elvarg',
+    'galvek'
+]);
+
+const shouldApplyMonsterGate = function() {
+    return monsterGateActive || dragonfireGateActive;
+};
+
+const getBaseMonsterName = function(monsterName) {
+    return (monsterName || '').split('#')[0].trim();
+};
+
+const getDragonfireRequirement = function(monsterName) {
+    let baseName = getBaseMonsterName(monsterName);
+    let lowerName = baseName.toLowerCase();
+    if (!lowerName) return null;
+    if (lowerName === 'drake') {
+        return {
+            type: 'dodgable',
+            label: 'movement-dodgable dragonfire',
+            safeDetail: baseName + ' breath is movement-dodgable, so dragonfire protection is not required'
+        };
+    }
+    if (lowerName.startsWith('baby ') && lowerName.includes(' dragon')) {
+        return {
+            type: 'none',
+            label: 'no dragonfire',
+            safeDetail: baseName + ' does not use dragonfire'
+        };
+    }
+    if (standardSafespottableDragonfireMonsters.has(lowerName)) {
+        return {
+            type: 'safespottable',
+            label: 'safespottable standard dragonfire',
+            safeDetail: baseName + ' uses melee-distance dragonfire that can be safespotted'
+        };
+    }
+    if (lowerName.startsWith('brutal ') && lowerName.includes(' dragon')) {
+        return {
+            type: 'long-ranged-standard',
+            label: 'long-ranged standard dragonfire',
+            requirementText: 'anti-dragon shield, super antifire, or regular antifire with Protect from Magic'
+        };
+    }
+    if (metalDragonfireMonsters.has(lowerName)) {
+        return {
+            type: 'shield-or-super',
+            label: 'metal dragonfire',
+            requirementText: 'anti-dragon shield or super antifire'
+        };
+    }
+    if (bossDragonfireMonsters.has(lowerName)) {
+        return {
+            type: 'shield-or-super',
+            label: 'boss/special dragonfire',
+            requirementText: 'anti-dragon shield or super antifire'
+        };
+    }
+    return null;
+};
+
+const expandDragonfireProtectionItems = function(itemNames) {
+    let expanded = new Set();
+    itemNames.forEach((itemName) => {
+        expanded.add(itemName);
+        if (itemsPlus && itemsPlus[itemName]) {
+            itemsPlus[itemName].forEach((plusItem) => expanded.add(plusItem));
+        }
+    });
+    return Array.from(expanded);
+};
+
+const dragonfireProtectionSourceUsable = function(source, sourceType) {
+    let sourceTypeString = String(sourceType || '');
+    if (sourceTypeString.includes('secondary')) return false;
+    if (sourceTypeString.includes('drop')) {
+        let requirement = getDragonfireRequirement(source);
+        if (requirement && requirement.type !== 'none' && requirement.type !== 'safespottable' && requirement.type !== 'dodgable') {
+            return false;
+        }
+    }
+    return true;
+};
+
+const hasDragonfireProtectionItem = function(itemNames) {
+    if (!baseChunkData || !baseChunkData['items']) return false;
+    return expandDragonfireProtectionItems(itemNames).some((itemName) => {
+        let itemSources = baseChunkData['items'][itemName];
+        if (!itemSources) return false;
+        return Object.keys(itemSources).some((source) => dragonfireProtectionSourceUsable(source, itemSources[source]));
+    });
+};
+
+const getDragonfireProtectionState = function() {
+    return {
+        hasDragonfireShield: hasDragonfireProtectionItem(dragonfireShieldItems),
+        hasRegularAntifire: hasDragonfireProtectionItem(regularAntifireItems),
+        hasSuperAntifire: hasDragonfireProtectionItem(superAntifireItems),
+        hasProtectionPrayers: !!(rules && rules['Has Protection Prayers'])
+    };
+};
+
+const describeDragonfireProtectionState = function(protection) {
+    let sources = [];
+    if (protection.hasDragonfireShield) sources.push('shield');
+    if (protection.hasSuperAntifire) sources.push('super antifire');
+    if (protection.hasRegularAntifire) sources.push('regular antifire');
+    if (protection.hasProtectionPrayers) sources.push('Protect from Magic');
+    return sources.length > 0 ? sources.join(', ') : 'none';
+};
+
+const getDragonfireGateStatus = function(monsterName) {
+    let requirement = getDragonfireRequirement(monsterName);
+    if (!requirement) return { blocked: false, requirement: null };
+    let protection = getDragonfireProtectionState();
+    if (requirement.type === 'none' || requirement.type === 'safespottable' || requirement.type === 'dodgable') {
+        return {
+            blocked: false,
+            requirement,
+            protection,
+            detail: '<b>Dragonfire:</b> ' + requirement.safeDetail + ' — no dragonfire protection required'
+        };
+    }
+    let protectedEnough = false;
+    if (requirement.type === 'long-ranged-standard') {
+        protectedEnough = protection.hasDragonfireShield || protection.hasSuperAntifire || (protection.hasRegularAntifire && protection.hasProtectionPrayers);
+    } else if (requirement.type === 'shield-or-super') {
+        protectedEnough = protection.hasDragonfireShield || protection.hasSuperAntifire;
+    }
+    return {
+        blocked: !protectedEnough,
+        requirement,
+        protection,
+        detail: protectedEnough
+            ? '<b>Dragonfire:</b> ' + getBaseMonsterName(monsterName) + ' uses ' + requirement.label + '; available protection: ' + describeDragonfireProtectionState(protection)
+            : '<b>Dragonfire protection required:</b> ' + getBaseMonsterName(monsterName) + ' uses ' + requirement.label + '; requires ' + requirement.requirementText + '. Available protection: ' + describeDragonfireProtectionState(protection)
+    };
+};
+
+const shayzienArmourFiveRequirements = [
+    ['Shayzien helm (5)'],
+    ['Shayzien body (5)', 'Shayzien platebody (5)'],
+    ['Shayzien greaves (5)'],
+    ['Shayzien gloves (5)'],
+    ['Shayzien boots (5)']
+];
+
+const isLizardmanShamanSource = function(sourceName) {
+    return getBaseMonsterName(sourceName).toLowerCase() === 'lizardman shaman';
+};
+
+const shayzienArmourFiveSourceUsable = function(sourceName, sourceType) {
+    let sourceTypeString = String(sourceType || '');
+    if (!sourceTypeString || sourceTypeString.includes('secondary')) return false;
+    return !isLizardmanShamanSource(sourceName);
+};
+
+const hasShayzienArmourFiveAccess = function(bcd) {
+    if (!bcd || !bcd['items']) return false;
+    return shayzienArmourFiveRequirements.every((itemOptions) => {
+        return itemOptions.some((itemName) => {
+            let itemSources = bcd['items'][itemName];
+            if (!itemSources) return false;
+            return Object.keys(itemSources).some((source) => shayzienArmourFiveSourceUsable(source, itemSources[source]));
+        });
+    });
+};
+
+const pruneLizardmanShamanSourcesWithoutShayzienFive = function(bcd) {
+    if (!bcd || hasShayzienArmourFiveAccess(bcd)) return false;
+    let pruned = false;
+    if (bcd['monsters'] && bcd['monsters']['Lizardman shaman']) {
+        delete bcd['monsters']['Lizardman shaman'];
+        pruned = true;
+    }
+    if (bcd['items']) {
+        Object.keys(bcd['items']).forEach((itemName) => {
+            Object.keys(bcd['items'][itemName]).filter(isLizardmanShamanSource).forEach((source) => {
+                delete bcd['items'][itemName][source];
+                pruned = true;
+            });
+            if (Object.keys(bcd['items'][itemName]).length === 0) {
+                delete bcd['items'][itemName];
+            }
+        });
+    }
+    return pruned;
+};
+
+const getGatedItemSources = function(itemName, itemContainer, includeStarred, combatContext) {
+    if (!itemContainer) return null;
+    let sourceKeys = [itemName];
+    if (includeStarred) sourceKeys.push(itemName + '*');
+    let usableSources = {};
+    sourceKeys.forEach((sourceKey) => {
+        if (!itemContainer[sourceKey]) return;
+        Object.keys(itemContainer[sourceKey]).forEach((source) => {
+            let sourceType = String(itemContainer[sourceKey][source] || '');
+            if (sourceType.includes('secondary')) return;
+            usableSources[source] = itemContainer[sourceKey][source];
+        });
+    });
+    if (Object.keys(usableSources).length === 0) return null;
+    if (shouldApplyMonsterGate() && !passesMonsterGate(itemName, usableSources, combatContext)) return null;
+    if (!passesShopCostGate(itemName, usableSources)) return null;
+    return usableSources;
+};
 
 // Estimate coins per hour from the best monster source in player's chunks
 const calcBestCoinsPerHour = function(atkLevel, strLevel, weaponAtk, weaponStr, weaponSpeed) {
@@ -2756,7 +3265,7 @@ const calcBestCoinsPerHour = function(atkLevel, strLevel, weaponAtk, weaponStr, 
 // Check if an item's drop sources pass the monster gate
 // combatContext: if true, processing-skill sources (Smithing, Crafting, etc.) don't count as reasonable
 const passesMonsterGate = function(itemName, itemSources, combatContext, visited) {
-    if (!monsterGateActive) return true;
+    if (!shouldApplyMonsterGate()) return true;
     if (!visited) visited = new Set();
     if (visited.has(itemName)) return true; // prevent infinite recursion
     visited.add(itemName);
@@ -2802,12 +3311,23 @@ const passesMonsterGate = function(itemName, itemSources, combatContext, visited
             hasReasonableSource = true;
             bestDetail = 'Non-drop source available (' + sourceVal + ') — auto-pass';
         } else {
+            let dragonfireStatus = dragonfireGateActive ? getDragonfireGateStatus(source) : { blocked: false };
+            if (dragonfireStatus.blocked) {
+                if (!bestDetail) bestDetail = dragonfireStatus.detail;
+                return;
+            }
+            if (!monsterGateActive) {
+                hasReasonableSource = true;
+                bestDetail = dragonfireStatus.detail || '<b>Dragonfire:</b> No protection-specific restriction for ' + source;
+                return;
+            }
+            let dragonfireDetail = dragonfireStatus.detail ? dragonfireStatus.detail + '<br>' : '';
             let ms = monsterStats[source] || {hp: 10, def: 1, db: 0};
             let mHp = ms.hp || 10, mDef = ms.def || 1, mDb = ms.db || 0;
             let mAl = ms.al || 0, mAb = ms.ab || 0, mMh = ms.mh || 0, mAs = ms.as || 4;
             if (gateHasRangedOrMagicCombat && !ms.uf) {
                 hasReasonableSource = true;
-                bestDetail = '<b>Ranged/Magic access:</b> Flinchable monster — auto-pass without DPS/hour check';
+                bestDetail = dragonfireDetail + '<b>Ranged/Magic access:</b> Flinchable monster — auto-pass without DPS/hour check';
                 return;
             }
             let killTime = estimateEffectiveKillTime(gatePlayerAtkLevel, gatePlayerStrLevel, gatePlayerWeaponAtk, gatePlayerWeaponStr, gatePlayerWeaponSpeed, mHp, mDef, mDb, mAl, mAb, mMh, mAs, ms.uf);
@@ -2829,13 +3349,13 @@ const passesMonsterGate = function(itemName, itemSources, combatContext, visited
                 hasReasonableSource = true;
                 // Full calculation breakdown
                 let breakdown = buildKillTimeBreakdown(source, mHp, mDef, mDb, mAl, mAb, mMh, mAs, ms.uf);
-                bestDetail = breakdown + '<br><b>Drop:</b> rate ' + rateStr + ', avg_kills=' + avgKills + ', total=' + (killTime === Infinity ? '∞' : Math.round(killTime) + 's') + '×' + avgKills + '/3600=<b>' + (totalHours === Infinity ? '∞' : totalHours.toFixed(1) + 'h') + '</b> (threshold: ' + bisMonsterGateHours + 'h) ✓';
+                bestDetail = dragonfireDetail + breakdown + '<br><b>Drop:</b> rate ' + rateStr + ', avg_kills=' + avgKills + ', total=' + (killTime === Infinity ? '∞' : Math.round(killTime) + 's') + '×' + avgKills + '/3600=<b>' + (totalHours === Infinity ? '∞' : totalHours.toFixed(1) + 'h') + '</b> (threshold: ' + bisMonsterGateHours + 'h) ✓';
             } else if (!bestDetail && killTime === Infinity) {
                 let breakdown = buildKillTimeBreakdown(source, mHp, mDef, mDb, mAl, mAb, mMh, mAs, ms.uf);
-                bestDetail = breakdown + '<br><b>Drop:</b> rate ' + rateStr + ' — <b>BLOCKED</b> (unkillable without protection prayers)';
+                bestDetail = dragonfireDetail + breakdown + '<br><b>Drop:</b> rate ' + rateStr + ' — <b>BLOCKED</b> (unkillable without protection prayers)';
             } else if (!bestDetail) {
                 let breakdown = buildKillTimeBreakdown(source, mHp, mDef, mDb, mAl, mAb, mMh, mAs, ms.uf);
-                bestDetail = breakdown + '<br><b>Drop:</b> rate ' + rateStr + ', avg_kills=' + avgKills + ', total=' + Math.round(killTime) + 's×' + avgKills + '/3600=<b>' + totalHours.toFixed(1) + 'h</b> (threshold: ' + bisMonsterGateHours + 'h) ✗ BLOCKED';
+                bestDetail = dragonfireDetail + breakdown + '<br><b>Drop:</b> rate ' + rateStr + ', avg_kills=' + avgKills + ', total=' + Math.round(killTime) + 's×' + avgKills + '/3600=<b>' + totalHours.toFixed(1) + 'h</b> (threshold: ' + bisMonsterGateHours + 'h) ✗ BLOCKED';
             }
         }
     });
@@ -2899,13 +3419,21 @@ const passesShopCostGate = function(itemName, itemSources) {
 
 // Primary Drop Monster Gate: downgrade primary-drop sources from monsters too hard to farm
 const applyPrimaryDropGate = function(bcd) {
-    if (!primaryDropGateActive) return;
+    if (!primaryDropGateActive && !dragonfirePrimaryDropGateActive) return;
     let items = bcd['items'];
     if (!items) return;
     Object.keys(items).forEach((itemName) => {
         let sources = items[itemName];
         Object.keys(sources).forEach((source) => {
             if (sources[source] !== 'primary-drop') return;
+            if (dragonfirePrimaryDropGateActive) {
+                let dragonfireStatus = getDragonfireGateStatus(source);
+                if (dragonfireStatus.blocked) {
+                    sources[source] = 'secondary-drop';
+                    return;
+                }
+            }
+            if (!primaryDropGateActive) return;
             let ms = monsterStats[source];
             if (!ms) return; // not a known monster, leave as-is
             let mHp = ms.hp || 10, mDef = ms.def || 1, mDb = ms.db || 0;
@@ -2951,6 +3479,7 @@ let elementalRunes;
 let manualTasks;
 let completeChallenges;
 let backlog;
+let splitBacklog = {};
 let rareDropNum;
 let universalPrimary;
 let elementalStaves;
@@ -2997,6 +3526,8 @@ let optOutSectionsWater = false;
 let maxSkill;
 let userTasks = {};
 let manualPrimary = {};
+let taskIdMap = {};
+let hiscoreSkillLevels = {};
 let updateLevel;
 
 let clueTasksPossible = {};
@@ -3015,6 +3546,113 @@ let globalSkillCaps = {}; // populated by method-based cap / skill task cap for 
 let globalEveryDropAltMap = {};
 let bankMemoryFormat = 'Item id	Item name	Item quantity\n';
 let unconnectedAreas = ['Zanaris', 'Puro-Puro', 'Player-owned house'];
+
+let getHiscoreSkillLevel = function(skill) {
+    if (!hiscoreSkillLevels || !hiscoreSkillLevels.hasOwnProperty(skill)) {
+        return null;
+    }
+    let level = parseInt(hiscoreSkillLevels[skill]);
+    return Number.isFinite(level) && level > 0 ? level : null;
+}
+
+let hasHiscoreSkillLevel = function(skill) {
+    return getHiscoreSkillLevel(skill) !== null;
+}
+
+let getKnownSkillLevel = function(skill) {
+    let hiscoreLevel = getHiscoreSkillLevel(skill);
+    if (hiscoreLevel !== null) {
+        return hiscoreLevel;
+    }
+    let knownLevel = 0;
+    if (passiveSkill && passiveSkill.hasOwnProperty(skill)) {
+        knownLevel = Math.max(knownLevel, parseInt(passiveSkill[skill]) || 0);
+    }
+    if (skillQuestXp && skillQuestXp.hasOwnProperty(skill)) {
+        knownLevel = Math.max(knownLevel, parseInt(skillQuestXp[skill]['level']) || 0);
+    }
+    return knownLevel;
+}
+
+let meetsKnownSkillLevel = function(skill, requiredLevel, boost) {
+    requiredLevel = parseInt(requiredLevel) || 0;
+    if (requiredLevel <= 1) {
+        return true;
+    }
+    return getKnownSkillLevel(skill) + (parseInt(boost) || 0) >= requiredLevel;
+}
+
+let getCompletedSkillLevel = function(skill) {
+    let highestCompletedLevel = 0;
+    !!completedChallenges && completedChallenges.hasOwnProperty(skill) && Object.keys(completedChallenges[skill]).forEach((task) => {
+        if (!!chunkInfo['challenges'][skill] && !!chunkInfo['challenges'][skill][task] && !!chunkInfo['challenges'][skill][task]['Level'] && chunkInfo['challenges'][skill][task]['Level'] > highestCompletedLevel) {
+            highestCompletedLevel = chunkInfo['challenges'][skill][task]['Level'];
+        }
+    });
+    return highestCompletedLevel;
+}
+
+let isSkillRequirementBlocked = function(skill, requiredLevel, valids, baseChunkDataLocal, boost) {
+    requiredLevel = parseInt(requiredLevel) || 0;
+    if (requiredLevel <= 1 || meetsKnownSkillLevel(skill, requiredLevel, boost)) {
+        return false;
+    }
+    if (hasHiscoreSkillLevel(skill)) {
+        return true;
+    }
+    return !checkPrimaryMethod(skill, valids, baseChunkDataLocal);
+}
+
+let skillTaskHasKnownOrPrimaryAccess = function(skill, taskName, valids, baseChunkDataLocal, boost) {
+    let task = !!chunkInfo['challenges'][skill] && chunkInfo['challenges'][skill][taskName];
+    if (!task || !task.hasOwnProperty('Level')) {
+        return false;
+    }
+    if (meetsKnownSkillLevel(skill, task['Level'], boost)) {
+        return true;
+    }
+    if (hasHiscoreSkillLevel(skill)) {
+        return false;
+    }
+    return checkPrimaryMethod(skill, valids, baseChunkDataLocal);
+}
+
+let getOutputTaskSkillThreshold = function(skill) {
+    let hiscoreLevel = getHiscoreSkillLevel(skill);
+    if (hiscoreLevel !== null) {
+        return hiscoreLevel;
+    }
+    let currentTask = highestOverall[skill] && highestOverall[skill].split('{')[0];
+    if (!!currentTask && chunkInfo['challenges'].hasOwnProperty(skill) && chunkInfo['challenges'][skill].hasOwnProperty(currentTask) && chunkInfo['challenges'][skill][currentTask].hasOwnProperty('Level')) {
+        return chunkInfo['challenges'][skill][currentTask]['Level'];
+    }
+    return 0;
+}
+
+let pruneClockworkBirdhouseTasks = function(validsLocal) {
+    if (!!baseChunkData['items'] && !!baseChunkData['items']['Clockwork'] && Object.keys(baseChunkData['items']['Clockwork']).length > 0) {
+        return;
+    }
+    let clockworkBirdhouseTasks = [
+        ...Object.keys((validsLocal && validsLocal['Crafting']) || {}),
+        ...Object.keys((outputTasks && outputTasks['Crafting']) || {})
+    ].filter((name, index, arr) => /^Craft an? ~\|.*bird house\|~$/.test(name) && arr.indexOf(name) === index);
+    clockworkBirdhouseTasks.forEach((name) => {
+        if (validsLocal && validsLocal['Crafting']) {
+            delete validsLocal['Crafting'][name];
+        }
+        if (outputTasks && outputTasks['Crafting']) {
+            delete outputTasks['Crafting'][name];
+        }
+        let output = chunkInfo['challenges']['Crafting'][name] && chunkInfo['challenges']['Crafting'][name]['Output'];
+        if (output && baseChunkData['items'] && baseChunkData['items'][output] && baseChunkData['items'][output][name]) {
+            delete baseChunkData['items'][output][name];
+            if (Object.keys(baseChunkData['items'][output]).length === 0) {
+                delete baseChunkData['items'][output];
+            }
+        }
+    });
+}
 
 onmessage = function(e) {
     try {
@@ -3040,6 +3678,7 @@ onmessage = function(e) {
             manualTasks,
             completedChallenges,
             backlog,
+            splitBacklog,
             rareDropNum,
             universalPrimary,
             elementalStaves,
@@ -3079,8 +3718,20 @@ onmessage = function(e) {
             maxSkill,
             userTasks,
             manualPrimary,
+            taskIdMap,
+            hiscoreSkillLevels,
             updateLevel
         } = eGlobal.data);
+        taskIdMap = taskIdMap || {};
+        splitBacklog = splitBacklog || {};
+        hiscoreSkillLevels = hiscoreSkillLevels || {};
+        passiveSkill = passiveSkill || {};
+        Object.keys(hiscoreSkillLevels).forEach((skill) => {
+            let hiscoreLevel = getHiscoreSkillLevel(skill);
+            if (hiscoreLevel !== null) {
+                passiveSkill[skill] = hiscoreLevel;
+            }
+        });
 
         if (updateLevel !== 'maintenance-mode') {
             postMessage({ type: 'reload' });
@@ -3140,17 +3791,20 @@ onmessage = function(e) {
         gatePlayerArmourDef = 0;
         gateHasPrayerBypass = false;
         gateHasRangedOrMagicCombat = false;
+        dragonfireGateActive = false;
+        monsterGateStatsReady = false;
         didWeaponRestart = false;
         primaryDropGateActive = false;
+        dragonfirePrimaryDropGateActive = false;
         primaryDropGateSeconds = (primaryDropGateMinutes || 3) * 60;
         type === 'current' && postMessage({ type: 'loading-update', percentage: '5%' });
         globalValids = calcChallenges(chunks, baseChunkData);
         // Now that globalValids is computed, set up Monster Power Gate using proper safespot check
         let needRerun = false;
         if (rules['BiS Monster Power Gate'] && bisMonsterGateHours > 0) {
-            let hasPrimaryRanged = checkPrimaryMethod('Ranged', globalValids, baseChunkData) || (!!manualTasks['Ranged'] && Object.keys(manualTasks['Ranged']).length > 0);
+            let hasPrimaryRanged = checkPrimaryMethod('Ranged', globalValids, baseChunkData);
             // Magic combat requires: primary Magic method + catalyst runes (mind/chaos/death) + elemental runes or staves
-            let hasPrimaryMagic = checkPrimaryMethod('Magic', globalValids, baseChunkData) || (!!manualTasks['Magic'] && Object.keys(manualTasks['Magic']).length > 0);
+            let hasPrimaryMagic = checkPrimaryMethod('Magic', globalValids, baseChunkData);
             let hasCombatMagic = false;
             if (hasPrimaryMagic && baseChunkData['items']) {
                 let catalystRunes = ['Mind rune', 'Chaos rune', 'Death rune'];
@@ -3175,12 +3829,16 @@ onmessage = function(e) {
                 hasCombatMagic = hasCatalyst && hasElemental;
             }
             let hasProtectionPrayers = !!rules['Has Protection Prayers'];
+            gateHasPrayerBypass = hasProtectionPrayers;
             gateHasRangedOrMagicCombat = hasPrimaryRanged || hasCombatMagic;
             let canBypassMonsterGate = gateHasRangedOrMagicCombat && hasProtectionPrayers;
+            dragonfireGateActive = true;
+            needRerun = true;
             if (!canBypassMonsterGate) {
                 monsterGateActive = true;
-                needRerun = true;
-                // Step 1: Best weapon from completed BiS tasks
+            }
+            monsterGateStatsReady = true;
+            // Step 1: Best weapon from completed BiS tasks
                 if (completedChallenges['BiS']) {
                     Object.keys(completedChallenges['BiS']).forEach(taskName => {
                         let match = taskName.match(/\|([^|]+)\|/);
@@ -3201,9 +3859,11 @@ onmessage = function(e) {
                         }
                     });
                 }
-                // Step 2: ATK level = highest completed Attack task level
-                // (equip tasks prove the player trained to that level)
-                if (completedChallenges['Attack']) {
+                // Step 2: combat levels come from hiscores when available.
+                let attackHiscoreLevel = getHiscoreSkillLevel('Attack');
+                if (attackHiscoreLevel !== null) {
+                    gatePlayerAtkLevel = attackHiscoreLevel;
+                } else if (completedChallenges['Attack']) {
                     Object.keys(completedChallenges['Attack']).forEach(taskName => {
                         let task = chunkInfo['challenges']['Attack'] && chunkInfo['challenges']['Attack'][taskName];
                         if (task && task['Level'] && task['Level'] > gatePlayerAtkLevel) {
@@ -3237,15 +3897,12 @@ onmessage = function(e) {
                 });
                 gatePlayerArmourDef = Math.round(bisArmourDef);
 
-                // STR mirrors ATK (melee training keeps them roughly equal)
-                gatePlayerStrLevel = gatePlayerAtkLevel;
-                // Set up player HP/DEF (DEF mirrors ATK)
-                gatePlayerHP = gatePlayerAtkLevel + 9;
-                gatePlayerDefLevel = gatePlayerAtkLevel;
+                gatePlayerStrLevel = getHiscoreSkillLevel('Strength') || gatePlayerAtkLevel;
+                gatePlayerHP = getHiscoreSkillLevel('Hitpoints') || (gatePlayerAtkLevel + 9);
+                gatePlayerDefLevel = getHiscoreSkillLevel('Defence') || gatePlayerAtkLevel;
                 // Weapon stays unarmed for first pass — will be updated from BiS result after calcBIS()
                 // Prayer bypass: check if player can gain enough prayer xp/hr from bone drops
-                gateHasPrayerBypass = !!rules['Has Protection Prayers'];
-            }
+                gateHasPrayerBypass = hasProtectionPrayers;
         }
         // Set up Shop Cost Gate — uses same player combat estimates as monster gate
         if (rules['Shop Cost Gate'] && shopCostGateHours > 0) {
@@ -3298,9 +3955,11 @@ onmessage = function(e) {
                 }
             }
         }
-        // Primary Drop Monster Gate: activate if rule enabled and monster gate is active (melee-only stats available)
-        if (rules['Primary Drop Monster Gate'] && primaryDropGateSeconds > 0 && monsterGateActive) {
-            primaryDropGateActive = true;
+        // Primary Drop Monster Gate: activate ordinary time gate only when melee stats are available;
+        // dragonfire-specific downgrades can still run when protection prayers bypass ordinary Monster Gate.
+        if (rules['Primary Drop Monster Gate'] && primaryDropGateSeconds > 0 && (monsterGateStatsReady || dragonfireGateActive)) {
+            if (monsterGateStatsReady) primaryDropGateActive = true;
+            if (dragonfireGateActive) dragonfirePrimaryDropGateActive = true;
             needRerun = true;
         }
         if (needRerun) {
@@ -3421,7 +4080,7 @@ onmessage = function(e) {
                 let rules_arr = [];
                 // BiS tasks reference equipment items via ItemsDetails
                 let bisItems = (chunkInfo['challenges']['BiS'] && chunkInfo['challenges']['BiS'][name] && chunkInfo['challenges']['BiS'][name]['ItemsDetails']) || [];
-                if (monsterGateActive) {
+                if (shouldApplyMonsterGate()) {
                     let details = [];
                     bisItems.forEach((item) => { if (monsterGateDetails[item]) details.push(monsterGateDetails[item]); });
                     rules_arr.push({
@@ -3692,7 +4351,7 @@ let calcChallenges = function(chunks, baseChunkData) {
                 if (!baseChunkData['items'][item]) {
                     baseChunkData['items'][item] = {};
                 }
-                baseChunkData['items'][item][chunk] = rules['Primary Spawns'] ? 'primary-spawn' : 'secondary-spawn';
+                baseChunkData['items'][item][chunk] = getItemSpawnSourceType(item);
             }
         });
     });
@@ -4293,6 +4952,35 @@ let calcChallenges = function(chunks, baseChunkData) {
         let savedValids = JSON.parse(JSON.stringify(newValids));
         let passedByTasks = {};
         let tasksModified;
+        let itemSourcesPassMonsterGate = function(item, combatContext) {
+            if (!shouldApplyMonsterGate()) return true;
+            let cleanItem = item.replaceAll(/\*/g, '');
+            if (cleanItem.includes('[+]x')) {
+                cleanItem = cleanItem.split('[+]x')[0] + '[+]';
+            }
+            let candidates = (cleanItem.includes('[+]') && itemsPlus.hasOwnProperty(cleanItem)) ? itemsPlus[cleanItem] : [cleanItem];
+            let foundSource = false;
+            let foundPassingSource = false;
+            candidates.forEach((candidate) => {
+                let keys = [candidate];
+                if (!combatContext && baseChunkData['items'] && baseChunkData['items'][candidate + '*']) {
+                    keys.unshift(candidate + '*');
+                }
+                keys.forEach((key) => {
+                    if (baseChunkData['items'] && baseChunkData['items'][key]) {
+                        foundSource = true;
+                        if (passesMonsterGate(key.replaceAll(/\*/g, ''), baseChunkData['items'][key], combatContext)) {
+                            foundPassingSource = true;
+                        }
+                    }
+                });
+            });
+            return !foundSource || foundPassingSource;
+        };
+        let challengeInputsPassMonsterGate = function(challenge, combatContext) {
+            if (!shouldApplyMonsterGate() || !challenge || !challenge['Items']) return true;
+            return !challenge['Items'].some((item) => !itemSourcesPassMonsterGate(item, combatContext));
+        };
         while ((leftoversCount < 10 && (Object.keys(diff(newValids, savedValids) || {}).length !== 0 || tasksModified)) || leftoversCount < 1) {
             tasksModified = false;
             savedValids = JSON.parse(JSON.stringify(newValids));
@@ -4327,14 +5015,15 @@ let calcChallenges = function(chunks, baseChunkData) {
                             }
                         });
                     }
-                    if ((!checkPrimaryMethod(skill, newValids, baseChunkData) && (!passiveSkill || !passiveSkill.hasOwnProperty(skill) || passiveSkill[skill] <= 1 || (chunkInfo['challenges'][skill][challenge]['Level'] - (bestBoost + (ownsCrystalSaw ? 3 : 0))) > passiveSkill[skill]) && (!skillQuestXp || !skillQuestXp.hasOwnProperty(skill) || (chunkInfo['challenges'][skill][challenge]['Level'] - (bestBoost + (ownsCrystalSaw ? 3 : 0))) > skillQuestXp[skill]['level'])) && !!chunkInfo['challenges'][skill][challenge] && chunkInfo['challenges'][skill][challenge]['Level'] > 1 && !chunkInfo['challenges'][skill][challenge]['ManualValid']) {
+                    let skillRequirementLevel = chunkInfo['challenges'][skill][challenge]['Level'] - (bestBoost + (ownsCrystalSaw ? 3 : 0));
+                    if ((!checkPrimaryMethod(skill, newValids, baseChunkData) && !meetsKnownSkillLevel(skill, skillRequirementLevel)) && !!chunkInfo['challenges'][skill][challenge] && chunkInfo['challenges'][skill][challenge]['Level'] > 1 && !chunkInfo['challenges'][skill][challenge]['ManualValid']) {
                         let highestCompletedLevel = 0;
                         !!completedChallenges && completedChallenges.hasOwnProperty(skill) && Object.keys(completedChallenges[skill]).forEach((task) => {
                             if (!!chunkInfo['challenges'][skill] && !!chunkInfo['challenges'][skill][task] && !!chunkInfo['challenges'][skill][task]['Level'] && chunkInfo['challenges'][skill][task]['Level'] > highestCompletedLevel) {
                                 highestCompletedLevel = chunkInfo['challenges'][skill][task]['Level'];
                             }
                         });
-                        if (highestCompletedLevel <= 1 || highestCompletedLevel < chunkInfo['challenges'][skill][challenge]['Level']) {
+                        if (hasHiscoreSkillLevel(skill) || highestCompletedLevel <= 1 || highestCompletedLevel < chunkInfo['challenges'][skill][challenge]['Level']) {
                             if (!nonValids.hasOwnProperty(challenge)) {
                                 nonValids[challenge] = [];
                             }
@@ -4380,7 +5069,10 @@ let calcChallenges = function(chunks, baseChunkData) {
                                     highestCompletedLevel = chunkInfo['challenges'][subSkill][task]['Level'];
                                 }
                             });
-                            if ((!checkPrimaryMethod(subSkill, newValids, baseChunkData) && ((subSkill !== 'Slayer' || !slayerLocked || (chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] - (bestBoost + (ownsCrystalSaw ? 3 : 0))) > slayerLocked['level'])) && (!passiveSkill || !passiveSkill.hasOwnProperty(subSkill) || passiveSkill[subSkill] <= 1 || (chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] - (bestBoost + (ownsCrystalSaw ? 3 : 0))) > passiveSkill[subSkill]) && (highestCompletedLevel <= 1 || highestCompletedLevel <= chunkInfo['challenges'][skill][challenge]['Skills'][subSkill]) && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > 1) || (subSkill === 'Slayer' && !!slayerLocked && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > slayerLocked['level']) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > maxSkill[subSkill])) {
+                            let subSkillRequirementLevel = chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] - (bestBoost + (ownsCrystalSaw ? 3 : 0));
+                            let subSkillHeuristicBlocked = !hasHiscoreSkillLevel(subSkill) && !checkPrimaryMethod(subSkill, newValids, baseChunkData) && ((subSkill !== 'Slayer' || !slayerLocked || subSkillRequirementLevel > slayerLocked['level'])) && !meetsKnownSkillLevel(subSkill, subSkillRequirementLevel) && (highestCompletedLevel <= 1 || highestCompletedLevel <= chunkInfo['challenges'][skill][challenge]['Skills'][subSkill]) && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > 1;
+                            let subSkillHiscoreBlocked = hasHiscoreSkillLevel(subSkill) && !meetsKnownSkillLevel(subSkill, subSkillRequirementLevel) && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > 1;
+                            if (subSkillHeuristicBlocked || subSkillHiscoreBlocked || (subSkill === 'Slayer' && !!slayerLocked && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > slayerLocked['level']) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > maxSkill[subSkill])) {
                                 if (!nonValids.hasOwnProperty(challenge)) {
                                     nonValids[challenge] = [];
                                 }
@@ -4445,7 +5137,7 @@ let calcChallenges = function(chunks, baseChunkData) {
                                     } else {
                                         let tempValid = false;
                                         tasksPlus[xSubTask].forEach((plus) => {
-                                            if (!((!checkPrimaryMethod(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask], savedValids, baseChunkData) && !!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]] !== 1 && (!passiveSkill || !passiveSkill.hasOwnProperty(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]) || passiveSkill[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] < chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]]['Level'])) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]]) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) && (!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] || !savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]))) || (!!backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && (backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) || backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0].replaceAll('#', '/')))))) {
+                                            if (!((!skillTaskHasKnownOrPrimaryAccess(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask], plus.split('--')[0], savedValids, baseChunkData) && !!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]] !== 1) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]]) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) && (!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] || !savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]))) || (!!backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && (backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) || backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0].replaceAll('#', '/')))))) {
                                                 tempValid = true;
                                                 xResults++;
                                             } else if (skill === 'Diary' && chunkInfo['challenges'][skill][challenge]['Tasks'][subTask] === 'Diary' && chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) && chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]].hasOwnProperty('Reward') && !chunkInfo['challenges'][skill][challenge].hasOwnProperty('Reward') && (rules['Show Diary Tasks Any'] || chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]]['BaseQuest'] === 'Combat Achievements')) {
@@ -4485,7 +5177,7 @@ let calcChallenges = function(chunks, baseChunkData) {
                                 } else {
                                     let tempValid = false;
                                     tasksPlus[subTask].forEach((plus) => {
-                                        if (!((!checkPrimaryMethod(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask], savedValids, baseChunkData) && !!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]] !== 1 && (!passiveSkill || !passiveSkill.hasOwnProperty(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]) || passiveSkill[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] < chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]]['Level'])) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]]) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) && (!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] || !savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]))) || (!!backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && (backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) || backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0].replaceAll('#', '/')))))) {
+                                        if (!((!skillTaskHasKnownOrPrimaryAccess(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask], plus.split('--')[0], savedValids, baseChunkData) && !!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]] !== 1) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]]) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) && (!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] || !savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]))) || (!!backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && (backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) || backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0].replaceAll('#', '/')))))) {
                                             tempValid = true;
                                         } else if (skill === 'Diary' && (chunkInfo['challenges'][skill][challenge]['Tasks'][subTask] === 'Diary' || subTask.includes('--')) && chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) && chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]].hasOwnProperty('Reward') && !chunkInfo['challenges'][skill][challenge].hasOwnProperty('Reward') && (rules['Show Diary Tasks Any'] || chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]]['BaseQuest'] === 'Combat Achievements')) {
                                             tempValid = true;
@@ -4514,7 +5206,12 @@ let calcChallenges = function(chunks, baseChunkData) {
                                         highestCompletedLevel = chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][task]['Level'];
                                     }
                                 });
-                                if (!savedValids.hasOwnProperty(skill) || !savedValids[skill].hasOwnProperty(challenge) || (!checkPrimaryMethod(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask], savedValids, baseChunkData) && (!passiveSkill || !passiveSkill.hasOwnProperty(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]) || passiveSkill[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] <= 1 || !chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][subTask.split('--')[0]] || passiveSkill[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] + bestBoostSub < chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][subTask.split('--')[0]]['Level']) && (highestCompletedLevel <= 1 || !chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][subTask.split('--')[0]] || highestCompletedLevel < chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][subTask.split('--')[0]]['Level']) && (!chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][subTask.split('--')[0]] || chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][subTask.split('--')[0]]['Level'] > 1)) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] || !savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(subTask.split('--')[0]) && !savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(subTask.split('--')[0]))) || (backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && (backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(subTask.split('--')[0]) || backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(subTask.split('--')[0].replaceAll('#', '/'))))) {
+                                let subTaskSkill = chunkInfo['challenges'][skill][challenge]['Tasks'][subTask];
+                                let subTaskName = subTask.split('--')[0];
+                                let subTaskChallenge = !!chunkInfo['challenges'][subTaskSkill] && chunkInfo['challenges'][subTaskSkill][subTaskName];
+                                let subTaskLevel = subTaskChallenge && subTaskChallenge.hasOwnProperty('Level') ? subTaskChallenge['Level'] : 0;
+                                let subTaskLevelBlocked = hasHiscoreSkillLevel(subTaskSkill) ? !meetsKnownSkillLevel(subTaskSkill, subTaskLevel, bestBoostSub) : (!checkPrimaryMethod(subTaskSkill, savedValids, baseChunkData) && (!meetsKnownSkillLevel(subTaskSkill, subTaskLevel, bestBoostSub)) && (highestCompletedLevel <= 1 || !subTaskChallenge || highestCompletedLevel < subTaskLevel) && (!subTaskChallenge || subTaskLevel > 1));
+                                if (!savedValids.hasOwnProperty(skill) || !savedValids[skill].hasOwnProperty(challenge) || subTaskLevelBlocked || (!valids[subTaskSkill] || !savedValids[subTaskSkill] || (!valids[subTaskSkill].hasOwnProperty(subTaskName) && !savedValids[subTaskSkill].hasOwnProperty(subTaskName))) || (backlog[subTaskSkill] && (backlog[subTaskSkill].hasOwnProperty(subTaskName) || backlog[subTaskSkill].hasOwnProperty(subTaskName.replaceAll('#', '/'))))) {
                                     if (!(skill === 'Diary' && (chunkInfo['challenges'][skill][challenge]['Tasks'][subTask] === 'Diary' || subTask.includes('--')) && chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(subTask.split('--')[0]) && !chunkInfo['challenges'][skill][challenge]['ManualShow'] && (rules['Show Diary Tasks Any'] || chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][subTask.split('--')[0]]['BaseQuest'] === 'Combat Achievements')) && !chunkInfo['challenges'][skill][challenge]['ManualValid']) {
                                         if (!nonValids.hasOwnProperty(challenge)) {
                                             nonValids[challenge] = [];
@@ -4555,7 +5252,14 @@ let calcChallenges = function(chunks, baseChunkData) {
                                     highestLevel = chunkInfo['challenges'][req][task]['Level'];
                                 }
                             });
-                            return !checkPrimaryMethod(req, newValids, baseChunkData) && !chunkInfo['challenges'][skill][challenge]['ManualValid'] && (!passiveSkill || !passiveSkill.hasOwnProperty(req) || passiveSkill[req] <= 1 || passiveSkill[req] < chunkInfo['challenges'][skill][challenge]['Requirements'][req]) && (highestLevel <= 1 || highestLevel < chunkInfo['challenges'][skill][challenge]['Requirements'][req]);
+                            let reqLevel = chunkInfo['challenges'][skill][challenge]['Requirements'][req];
+                            if (chunkInfo['challenges'][skill][challenge]['ManualValid'] || meetsKnownSkillLevel(req, reqLevel)) {
+                                return false;
+                            }
+                            if (hasHiscoreSkillLevel(req)) {
+                                return true;
+                            }
+                            return !checkPrimaryMethod(req, newValids, baseChunkData) && (highestLevel <= 1 || highestLevel < reqLevel);
                         }).some((req) => {
                             if (!nonValids.hasOwnProperty(challenge)) {
                                 nonValids[challenge] = [];
@@ -4667,7 +5371,7 @@ let calcChallenges = function(chunks, baseChunkData) {
                             } else {
                                 let tempValid = false;
                                 tasksPlus[xSubTask].forEach((plus) => {
-                                    if (!((!checkPrimaryMethod(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask], savedValids, baseChunkData) && !!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]] !== 1 && (!passiveSkill || !passiveSkill.hasOwnProperty(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]) || passiveSkill[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] < chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]]['Level'])) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]]) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) && (!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] || !savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]))) || (!!backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && (backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) || backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0].replaceAll('#', '/')))))) {
+                                    if (!((!skillTaskHasKnownOrPrimaryAccess(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask], plus.split('--')[0], savedValids, baseChunkData) && !!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]] !== 1) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]]) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) && (!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] || !savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]))) || (!!backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && (backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) || backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0].replaceAll('#', '/')))))) {
                                         tempValid = true;
                                         xResults++;
                                     } else if (skill === 'Diary' && chunkInfo['challenges'][skill][challenge]['Tasks'][subTask] === 'Diary' && chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) && chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]].hasOwnProperty('Reward') && !chunkInfo['challenges'][skill][challenge].hasOwnProperty('Reward') && (rules['Show Diary Tasks Any'] || chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]]['BaseQuest'] === 'Combat Achievements')) {
@@ -4691,7 +5395,7 @@ let calcChallenges = function(chunks, baseChunkData) {
                         } else {
                             let tempValid = false;
                             tasksPlus[subTask].forEach((plus) => {
-                                if (!((!checkPrimaryMethod(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask], savedValids, baseChunkData) && !!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]] !== 1 && (!passiveSkill || !passiveSkill.hasOwnProperty(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]) || passiveSkill[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] < chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]]['Level'])) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]]) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) && (!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] || !savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]))) || (!!backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && (backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) || backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0].replaceAll('#', '/')))))) {
+                                if (!((!skillTaskHasKnownOrPrimaryAccess(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask], plus.split('--')[0], savedValids, baseChunkData) && !!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]] !== 1) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]]) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) && (!savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] || !savedValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]))) || (!!backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && (backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) || backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0].replaceAll('#', '/')))))) {
                                     tempValid = true;
                                 } else if (skill === 'Diary' && (chunkInfo['challenges'][skill][challenge]['Tasks'][subTask] === 'Diary' || subTask.includes('--')) && chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(plus.split('--')[0]) && chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]].hasOwnProperty('Reward') && !chunkInfo['challenges'][skill][challenge].hasOwnProperty('Reward') && (rules['Show Diary Tasks Any'] || chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][plus.split('--')[0]]['BaseQuest'] === 'Combat Achievements')) {
                                     tempValid = true;
@@ -4746,7 +5450,11 @@ let calcChallenges = function(chunks, baseChunkData) {
                             }
                             tempLevel = tempLevel - (bestBoost + (ownsCrystalSaw ? 3 : 0));
                         }
-                        if (!newValids.hasOwnProperty(skill) || !newValids[skill].hasOwnProperty(challenge) || (!checkPrimaryMethod(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask], newValids, baseChunkData) && (!passiveSkill || !passiveSkill.hasOwnProperty(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]) || passiveSkill[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] <= 1 || !chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][subTask.split('--')[0]] || passiveSkill[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] < tempLevel) && (highestCompletedLevel <= 1 || !chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][subTask.split('--')[0]] || highestCompletedLevel < tempLevel)) || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] || !newValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] || (!valids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(subTask.split('--')[0]) && !newValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(subTask.split('--')[0]))) || (backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]] && (backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(subTask.split('--')[0]) || backlog[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(subTask.split('--')[0].replaceAll('#', '/'))))) {
+                        let subTaskSkill = chunkInfo['challenges'][skill][challenge]['Tasks'][subTask];
+                        let subTaskName = subTask.split('--')[0];
+                        let subTaskChallenge = !!chunkInfo['challenges'][subTaskSkill] && chunkInfo['challenges'][subTaskSkill][subTaskName];
+                        let subTaskLevelBlocked = hasHiscoreSkillLevel(subTaskSkill) ? !meetsKnownSkillLevel(subTaskSkill, tempLevel) : (!checkPrimaryMethod(subTaskSkill, newValids, baseChunkData) && !meetsKnownSkillLevel(subTaskSkill, tempLevel) && (highestCompletedLevel <= 1 || !subTaskChallenge || highestCompletedLevel < tempLevel));
+                        if (!newValids.hasOwnProperty(skill) || !newValids[skill].hasOwnProperty(challenge) || subTaskLevelBlocked || (!valids[subTaskSkill] || !newValids[subTaskSkill] || (!valids[subTaskSkill].hasOwnProperty(subTaskName) && !newValids[subTaskSkill].hasOwnProperty(subTaskName))) || (backlog[subTaskSkill] && (backlog[subTaskSkill].hasOwnProperty(subTaskName) || backlog[subTaskSkill].hasOwnProperty(subTaskName.replaceAll('#', '/'))))) {
                             if (!(skill === 'Diary' && (chunkInfo['challenges'][skill][challenge]['Tasks'][subTask] === 'Diary' || subTask.includes('--')) && chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(subTask.split('--')[0]) && !chunkInfo['challenges'][skill][challenge]['ManualShow'] && (rules['Show Diary Tasks Any'] || chunkInfo['challenges'][chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]][subTask.split('--')[0]]['BaseQuest'] === 'Combat Achievements')) && !chunkInfo['challenges'][skill][challenge]['ManualValid']) {
                                 if (!nonValids.hasOwnProperty(challenge)) {
                                     nonValids[challenge] = [];
@@ -4786,7 +5494,16 @@ let calcChallenges = function(chunks, baseChunkData) {
                             highestLevel = chunkInfo['challenges'][req][task]['Level'];
                         }
                     });
-                    return !checkPrimaryMethod(req, newValids, baseChunkData) && !chunkInfo['challenges'][skill][challenge]['ManualValid'] && (!passiveSkill || !passiveSkill.hasOwnProperty(req) || passiveSkill[req] <= 1 || passiveSkill[req] < chunkInfo['challenges'][req][chunkInfo['challenges'][skill][challenge]['Requirements'][req]]) && (highestLevel <= 1 || highestLevel < chunkInfo['challenges'][req][chunkInfo['challenges'][skill][challenge]['Requirements'][req]]);
+                    let reqTask = chunkInfo['challenges'][skill][challenge]['Requirements'][req];
+                    let reqChallenge = !!chunkInfo['challenges'][req] && chunkInfo['challenges'][req][reqTask];
+                    let reqLevel = reqChallenge && reqChallenge.hasOwnProperty('Level') ? reqChallenge['Level'] : reqTask;
+                    if (chunkInfo['challenges'][skill][challenge]['ManualValid'] || meetsKnownSkillLevel(req, reqLevel)) {
+                        return false;
+                    }
+                    if (hasHiscoreSkillLevel(req)) {
+                        return true;
+                    }
+                    return !checkPrimaryMethod(req, newValids, baseChunkData) && (highestLevel <= 1 || highestLevel < reqLevel);
                 }).some(req => {
                     if (!nonValids.hasOwnProperty(challenge)) {
                         nonValids[challenge] = [];
@@ -4941,9 +5658,18 @@ let calcChallenges = function(chunks, baseChunkData) {
             delete newValids[entry.skill][entry.task];
         });
         rules["Highest Level"] && Object.keys(tempItemSkill).forEach((skill) => {
-            Object.keys(tempItemSkill[skill]).filter((item) => { return !!baseChunkData['items'][item] }).forEach((item) => {
+            Object.keys(tempItemSkill[skill]).filter((item) => { return !!baseChunkData['items'][item] && (!shouldApplyMonsterGate() || passesMonsterGate(item, baseChunkData['items'][item], false)) }).forEach((item) => {
                 tempItemSkill[skill][item].filter((name) => { return !!chunkInfo['challenges'][skill][name] && !chunkInfo['challenges'][skill][name].hasOwnProperty('NoXp') && !chunkInfo['challenges'][skill][name].hasOwnProperty('AllowMulti') }).forEach((name) => {
                     let challenge = chunkInfo['challenges'][skill][name];
+                    if (!challengeInputsPassMonsterGate(challenge, false)) {
+                        !!newValids[skill] && delete newValids[skill][name];
+                        !!valids[skill] && delete valids[skill][name];
+                        !!tempItemSkill[skill][item] && tempItemSkill[skill][item].splice(tempItemSkill[skill][item].indexOf(name), 1);
+                        if (!!tempItemSkill[skill][item] && tempItemSkill[skill][item].length === 0) {
+                            delete tempItemSkill[skill][item];
+                        }
+                        return;
+                    }
                     if (challenge.hasOwnProperty('Tasks')) {
                         Object.keys(challenge['Tasks']).some(subTask => {
                             if (!newValids.hasOwnProperty(challenge['Tasks'][subTask]) || !newValids[challenge['Tasks'][subTask]].hasOwnProperty(subTask)) {
@@ -4958,7 +5684,7 @@ let calcChallenges = function(chunks, baseChunkData) {
                         });
                     }
                     if (challenge.hasOwnProperty('Skills')) {
-                        let subSkillValid = !(Object.keys(challenge['Skills']).filter((subSkill) => { return !checkPrimaryMethod(subSkill, newValids, baseChunkData) && (subSkill !== 'Slayer' || !slayerLocked || challenge['Skills'][subSkill] > slayerLocked['level']) && (!passiveSkill || !passiveSkill.hasOwnProperty(subSkill) || passiveSkill[subSkill] <= 1 || challenge['Skills'][subSkill] > passiveSkill[subSkill]) && (!maxSkill || !maxSkill.hasOwnProperty(subSkill) || challenge['Skills'][subSkill] > maxSkill[subSkill]) }).length > 0);
+                        let subSkillValid = !(Object.keys(challenge['Skills']).filter((subSkill) => { return isSkillRequirementBlocked(subSkill, challenge['Skills'][subSkill], newValids, baseChunkData) && (subSkill !== 'Slayer' || !slayerLocked || challenge['Skills'][subSkill] > slayerLocked['level']) && (!maxSkill || !maxSkill.hasOwnProperty(subSkill) || challenge['Skills'][subSkill] > maxSkill[subSkill]) }).length > 0);
                         if (!subSkillValid) {
                             !!newValids[skill] && delete newValids[skill][name];
                             !!valids[skill] && delete valids[skill][name];
@@ -4972,14 +5698,23 @@ let calcChallenges = function(chunks, baseChunkData) {
             });
         });
         !rules["Highest Level"] && Object.keys(tempItemSkill).forEach((skill) => {
-            Object.keys(tempItemSkill[skill]).filter((item) => { return !!baseChunkData['items'][item] }).forEach((item) => {
+            Object.keys(tempItemSkill[skill]).filter((item) => { return !!baseChunkData['items'][item] && (!shouldApplyMonsterGate() || passesMonsterGate(item, baseChunkData['items'][item], false)) }).forEach((item) => {
                 let lowestItem;
                 let lowestName;
                 let taskIsRemoved;
                 tempItemSkill[skill][item].filter((name) => { return !!chunkInfo['challenges'][skill][name] && !chunkInfo['challenges'][skill][name].hasOwnProperty('NoXp') && !chunkInfo['challenges'][skill][name].hasOwnProperty('AllowMulti') && !chunkInfo['challenges'][skill][name]['NeverShow'] }).forEach((name) => {
                     taskIsRemoved = false;
                     let challenge = chunkInfo['challenges'][skill][name];
-                    if (challenge.hasOwnProperty('Tasks')) {
+                    if (!challengeInputsPassMonsterGate(challenge, false)) {
+                        !!newValids[skill] && delete newValids[skill][name];
+                        !!valids[skill] && delete valids[skill][name];
+                        !!tempItemSkill[skill][item] && tempItemSkill[skill][item].splice(tempItemSkill[skill][item].indexOf(name), 1);
+                        if (!!tempItemSkill[skill][item] && tempItemSkill[skill][item].length === 0) {
+                            delete tempItemSkill[skill][item];
+                        }
+                        taskIsRemoved = true;
+                    }
+                    if (!taskIsRemoved && challenge.hasOwnProperty('Tasks')) {
                         Object.keys(challenge['Tasks']).some(subTask => {
                             if (!newValids.hasOwnProperty(challenge['Tasks'][subTask]) || !newValids[challenge['Tasks'][subTask]].hasOwnProperty(subTask)) {
                                 !!newValids[skill] && delete newValids[skill][name];
@@ -4993,7 +5728,7 @@ let calcChallenges = function(chunks, baseChunkData) {
                             }
                         });
                     }
-                    if (challenge.hasOwnProperty('Skills')) {
+                    if (!taskIsRemoved && challenge.hasOwnProperty('Skills')) {
                         let subSkillValid = !(Object.keys(challenge['Skills']).filter((subSkill) => { return (!checkPrimaryMethod(subSkill, newValids, baseChunkData) || (subSkill === 'Slayer' && !!slayerLocked && challenge['Skills'][subSkill] > slayerLocked['level']) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && challenge['Skills'][subSkill] > maxSkill[subSkill])) && challenge['Skills'][subSkill] > 1 }).length > 0);
                         if (!subSkillValid) {
                             !!newValids[skill] && delete newValids[skill][name];
@@ -5079,15 +5814,17 @@ let calcChallenges = function(chunks, baseChunkData) {
                     lowestLevel = tempLevel;
                 }
             });
-            if (!!passiveSkill && passiveSkill.hasOwnProperty(skill) && passiveSkill[skill] > 1 && passiveSkill[skill] > lowestLevel) {
-                lowestLevel = passiveSkill[skill];
-            } else if (!!skillQuestXp && skillQuestXp.hasOwnProperty(skill) && skillQuestXp[skill]['level'] > lowestLevel) {
-                lowestLevel = skillQuestXp[skill]['level'];
+            let knownLevel = getKnownSkillLevel(skill);
+            if (knownLevel > 1 && knownLevel > (lowestLevel || 0)) {
+                lowestLevel = knownLevel;
             }
             !!lowestName && Object.keys(tempItemSkill[skill]).forEach((item) => {
-                !!baseChunkData['items'][item] && tempItemSkill[skill][item].filter((name) => { return chunkInfo['challenges'].hasOwnProperty(skill) && chunkInfo['challenges'][skill].hasOwnProperty(name) && name !== lowestName}).forEach((name) => {
+                !!baseChunkData['items'][item] && (!shouldApplyMonsterGate() || passesMonsterGate(item, baseChunkData['items'][item], false)) && tempItemSkill[skill][item].filter((name) => { return chunkInfo['challenges'].hasOwnProperty(skill) && chunkInfo['challenges'][skill].hasOwnProperty(name) && name !== lowestName}).forEach((name) => {
                     let stillValid = true;
                     let tempLevel = chunkInfo['challenges'][skill][name]['Level'];
+                    if (!challengeInputsPassMonsterGate(chunkInfo['challenges'][skill][name], false)) {
+                        stillValid = false;
+                    }
                     if (rules["Boosting"] && chunkInfo['codeItems']['boostItems'].hasOwnProperty(skill) && !chunkInfo['challenges'][skill][name].hasOwnProperty('NoBoost')) {
                         let bestBoost = 0;
                         let ownsCrystalSaw = false;
@@ -5140,13 +5877,15 @@ let calcChallenges = function(chunks, baseChunkData) {
                     lowestLevel = newValids[skill][challenge];
                 }
             });
-            if (!!passiveSkill && passiveSkill.hasOwnProperty(skill) && passiveSkill[skill] > 1 && passiveSkill[skill] > lowestLevel) {
-                lowestLevel = passiveSkill[skill];
-            } else if (!!skillQuestXp && skillQuestXp.hasOwnProperty(skill) && skillQuestXp[skill]['level'] > lowestLevel) {
-                lowestLevel = skillQuestXp[skill]['level'];
+            let knownLevel = getKnownSkillLevel(skill);
+            if (knownLevel > 1 && knownLevel > (lowestLevel || 0)) {
+                lowestLevel = knownLevel;
             }
             !!lowestLevel && Object.keys(tempMultiStepSkill[skill]).filter((name) => { return chunkInfo['challenges'].hasOwnProperty(skill) && chunkInfo['challenges'][skill].hasOwnProperty(name) && (chunkInfo['challenges'][skill][name]['Level'] <= lowestLevel)}).forEach((name) => {
                 let stillValid = true;
+                if (!challengeInputsPassMonsterGate(chunkInfo['challenges'][skill][name], false)) {
+                    stillValid = false;
+                }
                 chunkInfo['challenges'][skill][name].hasOwnProperty('Skills') && Object.keys(chunkInfo['challenges'][skill][name]['Skills']).some(subSkill => {
                     let highestCompletedLevel = 0;
                     !!completedChallenges && completedChallenges.hasOwnProperty(subSkill) && Object.keys(completedChallenges[subSkill]).forEach((task) => {
@@ -5154,7 +5893,10 @@ let calcChallenges = function(chunks, baseChunkData) {
                             highestCompletedLevel = chunkInfo['challenges'][subSkill][task]['Level'];
                         }
                     });
-                    if ((!checkPrimaryMethod(subSkill, newValids, baseChunkData) && ((subSkill !== 'Slayer' || !slayerLocked || chunkInfo['challenges'][skill][name]['Skills'][subSkill] > slayerLocked['level'])) && (!passiveSkill || !passiveSkill.hasOwnProperty(subSkill) || passiveSkill[subSkill] <= 1 || chunkInfo['challenges'][skill][name]['Skills'][subSkill] > passiveSkill[subSkill]) && (highestCompletedLevel <= 1 || highestCompletedLevel <= chunkInfo['challenges'][skill][name]['Skills'][subSkill])) || (subSkill === 'Slayer' && !!slayerLocked && chunkInfo['challenges'][skill][name]['Skills'][subSkill] > slayerLocked['level']) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && chunkInfo['challenges'][skill][name]['Skills'][subSkill] > maxSkill[subSkill])) {
+                    let subSkillRequirementLevel = chunkInfo['challenges'][skill][name]['Skills'][subSkill];
+                    let subSkillHeuristicBlocked = !hasHiscoreSkillLevel(subSkill) && !checkPrimaryMethod(subSkill, newValids, baseChunkData) && ((subSkill !== 'Slayer' || !slayerLocked || subSkillRequirementLevel > slayerLocked['level'])) && !meetsKnownSkillLevel(subSkill, subSkillRequirementLevel) && (highestCompletedLevel <= 1 || highestCompletedLevel <= subSkillRequirementLevel);
+                    let subSkillHiscoreBlocked = hasHiscoreSkillLevel(subSkill) && !meetsKnownSkillLevel(subSkill, subSkillRequirementLevel);
+                    if (subSkillHeuristicBlocked || subSkillHiscoreBlocked || (subSkill === 'Slayer' && !!slayerLocked && subSkillRequirementLevel > slayerLocked['level']) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && subSkillRequirementLevel > maxSkill[subSkill])) {
                         stillValid = false;
                         return true;
                     }
@@ -5190,7 +5932,9 @@ let calcChallenges = function(chunks, baseChunkData) {
             if (chunkInfo['challenges']['Nonskill'][task].hasOwnProperty('SkillsNeeded')) {
                 let tempValidNeeded = true;
                 Object.keys(chunkInfo['challenges']['Nonskill'][task]['SkillsNeeded']).some(taskSkill => {
-                    if ((!checkPrimaryMethod(taskSkill, newValids, baseChunkData) || (taskSkill === 'Slayer' && (!!slayerLocked && chunkInfo['challenges']['Nonskill'][task]['SkillsNeeded'][taskSkill] > slayerLocked['level'])) || (!!maxSkill && maxSkill.hasOwnProperty(taskSkill) && chunkInfo['challenges']['Nonskill'][task]['SkillsNeeded'][taskSkill] > maxSkill[taskSkill])) && !(!!passiveSkill && passiveSkill.hasOwnProperty(taskSkill) && passiveSkill[taskSkill] > 1 && chunkInfo['challenges']['Nonskill'][task]['SkillsNeeded'][taskSkill] <= passiveSkill[taskSkill])) {
+                    let taskSkillLevel = chunkInfo['challenges']['Nonskill'][task]['SkillsNeeded'][taskSkill];
+                    let taskSkillBlocked = hasHiscoreSkillLevel(taskSkill) ? !meetsKnownSkillLevel(taskSkill, taskSkillLevel) : (!checkPrimaryMethod(taskSkill, newValids, baseChunkData) && !meetsKnownSkillLevel(taskSkill, taskSkillLevel));
+                    if (taskSkillBlocked || (taskSkill === 'Slayer' && (!!slayerLocked && taskSkillLevel > slayerLocked['level'])) || (!!maxSkill && maxSkill.hasOwnProperty(taskSkill) && taskSkillLevel > maxSkill[taskSkill])) {
                         tempValidNeeded = false;
                         return true;
                     }
@@ -5252,7 +5996,7 @@ let calcChallenges = function(chunks, baseChunkData) {
                     if (!baseChunkData['items'][item]) {
                         baseChunkData['items'][item] = {};
                     }
-                    baseChunkData['items'][item][chunk] = rules['Primary Spawns'] ? 'primary-spawn' : 'secondary-spawn';
+                    baseChunkData['items'][item][chunk] = getItemSpawnSourceType(item);
                 }
             });
         });
@@ -5873,7 +6617,9 @@ let calcChallenges = function(chunks, baseChunkData) {
                 if (chunkInfo['challenges'][skill][challenge].hasOwnProperty('SkillsNeeded')) {
                     let skillsNeededInvalid = false;
                     Object.keys(chunkInfo['challenges'][skill][challenge]['SkillsNeeded']).some(taskSkill => {
-                        if ((!checkPrimaryMethod(taskSkill, newValids, baseChunkData) || (taskSkill === 'Slayer' && (!!slayerLocked && chunkInfo['challenges'][skill][challenge]['SkillsNeeded'][taskSkill] > slayerLocked['level'])) || (!!maxSkill && maxSkill.hasOwnProperty(taskSkill) && chunkInfo['challenges'][skill][challenge]['SkillsNeeded'][taskSkill] > maxSkill[taskSkill])) && !(!!passiveSkill && passiveSkill.hasOwnProperty(taskSkill) && passiveSkill[taskSkill] > 1 && chunkInfo['challenges'][skill][challenge]['SkillsNeeded'][taskSkill] <= passiveSkill[taskSkill])) {
+                        let taskSkillLevel = chunkInfo['challenges'][skill][challenge]['SkillsNeeded'][taskSkill];
+                        let taskSkillBlocked = hasHiscoreSkillLevel(taskSkill) ? !meetsKnownSkillLevel(taskSkill, taskSkillLevel) : (!checkPrimaryMethod(taskSkill, newValids, baseChunkData) && !meetsKnownSkillLevel(taskSkill, taskSkillLevel));
+                        if (taskSkillBlocked || (taskSkill === 'Slayer' && (!!slayerLocked && taskSkillLevel > slayerLocked['level'])) || (!!maxSkill && maxSkill.hasOwnProperty(taskSkill) && taskSkillLevel > maxSkill[taskSkill])) {
                             skillsNeededInvalid = true;
                             return true;
                         }
@@ -5883,7 +6629,11 @@ let calcChallenges = function(chunks, baseChunkData) {
                         nonValids[challenge] = ['SkillsNeeded'];
                     }
                 }
-                let subSkillValid = !(chunkInfo['challenges'][skill][challenge].hasOwnProperty('Skills') && Object.keys(chunkInfo['challenges'][skill][challenge]['Skills']).filter((subSkill) => { return !checkPrimaryMethod(subSkill, tempChallenges, baseChunkData) || (subSkill === 'Slayer' && !!slayerLocked && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > slayerLocked['level']) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > maxSkill[subSkill]) }).length > 0);
+                let subSkillValid = !(chunkInfo['challenges'][skill][challenge].hasOwnProperty('Skills') && Object.keys(chunkInfo['challenges'][skill][challenge]['Skills']).filter((subSkill) => {
+                    let subSkillLevel = chunkInfo['challenges'][skill][challenge]['Skills'][subSkill];
+                    let subSkillBlocked = hasHiscoreSkillLevel(subSkill) ? !meetsKnownSkillLevel(subSkill, subSkillLevel) : (!checkPrimaryMethod(subSkill, tempChallenges, baseChunkData) && !meetsKnownSkillLevel(subSkill, subSkillLevel));
+                    return subSkillBlocked || (subSkill === 'Slayer' && !!slayerLocked && subSkillLevel > slayerLocked['level']) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && subSkillLevel > maxSkill[subSkill]);
+                }).length > 0);
                 if (subSkillValid && skill !== 'BiS') {
                     if (!!chunkInfo['challenges'][skill][challenge]['Output'] && ((!backlog[skill] || (!backlog[skill].hasOwnProperty(challenge) && !backlog[skill].hasOwnProperty(challenge.replaceAll('#', '/')))))) {
                         let output = chunkInfo['challenges'][skill][challenge]['Output'];
@@ -6497,6 +7247,7 @@ let calcChallenges = function(chunks, baseChunkData) {
                 });
             });
         });
+        pruneLizardmanShamanSourcesWithoutShayzienFive(baseChunkData);
         let tier;
         !!newValids && !!newValids['Diary'] && Object.keys(newValids['Diary']).forEach((line) => {
             tier = line.split('|')[1].split('#')[1];
@@ -6596,6 +7347,7 @@ let calcChallenges = function(chunks, baseChunkData) {
         }
     } while ((Object.keys(diff(valids, newValids) || {}).length !== 0 && i < 15) || i < 3);
     valids = newValids;
+    pruneClockworkBirdhouseTasks(valids);
     //console.log(baseChunkData);
     tempChunkData = baseChunkData;
     return valids;
@@ -6803,7 +7555,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             chunkInfo['challenges'][skill][name]['Skill Requirements'] = [];
             chunkInfo['challenges'][skill][name]['Task RequirementsDetails'] = [];
 
-            
+
             if (chunkInfo['challenges'][skill][name].hasOwnProperty('Skills')) {
                 chunkInfo['challenges'][skill][name]['Skill Requirements'].push(...Object.keys(chunkInfo['challenges'][skill][name]['Skills']).map((key) => chunkInfo['challenges'][skill][name]['Skills'][key] + ' ' + key));
                 chunkInfo['challenges'][skill][name]['Skill RequirementsDetails'].push(...Object.keys(chunkInfo['challenges'][skill][name]['Skills']).map((key) => chunkInfo['challenges'][skill][name]['Skills'][key] + ' ' + key));
@@ -7050,11 +7802,12 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                                         return true;
                                     }
                                 });
-                                if (combatSkills.includes(skill) || (chunkInfo['challenges'][skill][name].hasOwnProperty('Category') && chunkInfo['challenges'][skill][name]['Category'].includes('BIS Skilling'))) {
-                                    let sourceFilterPasses = Object.keys(items[plusAdjusted]).filter((source) => { return !items[plusAdjusted][source].includes('-') || !processingSkill[items[plusAdjusted][source].split('-')[1]] || chunkInfo['challenges'][skill][name]['Not Equip'] || rules['Wield Crafted Items'] || items[plusAdjusted][source].split('-')[1] === 'Slayer' || skill === 'Magic' }).length > 0;
+                                let gateContext = combatSkills.includes(skill) || (chunkInfo['challenges'][skill][name].hasOwnProperty('Category') && chunkInfo['challenges'][skill][name]['Category'].includes('BIS Skilling'));
+                                if (gateContext || shouldApplyMonsterGate()) {
+                                    let sourceFilterPasses = !gateContext || Object.keys(items[plusAdjusted]).filter((source) => { return !items[plusAdjusted][source].includes('-') || !processingSkill[items[plusAdjusted][source].split('-')[1]] || chunkInfo['challenges'][skill][name]['Not Equip'] || rules['Wield Crafted Items'] || items[plusAdjusted][source].split('-')[1] === 'Slayer' || skill === 'Magic' }).length > 0;
                                     if (sourceFilterPasses) {
-                                        let mGate = passesMonsterGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted], true);
-                                        let sGate = mGate && passesShopCostGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted]);
+                                        let mGate = passesMonsterGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted], gateContext);
+                                        let sGate = mGate && (!gateContext || passesShopCostGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted]));
                                         if (mGate && sGate) {
                                             tempTempValid = true;
                                         } else if (!tempTempValid) {
@@ -7129,11 +7882,12 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                                     return true;
                                 }
                             });
-                            if (combatSkills.includes(skill) || (chunkInfo['challenges'][skill][name].hasOwnProperty('Category') && chunkInfo['challenges'][skill][name]['Category'].includes('BIS Skilling'))) {
-                                let sourceFilterPasses = Object.keys(items[plusAdjusted]).filter((source) => { return !items[plusAdjusted][source].includes('-') || !processingSkill[items[plusAdjusted][source].split('-')[1]] || chunkInfo['challenges'][skill][name]['Not Equip'] || rules['Wield Crafted Items'] || items[plusAdjusted][source].split('-')[1] === 'Slayer' || skill === 'Magic' }).length > 0;
+                            let gateContext = combatSkills.includes(skill) || (chunkInfo['challenges'][skill][name].hasOwnProperty('Category') && chunkInfo['challenges'][skill][name]['Category'].includes('BIS Skilling'));
+                            if (gateContext || shouldApplyMonsterGate()) {
+                                let sourceFilterPasses = !gateContext || Object.keys(items[plusAdjusted]).filter((source) => { return !items[plusAdjusted][source].includes('-') || !processingSkill[items[plusAdjusted][source].split('-')[1]] || chunkInfo['challenges'][skill][name]['Not Equip'] || rules['Wield Crafted Items'] || items[plusAdjusted][source].split('-')[1] === 'Slayer' || skill === 'Magic' }).length > 0;
                                 if (sourceFilterPasses) {
-                                    let mGate = passesMonsterGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted], true);
-                                    let sGate = mGate && passesShopCostGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted]);
+                                    let mGate = passesMonsterGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted], gateContext);
+                                    let sGate = mGate && (!gateContext || passesShopCostGate(plusAdjusted.replaceAll(/\*/g, ''), items[plusAdjusted]));
                                     if (mGate && sGate) {
                                         tempTempValid = true;
                                     } else if (!tempTempValid) {
@@ -7210,24 +7964,29 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                         if (item.includes('*') && !!items[tempItem]) {
                             (Object.keys(items[tempItem]).filter((source) => { return (!items[tempItem][source].includes('-Farming') || rules['Farming Primary']) && (!items[tempItem][source].includes('secondary-') || (items[tempItem][source].includes('primary-') && !processingSkill[items[tempItem][source].split('-')[1]]) || items[tempItem][source] === 'shop' )}).length > 0) && (secondary = false);
                         }
-                        if (combatSkills.includes(skill) || (chunkInfo['challenges'][skill][name].hasOwnProperty('Category') && chunkInfo['challenges'][skill][name]['Category'].includes('BIS Skilling'))) {
+                        let gateContext = combatSkills.includes(skill) || (chunkInfo['challenges'][skill][name].hasOwnProperty('Category') && chunkInfo['challenges'][skill][name]['Category'].includes('BIS Skilling'));
+                        if (gateContext || shouldApplyMonsterGate()) {
                             let tempTempValid = false;
-                            Object.keys(items[tempItem]).some(source => {
-                                if (!items[tempItem][source].includes('-') || !skillNames.includes(items[tempItem][source].split('-')[1]) || chunkInfo['challenges'][skill][name]['Not Equip'] || rules['Wield Crafted Items'] || items[tempItem][source].split('-')[1] === 'Slayer' || skill === 'Magic') {
-                                    tempTempValid = true;
-                                    return true;
-                                } else if (chunkInfo['challenges'][skill][name].hasOwnProperty('Tasks')) {
-                                    let questDiaryValid = false;
-                                    (Object.keys(chunkInfo['challenges'][skill][name]['Tasks']).filter((subTask) => { return subTask.split('--').length > 1 && subTask.split('--')[0] === name && (subTask.split('--')[1] === 'Quest' || subTask.split('--')[1] === 'Diary') }).length > 0) && (questDiaryValid = true);
-                                    if (questDiaryValid) {
-                                        tempTempValid = true
+                            if (!gateContext) {
+                                tempTempValid = true;
+                            } else {
+                                Object.keys(items[tempItem]).some(source => {
+                                    if (!items[tempItem][source].includes('-') || !skillNames.includes(items[tempItem][source].split('-')[1]) || chunkInfo['challenges'][skill][name]['Not Equip'] || rules['Wield Crafted Items'] || items[tempItem][source].split('-')[1] === 'Slayer' || skill === 'Magic') {
+                                        tempTempValid = true;
                                         return true;
+                                    } else if (chunkInfo['challenges'][skill][name].hasOwnProperty('Tasks')) {
+                                        let questDiaryValid = false;
+                                        (Object.keys(chunkInfo['challenges'][skill][name]['Tasks']).filter((subTask) => { return subTask.split('--').length > 1 && subTask.split('--')[0] === name && (subTask.split('--')[1] === 'Quest' || subTask.split('--')[1] === 'Diary') }).length > 0) && (questDiaryValid = true);
+                                        if (questDiaryValid) {
+                                            tempTempValid = true
+                                            return true;
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
                             let preGateValid = tempTempValid;
-                            tempTempValid && !passesMonsterGate(tempItem.replaceAll(/\*/g, ''), items[tempItem], true) && (tempTempValid = false);
-                            tempTempValid && !passesShopCostGate(tempItem.replaceAll(/\*/g, ''), items[tempItem]) && (tempTempValid = false);
+                            tempTempValid && !passesMonsterGate(tempItem.replaceAll(/\*/g, ''), items[tempItem], gateContext) && (tempTempValid = false);
+                            tempTempValid && gateContext && !passesShopCostGate(tempItem.replaceAll(/\*/g, ''), items[tempItem]) && (tempTempValid = false);
                             if (preGateValid && !tempTempValid) {
                                 let cleanItem = tempItem.replaceAll(/\*/g, '');
                                 if (monsterGateDetails[cleanItem]) taskGateReasons.push({ label: 'Monster Gate', detail: monsterGateDetails[cleanItem] });
@@ -7735,7 +8494,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
         !!tempItemSkill[skill] && Object.keys(tempItemSkill[skill]).forEach((item) => {
             tempStorage = [];
             if (rules["Highest Level"]) {
-                !!items[item] && tempItemSkill[skill][item].forEach((name) => {
+                !!items[item] && tempItemSkill[skill][item].filter(name => !nonValids.hasOwnProperty(name)).forEach((name) => {
                     valids[skill][name] = chunkInfo['challenges'][skill][name]['Level'];
                 });
             } else {
@@ -7751,7 +8510,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                         });
                     }
                 });
-                !!items[item] && tempItemSkill[skill][item].filter((name) => !chunkInfo['challenges'][skill][name]['NeverShow']).forEach((name) => {
+                !!items[item] && tempItemSkill[skill][item].filter((name) => !nonValids.hasOwnProperty(name) && !chunkInfo['challenges'][skill][name]['NeverShow']).forEach((name) => {
                     let challenge = chunkInfo['challenges'][skill][name];
                     let tempLevel = challenge['Level'];
                     if (rules["Boosting"] && chunkInfo['codeItems']['boostItems'].hasOwnProperty(skill) && !chunkInfo['challenges'][skill][name].hasOwnProperty('NoBoost')) {
@@ -7860,6 +8619,65 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
     // Strict Tool Gating: cap gathering skill tasks by best available tool tier
     let toolGatingCaps = {}; // saved for task rule info
     let toolGatingToolNames = {}; // best tool name per skill
+    let toolGatingExemptTasks = {};
+    let isToolGatingExempt = function(skill, taskName) {
+        return !!toolGatingExemptTasks[skill] && !!toolGatingExemptTasks[skill][taskName];
+    };
+    let isUnlockChunkAccessible = function(chunk) {
+        if (!chunk || !chunk.match(/^[0-9]+-(W)?[0-9]+$/g)) {
+            return !!chunks && chunks.hasOwnProperty(chunk);
+        }
+        let chunkId = chunk.split('-')[0];
+        let sectionId = chunk.split('-')[1];
+        return !!chunks
+            && chunks.hasOwnProperty(chunkId)
+            && !!unlockedSections
+            && unlockedSections.hasOwnProperty(chunkId)
+            && unlockedSections[chunkId].hasOwnProperty(sectionId)
+            && unlockedSections[chunkId][sectionId];
+    };
+    let unlocksBetterToolShop = function(skill, taskName, toolType, bestToolLevel) {
+        if (!chunkInfo['taskUnlocks'] || !chunkInfo['taskUnlocks']['Shops'] || !chunkInfo['shopItems'] || !itemsPlus[toolType] || !chunkInfo['toolLevels'][toolType]) {
+            return false;
+        }
+        return Object.keys(chunkInfo['taskUnlocks']['Shops']).some((shopKey) => {
+            let shopName = shopKey.includes('^') ? shopKey.split('^')[0] : shopKey;
+            let shopItem = shopKey.includes('^') ? shopKey.split('^')[1] : null;
+            let shopItems = shopItem ? {[shopItem]: true} : chunkInfo['shopItems'][shopName];
+            if (!shopItems) return false;
+            let sellsBetterTool = Object.keys(shopItems).some((item) => {
+                return itemsPlus[toolType].includes(item) && (chunkInfo['toolLevels'][toolType][item] || 0) > bestToolLevel;
+            });
+            if (!sellsBetterTool) return false;
+            return Object.keys(chunkInfo['taskUnlocks']['Shops'][shopKey]).some((chunk) => {
+                if (!isUnlockChunkAccessible(chunk)) return false;
+                return chunkInfo['taskUnlocks']['Shops'][shopKey][chunk].some((taskReq) => {
+                    return taskReq && taskReq[taskName] === skill;
+                });
+            });
+        });
+    };
+    let removeCappedTaskOutputs = function(capMap) {
+        Object.keys(capMap).forEach(skill => {
+            let cap = capMap[skill];
+            if (!chunkInfo['challenges'][skill]) return;
+            Object.keys(chunkInfo['challenges'][skill]).forEach(taskName => {
+                let task = chunkInfo['challenges'][skill][taskName];
+                if (!task || !task['Output'] || !task['Level'] || task['Level'] <= cap || isToolGatingExempt(skill, taskName)) return;
+                let output = task['Output'];
+                [output, output + '*', output + '*^', output + '*^^'].forEach(key => {
+                    [baseChunkData['items'], items].forEach(itemMap => {
+                        if (itemMap && itemMap[key] && itemMap[key][taskName]) {
+                            delete itemMap[key][taskName];
+                            if (Object.keys(itemMap[key]).length === 0) {
+                                delete itemMap[key];
+                            }
+                        }
+                    });
+                });
+            });
+        });
+    };
     if (rules['Strict Tool Gating'] && !!chunkInfo['toolLevels']) {
         let toolSkillMap = { 'Woodcutting': 'Axe[+]', 'Mining': 'Pickaxe[+]' };
         Object.keys(toolSkillMap).forEach((skill) => {
@@ -7878,18 +8696,17 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             }
             itemsPlus[toolType].forEach((toolName) => {
                 if (completedBiSTool.level > 0) return;
-                if (items[toolName] || items[toolName + '*']) {
-                    let eff = (toolEfficiency[toolType] && toolEfficiency[toolType][toolName]) || 0;
-                    if (eff > bestEfficiency) bestEfficiency = eff;
-                    let tLevel = chunkInfo['toolLevels'][toolType][toolName] || 0;
-                    if (tLevel > bestToolLevel) {
-                        bestToolLevel = tLevel;
-                        bestToolName = toolName;
-                    }
+                if (!getGatedItemSources(toolName, items, true, true)) return;
+                let eff = (toolEfficiency[toolType] && toolEfficiency[toolType][toolName]) || 0;
+                if (eff > bestEfficiency) bestEfficiency = eff;
+                let tLevel = chunkInfo['toolLevels'][toolType][toolName] || 0;
+                if (tLevel > bestToolLevel) {
+                    bestToolLevel = tLevel;
+                    bestToolName = toolName;
                 }
             });
 
-            // If best tool meets efficiency threshold, no cap needed
+            // If best tool meets efficiency threshold, no cap needed.
             if (bestEfficiency >= toolGatingThreshold) return;
 
             // Cap tasks at best tool level + buffer
@@ -7900,6 +8717,11 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                 Object.keys(valids[skill]).forEach((name) => {
                     let taskLevel = chunkInfo['challenges'][skill][name]['Level'] || 0;
                     if (taskLevel > cap) {
+                        if (unlocksBetterToolShop(skill, name, toolType, bestToolLevel)) {
+                            if (!toolGatingExemptTasks[skill]) toolGatingExemptTasks[skill] = {};
+                            toolGatingExemptTasks[skill][name] = true;
+                            return;
+                        }
                         if (!ruleSkippedTasks[skill]) ruleSkippedTasks[skill] = {};
                         if (!ruleSkippedTasks[skill][name]) ruleSkippedTasks[skill][name] = { level: taskLevel, reasons: [] };
                         ruleSkippedTasks[skill][name].reasons.push({
@@ -7911,54 +8733,262 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                 });
             }
         });
+        removeCappedTaskOutputs(toolGatingCaps);
     }
 
     // Method-Based Cap: cap all skill tasks at highest available primary method level + buffer
     let methodBasedCaps = {}; // saved for task rule info
     let methodBasedHighestLevel = {}; // highest primary method level per skill
+    let methodBasedSourceNames = {}; // chosen source task per skill
     if (rules['Method-Based Cap']) {
         skillNames.forEach((skill) => {
             if (!valids[skill] || Object.keys(valids[skill]).length === 0) return;
+            Object.keys(valids[skill]).forEach((name) => {
+                let task = chunkInfo['challenges'][skill] && chunkInfo['challenges'][skill][name];
+                if (name.startsWith('Train to efficient cap towards') && task && task['Synthetic'] && !task['SplitBacklog']) {
+                    delete valids[skill][name];
+                    delete chunkInfo['challenges'][skill][name];
+                }
+            });
 
             let highestPrimaryLevel = 0;
+            let highestPrimaryTask = '';
+            let highestPrimaryEstablished = false;
+            let methodSourcePriority = function(name) {
+                return getMethodSourceProfile(skill, name).priority || 0;
+            };
+            let isBackloggedMethodCapTask = function(name) {
+                if (!backlog || !backlog[skill]) return false;
+                let variants = [
+                    name,
+                    name.replaceAll('#', '/'),
+                    name.replaceAll('/', '#')
+                ];
+                variants.slice().forEach((variant) => {
+                    if (taskIdMap && taskIdMap[variant]) {
+                        variants.push(taskIdMap[variant]);
+                    }
+                    let task = chunkInfo['challenges'][skill] && chunkInfo['challenges'][skill][variant];
+                    if (task && task['TaskId']) {
+                        variants.push(task['TaskId']);
+                        variants.push('t_' + task['TaskId']);
+                    }
+                });
+                return variants.some((variant) => backlog[skill].hasOwnProperty(variant));
+            };
+            let promotePrimarySource = function(name, level, established) {
+                let currentCap = highestPrimaryLevel > 0 ? calcMethodCap(skill, highestPrimaryLevel, highestPrimaryTask, highestPrimaryEstablished) : 0;
+                let nextCap = calcMethodCap(skill, level, name, established);
+                let currentPriority = highestPrimaryLevel > 0 ? methodSourcePriority(highestPrimaryTask) : 0;
+                let nextPriority = methodSourcePriority(name);
+                if (nextCap > currentCap
+                    || (nextCap === currentCap && nextPriority > currentPriority)
+                    || (nextCap === currentCap && nextPriority === currentPriority && level > highestPrimaryLevel)
+                    || (nextCap === currentCap && nextPriority === currentPriority && level === highestPrimaryLevel && (!highestPrimaryTask || name.localeCompare(highestPrimaryTask, 'en', { numeric: true }) < 0))) {
+                    highestPrimaryLevel = level;
+                    highestPrimaryTask = name;
+                    highestPrimaryEstablished = established;
+                }
+            };
             Object.keys(valids[skill]).forEach((name) => {
                 if (skill === 'Crafting' && rules['Exclude Cape Dyeing Crafting Method'] && name === 'Dye a ~|cape|~') return;
+                if (isBackloggedMethodCapTask(name)) return;
                 let task = chunkInfo['challenges'][skill][name];
                 if (!task) return;
                 let isPrimary = task['Primary'] && !task['Secondary'];
                 if (!isPrimary) return;
                 let taskLevel = task['Level'] || 0;
-                let accessible = taskLevel === 1
-                    || (!!passiveSkill && passiveSkill.hasOwnProperty(skill) && passiveSkill[skill] >= taskLevel)
-                    || (!!skillQuestXp && skillQuestXp.hasOwnProperty(skill) && skillQuestXp[skill]['level'] >= taskLevel);
+                let accessible = meetsKnownSkillLevel(skill, taskLevel);
                 if (!accessible) return;
                 // Arceuus Library scales with level — treat as effective lv55 for cap purposes
                 if (name.includes('Arceuus Library') && task['Level'] === 1) taskLevel = 55;
-                if (taskLevel > highestPrimaryLevel) {
-                    highestPrimaryLevel = taskLevel;
-                }
+                promotePrimarySource(name, taskLevel, true);
             });
+            [completedChallenges[skill], checkedChallenges[skill]].forEach((taskList) => {
+                if (!taskList) return;
+                Object.keys(taskList).forEach((name) => {
+                    if (skill === 'Crafting' && rules['Exclude Cape Dyeing Crafting Method'] && name === 'Dye a ~|cape|~') return;
+                    if (isBackloggedMethodCapTask(name)) return;
+                    let task = chunkInfo['challenges'][skill][name] || chunkInfo['challenges'][skill][name.replaceAll('#', '/')];
+                    if (!task) return;
+                    let isPrimary = task['Primary'] && !task['Secondary'];
+                    if (!isPrimary) return;
+                    let taskLevel = task['Level'] || 0;
+                    promotePrimarySource(name, taskLevel, true);
+                });
+            });
+            if (!!manualTasks && !!manualTasks[skill]) {
+                Object.keys(manualTasks[skill]).forEach((name) => {
+                    if (skill === 'Crafting' && rules['Exclude Cape Dyeing Crafting Method'] && name === 'Dye a ~|cape|~') return;
+                    if (isBackloggedMethodCapTask(name)) return;
+                    let task = chunkInfo['challenges'][skill][name];
+                    if (!task) return;
+                    let isPrimary = (task['Primary'] && !task['Secondary']) || task['Manual'];
+                    if (!isPrimary) return;
+                    if (skill === 'Smithing' && !rules['Smithing by Smelting'] && !baseChunkData['objects'].hasOwnProperty('Anvil') && !baseChunkData['objects'].hasOwnProperty('Rusted anvil')) return;
+                    let manualLevel = parseInt(manualTasks[skill][name]) || task['Level'] || 0;
+                    promotePrimarySource(name, manualLevel, true);
+                });
+            }
 
             if (highestPrimaryLevel === 0) {
                 return;
             }
 
-            let cap = calcLevelCap(highestPrimaryLevel);
+            let isMethodCapCandidate = function(name) {
+                if (skill === 'Crafting' && rules['Exclude Cape Dyeing Crafting Method'] && name === 'Dye a ~|cape|~') return false;
+                let task = chunkInfo['challenges'][skill][name];
+                if (!task) return false;
+                if (!task['Primary'] || task['Secondary'] || task['Synthetic'] || task['NoXp'] || task['NeverShow']) return false;
+                if (toolGatingCaps[skill] && (task['Level'] || 0) > toolGatingCaps[skill]) return false;
+                if (isBackloggedMethodCapTask(name)) return false;
+                return true;
+            };
+            let isCompletedOrChecked = function(name) {
+                return (!!completedChallenges[skill] && (completedChallenges[skill].hasOwnProperty(name) || completedChallenges[skill].hasOwnProperty(name.replaceAll('#', '/'))))
+                    || (!!checkedChallenges[skill] && (checkedChallenges[skill].hasOwnProperty(name) || checkedChallenges[skill].hasOwnProperty(name.replaceAll('#', '/'))));
+            };
+            let methodCapTaskRequirementsPass = function(name) {
+                if (!isMethodCapCandidate(name)) return false;
+                let challenge = chunkInfo['challenges'][skill][name];
+                if (challenge.hasOwnProperty('Tasks')) {
+                    let tasksValid = true;
+                    Object.keys(challenge['Tasks']).some((subTask) => {
+                        let subSkill = challenge['Tasks'][subTask];
+                        if (subTask.includes('[+]') && tasksPlus.hasOwnProperty(subTask.split('[+]x')[0].replaceAll('[+]', '') + '[+]')) {
+                            let plusTask = subTask.includes('[+]x') ? subTask.split('[+]x')[0] + '[+]' : subTask;
+                            let neededCount = subTask.includes('[+]x') ? parseInt(subTask.split('[+]x')[1]) : 1;
+                            let validCount = 0;
+                            tasksPlus[plusTask].forEach((plus) => {
+                                let plusName = plus.split('--')[0];
+                                if (valids.hasOwnProperty(subSkill) && valids[subSkill].hasOwnProperty(plusName)) {
+                                    validCount++;
+                                }
+                            });
+                            if (validCount < neededCount) {
+                                tasksValid = false;
+                                return true;
+                            }
+                        } else if (!valids.hasOwnProperty(subSkill) || !valids[subSkill].hasOwnProperty(subTask)) {
+                            tasksValid = false;
+                            return true;
+                        }
+                    });
+                    if (!tasksValid) return false;
+                }
+                if (challenge.hasOwnProperty('Skills')) {
+                    return Object.keys(challenge['Skills']).filter((subSkill) => {
+                        return (!checkPrimaryMethod(subSkill, valids, baseChunkData) && (!passiveSkill || !passiveSkill.hasOwnProperty(subSkill) || passiveSkill[subSkill] <= 1 || challenge['Skills'][subSkill] > passiveSkill[subSkill]) && (subSkill !== 'Slayer' || !slayerLocked || challenge['Skills'][subSkill] > slayerLocked['level'])) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && challenge['Skills'][subSkill] > maxSkill[subSkill]);
+                    }).length === 0;
+                }
+                return true;
+            };
+            let itemHasMethodTrainableSource = function(rawItem) {
+                let cleanItem = rawItem.replaceAll(/\*/g, '');
+                let possibleItems = [];
+                if (itemsPlus[cleanItem]) {
+                    possibleItems = possibleItems.concat(itemsPlus[cleanItem]);
+                } else {
+                    possibleItems.push(cleanItem);
+                }
+                return possibleItems.some((item) => {
+                    if (tools[item] || tools[item.replaceAll(/\*/g, '')]) return true;
+                    let sources = (baseChunkData['items'] && (baseChunkData['items'][item] || baseChunkData['items'][item + '*'])) || null;
+                    if (!sources) return false;
+                    return Object.entries(sources).some(([sourceName, source]) => {
+                        if (typeof source !== 'string') return false;
+                        let sourceParts = source.split('-');
+                        return source === 'shop'
+                            || source === 'primary-spawn'
+                            || source === 'secondary-spawn'
+                            || source.startsWith('primary-')
+                            || (sourceParts[0] === 'secondary'
+                                && sourceParts[1]
+                                && skillNames.includes(sourceParts[1])
+                                && processingSkill.hasOwnProperty(sourceParts[1])
+                                && !processingSkill[sourceParts[1]]
+                                && !!chunkInfo['challenges'][sourceParts[1]]
+                                && !!chunkInfo['challenges'][sourceParts[1]][sourceName]
+                                && !!chunkInfo['challenges'][sourceParts[1]][sourceName]['Primary']
+                                && !chunkInfo['challenges'][sourceParts[1]][sourceName]['Secondary']
+                                && !chunkInfo['challenges'][sourceParts[1]][sourceName]['Synthetic']
+                                && !chunkInfo['challenges'][sourceParts[1]][sourceName]['NoXp']
+                                && !chunkInfo['challenges'][sourceParts[1]][sourceName]['NeverShow']);
+                    });
+                });
+            };
+            let methodCapTaskInputsAreTrainable = function(name) {
+                if (!processingSkill[skill]) return true;
+                let challenge = chunkInfo['challenges'][skill][name];
+                if (!challenge || !challenge['Items']) return true;
+                return !challenge['Items'].some((item) => {
+                    let cleanItem = item.replaceAll(/\*/g, '');
+                    if (cleanItem.includes('[+]') && itemsPlus[cleanItem]) return !itemHasMethodTrainableSource(cleanItem);
+                    if (tools[cleanItem]) return false;
+                    return !itemHasMethodTrainableSource(cleanItem);
+                });
+            };
+            let preCapValidNames = Object.keys(valids[skill]).filter((name) => methodCapTaskRequirementsPass(name));
+            if (!!tempItemSkill && !!tempItemSkill[skill]) {
+                Object.keys(tempItemSkill[skill]).filter((item) => !!baseChunkData['items'] && !!baseChunkData['items'][item] && (!shouldApplyMonsterGate() || passesMonsterGate(item, baseChunkData['items'][item], false))).forEach((item) => {
+                    tempItemSkill[skill][item].filter((name) => preCapValidNames.indexOf(name) === -1 && methodCapTaskRequirementsPass(name)).forEach((name) => {
+                        preCapValidNames.push(name);
+                    });
+                });
+            }
+            if (!!tempMultiStepSkill && !!tempMultiStepSkill[skill]) {
+                Object.keys(tempMultiStepSkill[skill]).filter((name) => preCapValidNames.indexOf(name) === -1 && methodCapTaskRequirementsPass(name)).forEach((name) => {
+                    preCapValidNames.push(name);
+                });
+            }
+            let highestPrimaryProfile = getMethodSourceProfile(skill, highestPrimaryTask);
+            let methodCapClosurePasses = function(nextPrimaryTask = '') {
+                highestPrimaryProfile = getMethodSourceProfile(skill, highestPrimaryTask);
+                if (skill === 'Fletching' || !!highestPrimaryProfile.allowClosure) return true;
+                let nextPrimaryProfile = nextPrimaryTask ? getMethodSourceProfile(skill, nextPrimaryTask) : { label: 'fallback', priority: 0 };
+                return nextPrimaryProfile.label !== 'fallback' || !!nextPrimaryProfile.priority || !!nextPrimaryProfile.allowClosure;
+            };
+            let cap = calcMethodCap(skill, highestPrimaryLevel, highestPrimaryTask, highestPrimaryEstablished);
+            let bridgeChanged = true;
+            while (bridgeChanged) {
+                bridgeChanged = false;
+                cap = calcMethodCap(skill, highestPrimaryLevel, highestPrimaryTask, highestPrimaryEstablished);
+                preCapValidNames.forEach((name) => {
+                    if (!isMethodCapCandidate(name)) return;
+                    if (!methodCapTaskInputsAreTrainable(name)) return;
+                    let taskLevel = chunkInfo['challenges'][skill][name]['Level'] || 0;
+                    if (taskLevel <= 0 || taskLevel > cap) return;
+                    if (taskLevel > highestPrimaryLevel && !methodCapClosurePasses(name)) return;
+                    let beforeLevel = highestPrimaryLevel;
+                    let beforeTask = highestPrimaryTask;
+                    let beforeEstablished = highestPrimaryEstablished;
+                    let beforeCap = cap;
+                    promotePrimarySource(name, taskLevel, true);
+                    cap = calcMethodCap(skill, highestPrimaryLevel, highestPrimaryTask, highestPrimaryEstablished);
+                    if (highestPrimaryLevel !== beforeLevel || highestPrimaryTask !== beforeTask || highestPrimaryEstablished !== beforeEstablished || cap !== beforeCap) {
+                        bridgeChanged = true;
+                    }
+                });
+            }
+            cap = calcMethodCap(skill, highestPrimaryLevel, highestPrimaryTask, highestPrimaryEstablished);
             methodBasedCaps[skill] = cap;
             methodBasedHighestLevel[skill] = highestPrimaryLevel;
+            methodBasedSourceNames[skill] = highestPrimaryTask;
             Object.keys(valids[skill]).forEach((name) => {
+                if (isBackloggedMethodCapTask(name)) return;
                 let taskLevel = chunkInfo['challenges'][skill][name]['Level'] || 0;
+                let hiscoreLevel = getHiscoreSkillLevel(skill);
+                if (hiscoreLevel !== null && taskLevel <= hiscoreLevel) return;
                 if (taskLevel > cap) {
                     if (!ruleSkippedTasks[skill]) ruleSkippedTasks[skill] = {};
                     if (!ruleSkippedTasks[skill][name]) ruleSkippedTasks[skill][name] = { level: taskLevel, reasons: [] };
                     ruleSkippedTasks[skill][name].reasons.push({
                         label: 'Method Cap',
-                        detail: 'Highest primary method lv' + highestPrimaryLevel + ' → cap lv' + cap + '; task needs lv' + taskLevel
+                        detail: 'Best primary method "' + highestPrimaryTask + '" lv' + highestPrimaryLevel + ' → cap lv' + cap + '; task needs lv' + taskLevel
                     });
                     delete valids[skill][name];
                 }
             });
-
             // Add synthetic training task referencing the lowest skipped task
             let skippedInSkill = ruleSkippedTasks[skill] ? Object.keys(ruleSkippedTasks[skill]).filter(
                 (n) => ruleSkippedTasks[skill][n].reasons.some((r) => r.label === 'Method Cap')
@@ -7971,11 +9001,24 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                 let targetLabel = lowestSkipped.name.includes('|') ? lowestSkipped.name.split('|')[1] : lowestSkipped.name;
                 let syntheticName = 'Train to efficient cap towards ~|' + targetLabel + '|~';
                 valids[skill][syntheticName] = cap;
+                let highestRealTask = preCapValidNames.reduce((best, name) => {
+                    if (!isMethodCapCandidate(name) || isCompletedOrChecked(name)) return best;
+                    let level = chunkInfo['challenges'][skill][name]['Level'] || 0;
+                    if (level > cap) return best;
+                    if (!best || level > best.level || (level === best.level && name.localeCompare(best.name, 'en', { numeric: true }) < 0)) {
+                        return { name, level };
+                    }
+                    return best;
+                }, null);
+                if (highestRealTask) {
+                    valids[skill][highestRealTask.name] = highestRealTask.level;
+                }
                 if (!chunkInfo['challenges'][skill][syntheticName]) {
                     chunkInfo['challenges'][skill][syntheticName] = {
                         Level: cap,
                         NoBoost: true,
-                        Synthetic: true
+                        Synthetic: true,
+                        MethodCapSynthetic: true
                     };
                 }
             }
@@ -7983,24 +9026,26 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
 
         // Remove outputs of capped tasks from baseChunkData.items
         // so downstream tasks (e.g. Defence "Wield X") don't see unreachable items
-        Object.keys(methodBasedCaps).forEach(skill => {
-            let cap = methodBasedCaps[skill];
-            if (!chunkInfo['challenges'][skill]) return;
-            Object.keys(chunkInfo['challenges'][skill]).forEach(taskName => {
-                let task = chunkInfo['challenges'][skill][taskName];
-                if (!task || !task['Output'] || !task['Level'] || task['Level'] <= cap) return;
-                let output = task['Output'];
-                [output, output + '*', output + '*^', output + '*^^'].forEach(key => {
-                    if (baseChunkData['items'] && baseChunkData['items'][key] && baseChunkData['items'][key][taskName]) {
-                        delete baseChunkData['items'][key][taskName];
-                        if (Object.keys(baseChunkData['items'][key]).length === 0) {
-                            delete baseChunkData['items'][key];
-                        }
-                    }
-                });
-            });
-        });
+        removeCappedTaskOutputs(methodBasedCaps);
     }
+    let splitBacklogCaps = getSplitBacklogCapValues();
+    Object.keys(splitBacklogCaps).forEach((skill) => {
+        if (!valids[skill] || Object.keys(valids[skill]).length === 0) return;
+        let cap = splitBacklogCaps[skill];
+        Object.keys(valids[skill]).forEach((name) => {
+            let taskLevel = chunkInfo['challenges'][skill] && chunkInfo['challenges'][skill][name] ? (chunkInfo['challenges'][skill][name]['Level'] || 0) : 0;
+            if (taskLevel > cap) {
+                if (!ruleSkippedTasks[skill]) ruleSkippedTasks[skill] = {};
+                if (!ruleSkippedTasks[skill][name]) ruleSkippedTasks[skill][name] = { level: taskLevel, reasons: [] };
+                ruleSkippedTasks[skill][name].reasons.push({
+                    label: 'Split Backlog',
+                    detail: 'Current split milestone for ' + skill + ': lv' + cap + '; task needs lv' + taskLevel
+                });
+                delete valids[skill][name];
+            }
+        });
+    });
+
     let skillTaskCapValues = {}; // saved for task rule info
     if (skillTaskCap && skillTaskCap !== 'none') {
         let capPerSkill = {};
@@ -8054,8 +9099,10 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
     globalSkillCaps = {};
     skillNames.forEach((skill) => {
         let caps = [];
+        if (toolGatingCaps[skill]) caps.push(toolGatingCaps[skill]);
         if (methodBasedCaps[skill]) caps.push(methodBasedCaps[skill]);
         if (skillTaskCapValues[skill]) caps.push(skillTaskCapValues[skill]);
+        if (splitBacklogCaps[skill]) caps.push(splitBacklogCaps[skill]);
         if (caps.length > 0) globalSkillCaps[skill] = Math.min(...caps);
     });
 
@@ -8445,7 +9492,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             let isSkillTask = skillNames.includes(skill);
             let taskLevel = (chunkInfo['challenges'][skill][name] && chunkInfo['challenges'][skill][name]['Level']) || 0;
             if (isSkillTask) {
-                if (toolGatingCaps[skill]) {
+                if (toolGatingCaps[skill] && !isToolGatingExempt(skill, name)) {
                     let toolName = toolGatingToolNames[skill] || '?';
                     rules_arr.push({
                         label: 'Tool Gating',
@@ -8454,9 +9501,10 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
                 }
                 if (methodBasedCaps[skill]) {
                     let highLv = methodBasedHighestLevel[skill] || '?';
+                    let sourceName = methodBasedSourceNames[skill] || '?';
                     rules_arr.push({
                         label: 'Method Cap',
-                        detail: 'Highest primary method lv' + highLv + ' → cap lv' + methodBasedCaps[skill] + '; task needs lv' + taskLevel
+                        detail: 'Best primary method "' + sourceName + '" lv' + highLv + ' → cap lv' + methodBasedCaps[skill] + '; task needs lv' + taskLevel
                     });
                 }
                 if (skillTaskCapValues[skill]) {
@@ -8469,7 +9517,7 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             }
             // Look up gate details for items this task requires
             let taskItems = (chunkInfo['challenges'][skill][name] && chunkInfo['challenges'][skill][name]['Items']) || [];
-            if (monsterGateActive) {
+            if (shouldApplyMonsterGate()) {
                 let gateDetails = [];
                 taskItems.forEach((item) => {
                     let cleanItem = item.replace(/\*/g, '');
@@ -8496,6 +9544,8 @@ let calcChallengesWork = function(chunks, baseChunkData, oldTempItemSkill) {
             }
         });
     });
+
+    pruneClockworkBirdhouseTasks(valids);
 
     //console.log(JSON.parse(JSON.stringify(tempItemSkill)));
     //console.log(JSON.parse(JSON.stringify(valids)));
@@ -8539,7 +9589,7 @@ let checkPrimaryMethod = function(skill, valids, baseChunkData) {
                         bestBoost += 3;
                     }
                 }
-                if ((((chunkInfo['challenges'][skill][challenge]['Primary'] && (!chunkInfo['challenges'][skill][challenge]['Secondary'])) && (chunkInfo['challenges'][skill][challenge]['Level'] === 1 || (!!passiveSkill && passiveSkill.hasOwnProperty(skill) && passiveSkill[skill] > 1 && chunkInfo['challenges'][skill][challenge]['Level'] <= passiveSkill[skill] + bestBoost) || ((!!skillQuestXp && skillQuestXp.hasOwnProperty(skill) && chunkInfo['challenges'][skill][challenge]['Level'] <= skillQuestXp[skill]['level'] + bestBoost))) && ((!backlog[skill] || (!backlog[skill].hasOwnProperty(challenge) && !backlog[skill].hasOwnProperty(challenge.replaceAll('#', '/')))))) || chunkInfo['challenges'][skill][challenge]['Manual']) && (skill !== 'Smithing' || rules['Smithing by Smelting'] || baseChunkData['objects'].hasOwnProperty('Anvil') || baseChunkData['objects'].hasOwnProperty('Rusted anvil'))) {
+                if ((((chunkInfo['challenges'][skill][challenge]['Primary'] && (!chunkInfo['challenges'][skill][challenge]['Secondary'])) && meetsKnownSkillLevel(skill, chunkInfo['challenges'][skill][challenge]['Level'], bestBoost) && ((!backlog[skill] || (!backlog[skill].hasOwnProperty(challenge) && !backlog[skill].hasOwnProperty(challenge.replaceAll('#', '/')))))) || chunkInfo['challenges'][skill][challenge]['Manual']) && (skill !== 'Smithing' || rules['Smithing by Smelting'] || baseChunkData['objects'].hasOwnProperty('Anvil') || baseChunkData['objects'].hasOwnProperty('Rusted anvil'))) {
                     primaryTasks = true;
                     return true;
                 }
@@ -8595,7 +9645,7 @@ let checkPrimaryMethod = function(skill, valids, baseChunkData) {
                     let innerValid = false;
                     Object.keys(chunkInfo['codeItems']['ammoTools'][ammoItem]).every(item => {
                         if (!!baseChunkData['items'] && Object.keys(baseChunkData['items']).includes(item.replaceAll(/\*/g, ''))) {
-                            if (rangedItems.hasOwnProperty(item.replaceAll(/\*/g, '')) && (rangedItems[item.replaceAll(/\*/g, '')] === 1 || (!!passiveSkill && passiveSkill.hasOwnProperty(skill) && passiveSkill['Ranged'] > 1 && rangedItems[item.replaceAll(/\*/g, '')] <= passiveSkill['Ranged']) || ((!!skillQuestXp && skillQuestXp.hasOwnProperty('Ranged') && rangedItems[item.replaceAll(/\*/g, '')] <= skillQuestXp['Ranged']['level'])))) {
+                            if (rangedItems.hasOwnProperty(item.replaceAll(/\*/g, '')) && meetsKnownSkillLevel('Ranged', rangedItems[item.replaceAll(/\*/g, '')])) {
                                 if (item.includes('*')) {
                                     let tempSecondary = !(!!baseChunkData['items'][item.replaceAll(/\*/g, '')] && Object.keys(baseChunkData['items'][item.replaceAll(/\*/g, '')]).filter((source) => { return (!baseChunkData['items'][item.replaceAll(/\*/g, '')][source].includes('secondary-') && (!processingSkill[baseChunkData['items'][item.replaceAll(/\*/g, '')][source].split('-')[1]] || rules['Wield Crafted Items'])) || (baseChunkData['items'][item.replaceAll(/\*/g, '')][source]['Primary'] && (!processingSkill[baseChunkData['items'][item.replaceAll(/\*/g, '')][source].split('-')[1]] || rules['Wield Crafted Items'])) || baseChunkData['items'][item.replaceAll(/\*/g, '')][source] === 'shop' }).length > 0);
                                     !tempSecondary && (innerValid = true);
@@ -8656,12 +9706,31 @@ let formatEquip = function(equip) {
     }
 }
 
+const getMeleeDefenceScore = function(equipment) {
+    return equipment.defence_crush + equipment.defence_magic + equipment.defence_ranged + equipment.defence_slash + equipment.defence_stab;
+};
+
+const getMeleeAttackScore = function(equipment, style) {
+    if (style === 'Melee') {
+        return equipment.attack_crush + equipment.attack_slash + equipment.attack_stab;
+    }
+    return equipment['attack_' + style.toLowerCase()] || 0;
+};
+
+const getMeleeEquipmentScore = function(equipment, style) {
+    return (1000000000 * equipment.melee_strength) + (1000000 * getMeleeAttackScore(equipment, style)) + getMeleeDefenceScore(equipment);
+};
+
+const isMeleeEquipmentCandidate = function(equipment, style) {
+    return equipment.slot !== 'ammo' && (equipment.melee_strength > 0 || getMeleeAttackScore(equipment, style) > 0 || getMeleeDefenceScore(equipment) > 0);
+};
+
 // Calcs the BIS gear
 let calcBIS = function(completedOnly) {
     let combatStyles = ['Melee', 'Ranged', 'Magic'];
     let primarySkill = {};
     skillNames.forEach((skill) => {
-        primarySkill[skill] = checkPrimaryMethod(skill, globalValids, baseChunkData) || (!!manualTasks[skill] && Object.keys(manualTasks[skill]).length > 0);
+        primarySkill[skill] = checkPrimaryMethod(skill, globalValids, baseChunkData);
     });
     if (rules['Show Best in Slot Prayer Tasks']) {
         combatStyles.push('Prayer');
@@ -8872,12 +9941,12 @@ let calcBIS = function(completedOnly) {
                             }
                         }
                     } else {
-                        if ((Math.min(chunkInfo['equipment'][equip].attack_crush, chunkInfo['equipment'][equip].attack_slash, chunkInfo['equipment'][equip].attack_stab) >= 0 || chunkInfo['equipment'][equip].melee_strength > 0) && chunkInfo['equipment'][equip].slot !== 'ammo' && Math.max(chunkInfo['equipment'][equip].attack_crush, chunkInfo['equipment'][equip].attack_slash, chunkInfo['equipment'][equip].attack_stab, chunkInfo['equipment'][equip].attack_magic, chunkInfo['equipment'][equip].attack_ranged, chunkInfo['equipment'][equip].defence_crush, chunkInfo['equipment'][equip].defence_slash, chunkInfo['equipment'][equip].defence_stab, chunkInfo['equipment'][equip].defence_magic, chunkInfo['equipment'][equip].defence_ranged, chunkInfo['equipment'][equip].melee_strength, chunkInfo['equipment'][equip].magic_damage, chunkInfo['equipment'][equip].ranged_strength, chunkInfo['equipment'][equip].prayer) > 0) {
+                        if (isMeleeEquipmentCandidate(chunkInfo['equipment'][equip], 'Melee')) {
                             if (!completedOnly) {
                                 if (!bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot]) {
                                     bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot] = {};
                                 }
-                                bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot][equip] = (100000 * chunkInfo['equipment'][equip].melee_strength) + (1000 * (chunkInfo['equipment'][equip].attack_crush + chunkInfo['equipment'][equip].attack_slash + chunkInfo['equipment'][equip].attack_stab)) + (chunkInfo['equipment'][equip].defence_crush + chunkInfo['equipment'][equip].defence_magic + chunkInfo['equipment'][equip].defence_ranged + chunkInfo['equipment'][equip].defence_slash + chunkInfo['equipment'][equip].defence_stab);
+                                bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot][equip] = getMeleeEquipmentScore(chunkInfo['equipment'][equip], 'Melee');
                             }
                             if (!bestEquipment[chunkInfo['equipment'][equip].slot] || (chunkInfo['equipment'][equip].melee_strength > chunkInfo['equipment'][bestEquipment[chunkInfo['equipment'][equip].slot]].melee_strength)) {
                                 let tempTempValid = false;
@@ -8930,12 +9999,12 @@ let calcBIS = function(completedOnly) {
                             }
                         }
                     } else {
-                        if ((chunkInfo['equipment'][equip].attack_stab >= 0 || chunkInfo['equipment'][equip].melee_strength > 0) && chunkInfo['equipment'][equip].slot !== 'ammo' && Math.max(chunkInfo['equipment'][equip].attack_crush, chunkInfo['equipment'][equip].attack_slash, chunkInfo['equipment'][equip].attack_stab, chunkInfo['equipment'][equip].attack_magic, chunkInfo['equipment'][equip].attack_ranged, chunkInfo['equipment'][equip].defence_crush, chunkInfo['equipment'][equip].defence_slash, chunkInfo['equipment'][equip].defence_stab, chunkInfo['equipment'][equip].defence_magic, chunkInfo['equipment'][equip].defence_ranged, chunkInfo['equipment'][equip].melee_strength, chunkInfo['equipment'][equip].magic_damage, chunkInfo['equipment'][equip].ranged_strength, chunkInfo['equipment'][equip].prayer) > 0) {
+                        if (isMeleeEquipmentCandidate(chunkInfo['equipment'][equip], 'Stab')) {
                             if (!completedOnly) {
                                 if (!bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot]) {
                                     bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot] = {};
                                 }
-                                bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot][equip] = (100000 * chunkInfo['equipment'][equip].melee_strength) + (1000 * chunkInfo['equipment'][equip].attack_stab) + (chunkInfo['equipment'][equip].defence_crush + chunkInfo['equipment'][equip].defence_magic + chunkInfo['equipment'][equip].defence_ranged + chunkInfo['equipment'][equip].defence_slash + chunkInfo['equipment'][equip].defence_stab);
+                                bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot][equip] = getMeleeEquipmentScore(chunkInfo['equipment'][equip], 'Stab');
                             }
                             if (!bestEquipment[chunkInfo['equipment'][equip].slot] || (chunkInfo['equipment'][equip].melee_strength > chunkInfo['equipment'][bestEquipment[chunkInfo['equipment'][equip].slot]].melee_strength)) {
                                 let tempTempValid = false;
@@ -8997,12 +10066,12 @@ let calcBIS = function(completedOnly) {
                             }
                         }
                     } else {
-                        if ((chunkInfo['equipment'][equip].attack_slash >= 0 || chunkInfo['equipment'][equip].melee_strength > 0) && chunkInfo['equipment'][equip].slot !== 'ammo' && Math.max(chunkInfo['equipment'][equip].attack_crush, chunkInfo['equipment'][equip].attack_slash, chunkInfo['equipment'][equip].attack_stab, chunkInfo['equipment'][equip].attack_magic, chunkInfo['equipment'][equip].attack_ranged, chunkInfo['equipment'][equip].defence_crush, chunkInfo['equipment'][equip].defence_slash, chunkInfo['equipment'][equip].defence_stab, chunkInfo['equipment'][equip].defence_magic, chunkInfo['equipment'][equip].defence_ranged, chunkInfo['equipment'][equip].melee_strength, chunkInfo['equipment'][equip].magic_damage, chunkInfo['equipment'][equip].ranged_strength, chunkInfo['equipment'][equip].prayer) > 0) {
+                        if (isMeleeEquipmentCandidate(chunkInfo['equipment'][equip], 'Slash')) {
                             if (!completedOnly) {
                                 if (!bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot]) {
                                     bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot] = {};
                                 }
-                                bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot][equip] = (100000 * chunkInfo['equipment'][equip].melee_strength) + (1000 * chunkInfo['equipment'][equip].attack_slash) + (chunkInfo['equipment'][equip].defence_crush + chunkInfo['equipment'][equip].defence_magic + chunkInfo['equipment'][equip].defence_ranged + chunkInfo['equipment'][equip].defence_slash + chunkInfo['equipment'][equip].defence_stab);
+                                bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot][equip] = getMeleeEquipmentScore(chunkInfo['equipment'][equip], 'Slash');
                             }
                             if (!bestEquipment[chunkInfo['equipment'][equip].slot] || (chunkInfo['equipment'][equip].melee_strength > chunkInfo['equipment'][bestEquipment[chunkInfo['equipment'][equip].slot]].melee_strength)) {
                                 let tempTempValid = false;
@@ -9055,12 +10124,12 @@ let calcBIS = function(completedOnly) {
                             }
                         }
                     } else {
-                        if ((chunkInfo['equipment'][equip].attack_crush >= 0 || chunkInfo['equipment'][equip].melee_strength > 0) && chunkInfo['equipment'][equip].slot !== 'ammo' && Math.max(chunkInfo['equipment'][equip].attack_crush, chunkInfo['equipment'][equip].attack_slash, chunkInfo['equipment'][equip].attack_stab, chunkInfo['equipment'][equip].attack_magic, chunkInfo['equipment'][equip].attack_ranged, chunkInfo['equipment'][equip].defence_crush, chunkInfo['equipment'][equip].defence_slash, chunkInfo['equipment'][equip].defence_stab, chunkInfo['equipment'][equip].defence_magic, chunkInfo['equipment'][equip].defence_ranged, chunkInfo['equipment'][equip].melee_strength, chunkInfo['equipment'][equip].magic_damage, chunkInfo['equipment'][equip].ranged_strength, chunkInfo['equipment'][equip].prayer) > 0) {
+                        if (isMeleeEquipmentCandidate(chunkInfo['equipment'][equip], 'Crush')) {
                             if (!completedOnly) {
                                 if (!bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot]) {
                                     bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot] = {};
                                 }
-                                bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot][equip] = (100000 * chunkInfo['equipment'][equip].melee_strength) + (1000 * chunkInfo['equipment'][equip].attack_crush) + (chunkInfo['equipment'][equip].defence_crush + chunkInfo['equipment'][equip].defence_magic + chunkInfo['equipment'][equip].defence_ranged + chunkInfo['equipment'][equip].defence_slash + chunkInfo['equipment'][equip].defence_stab);
+                                bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot][equip] = getMeleeEquipmentScore(chunkInfo['equipment'][equip], 'Crush');
                             }
                             if (!bestEquipment[chunkInfo['equipment'][equip].slot] || (chunkInfo['equipment'][equip].melee_strength > chunkInfo['equipment'][bestEquipment[chunkInfo['equipment'][equip].slot]].melee_strength)) {
                                 let tempTempValid = false;
@@ -9186,7 +10255,7 @@ let calcBIS = function(completedOnly) {
                             }
                         }
                     } else {
-                        if ((chunkInfo['equipment'][equip].attack_ranged >= 0 || chunkInfo['equipment'][equip].ranged_strength > 0) && chunkInfo['equipment'][equip].slot !== 'ammo' && Math.max(chunkInfo['equipment'][equip].attack_crush, chunkInfo['equipment'][equip].attack_slash, chunkInfo['equipment'][equip].attack_stab, chunkInfo['equipment'][equip].attack_magic, chunkInfo['equipment'][equip].attack_ranged, chunkInfo['equipment'][equip].defence_crush, chunkInfo['equipment'][equip].defence_slash, chunkInfo['equipment'][equip].defence_stab, chunkInfo['equipment'][equip].defence_magic, chunkInfo['equipment'][equip].defence_ranged, chunkInfo['equipment'][equip].melee_strength, chunkInfo['equipment'][equip].magic_damage, chunkInfo['equipment'][equip].ranged_strength, chunkInfo['equipment'][equip].prayer) > 0) {
+                        if ((chunkInfo['equipment'][equip].attack_ranged > 0 || chunkInfo['equipment'][equip].ranged_strength > 0) && chunkInfo['equipment'][equip].slot !== 'ammo') {
                             if (!completedOnly) {
                                 if (!bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot]) {
                                     bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot] = {};
@@ -9248,7 +10317,7 @@ let calcBIS = function(completedOnly) {
                             }
                         }
                     } else {
-                        if ((chunkInfo['equipment'][equip].attack_magic >= 0 || chunkInfo['equipment'][equip].magic_damage > 0) && chunkInfo['equipment'][equip].slot !== 'ammo' && Math.max(chunkInfo['equipment'][equip].attack_crush, chunkInfo['equipment'][equip].attack_slash, chunkInfo['equipment'][equip].attack_stab, chunkInfo['equipment'][equip].attack_magic, chunkInfo['equipment'][equip].attack_ranged, chunkInfo['equipment'][equip].defence_crush, chunkInfo['equipment'][equip].defence_slash, chunkInfo['equipment'][equip].defence_stab, chunkInfo['equipment'][equip].defence_magic, chunkInfo['equipment'][equip].defence_ranged, chunkInfo['equipment'][equip].melee_strength, chunkInfo['equipment'][equip].magic_damage, chunkInfo['equipment'][equip].ranged_strength, chunkInfo['equipment'][equip].prayer) > 0) {
+                        if ((chunkInfo['equipment'][equip].attack_magic > 0 || chunkInfo['equipment'][equip].magic_damage > 0) && chunkInfo['equipment'][equip].slot !== 'ammo') {
                             if (!completedOnly) {
                                 if (!bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot]) {
                                     bisUpgrades[skill.replaceAll(' ', '_') + '-' + chunkInfo['equipment'][equip].slot] = {};
@@ -11897,19 +12966,121 @@ let calcBIS = function(completedOnly) {
     return highestOverallLocal;
 }
 
+const getSplitBacklogActiveEntries = function() {
+    let entries = {};
+    if (!splitBacklog || Object.keys(splitBacklog).length === 0) return entries;
+    Object.keys(splitBacklog).forEach((skill) => {
+        if (!globalValids[skill] || !chunkInfo['challenges'][skill]) return;
+        Object.keys(splitBacklog[skill]).forEach((targetTask) => {
+            let entry = splitBacklog[skill][targetTask];
+            if (!entry || !entry.milestones || !entry.milestones.length) return;
+            let splitCount = parseInt(entry.splitCount) || entry.milestones.length;
+            let currentSplit = Math.max(1, Math.min(splitCount, parseInt(entry.currentSplit) || 1));
+            let milestone = entry.milestones[Math.min(currentSplit - 1, entry.milestones.length - 1)];
+            if (!milestone || (!milestone.level && !milestone.xp)) return;
+            let milestoneXp = parseInt(milestone.xp);
+            let milestoneLevel = parseInt(milestone.level);
+            if ((!milestoneLevel || milestoneLevel < 1) && !isNaN(milestoneXp)) {
+                milestoneLevel = getLevelForXp(milestoneXp);
+            }
+            let targetLevel = parseInt(entry.targetLevel) || (chunkInfo['challenges'][skill][targetTask] ? chunkInfo['challenges'][skill][targetTask]['Level'] : milestoneLevel);
+            milestoneLevel = Math.max(1, Math.min(targetLevel || 99, milestoneLevel || targetLevel || 1));
+            if (isNaN(milestoneXp)) {
+                milestoneXp = xpTable[milestoneLevel] || 0;
+            }
+            let targetLabel = targetTask.includes('|') ? targetTask.split('|')[1] : targetTask;
+            let syntheticName = 'Get to ' + milestoneXp.toLocaleString() + ' XP in ' + skill + ' [level ' + milestoneLevel + '] (' + currentSplit + '/' + splitCount + ') by training towards ~|' + targetLabel + '|~';
+            let completedCompanions = entry.completedCompanions || {};
+            let companionDone = !!completedCompanions[currentSplit.toString()];
+            let closestCompanion = Object.keys(globalValids[skill]).reduce((best, name) => {
+                let task = chunkInfo['challenges'][skill][name];
+                if (!task || name === syntheticName || task['Synthetic'] || task['NeverShow'] || task['NoXp']) return best;
+                if (backlog[skill] && backlog[skill][name] && !(name === targetTask && currentSplit >= splitCount)) return best;
+                let level = task['Level'] || 0;
+                if (level > milestoneLevel) return best;
+                if (!best || level > best.level || (level === best.level && ((!task['Priority'] && chunkInfo['challenges'][skill][best.name]['Priority']) || (task['Priority'] && chunkInfo['challenges'][skill][best.name]['Priority'] && task['Priority'] < chunkInfo['challenges'][skill][best.name]['Priority']) || name.localeCompare(best.name, 'en', { numeric: true }) < 0))) {
+                    return { name, level };
+                }
+                return best;
+            }, null);
+            let companion = null;
+            if (!companionDone && closestCompanion) {
+                let name = closestCompanion.name;
+                let completed = completedChallenges[skill] && (completedChallenges[skill][name] || completedChallenges[skill][name.replaceAll('#', '/')]);
+                let checked = checkedChallenges[skill] && (checkedChallenges[skill][name] || checkedChallenges[skill][name.replaceAll('#', '/')]);
+                if (!completed && !checked) {
+                    companion = closestCompanion;
+                }
+            }
+            if (!entries[skill] || milestone.level > entries[skill].milestoneLevel) {
+                if (!chunkInfo['challenges'][skill][syntheticName]) {
+                    chunkInfo['challenges'][skill][syntheticName] = {
+                        Level: milestoneLevel,
+                        NoBoost: true,
+                        Synthetic: true,
+                        SplitBacklog: true,
+                        SplitBacklogTarget: targetTask,
+                        SplitBacklogXp: milestoneXp,
+                        Priority: -1000
+                    };
+                }
+                chunkInfo['challenges'][skill][syntheticName]['SplitBacklogCompanion'] = companion ? companion.name : null;
+                globalValids[skill][syntheticName] = milestoneLevel;
+                entries[skill] = {
+                    milestoneLevel,
+                    milestoneXp,
+                    syntheticName,
+                    targetTask,
+                    currentSplit,
+                    splitCount
+                };
+            }
+        });
+    });
+    return entries;
+}
+
+const getSplitBacklogCapValues = function() {
+    let caps = {};
+    if (!splitBacklog || Object.keys(splitBacklog).length === 0) return caps;
+    Object.keys(splitBacklog).forEach((skill) => {
+        if (!splitBacklog[skill]) return;
+        Object.keys(splitBacklog[skill]).forEach((targetTask) => {
+            let entry = splitBacklog[skill][targetTask];
+            if (!entry || !entry.milestones || !entry.milestones.length) return;
+            let splitCount = parseInt(entry.splitCount) || entry.milestones.length;
+            let currentSplit = Math.max(1, Math.min(splitCount, parseInt(entry.currentSplit) || 1));
+            let milestone = entry.milestones[Math.min(currentSplit - 1, entry.milestones.length - 1)];
+            let cap = parseInt(milestone && milestone.level) || 0;
+            if (cap < 1 && milestone && milestone.xp !== undefined) {
+                cap = getLevelForXp(milestone.xp);
+            }
+            if (cap > 0 && (!caps[skill] || cap > caps[skill])) {
+                caps[skill] = cap;
+            }
+        });
+    });
+    return caps;
+}
+
 // Calcs the current challenges to be displayed
 let calcCurrentChallenges2 = function() {
     let tempChallengeArr = {};
     let highestChallenge = {};
     let highestChallengeLevelArr = {};
     let realLevel = {};
+    let splitBacklogActiveEntries = getSplitBacklogActiveEntries();
 
     Object.keys(globalValids).forEach((skill) => {
         realLevel[skill] = [];
         if (skill !== 'Extra' && skill !== 'Quest' && skill !== 'Diary' && skill !== 'BiS') {
             highestChallengeLevelArr[skill] = 0;
-            !!completedChallenges[skill] && Object.keys(completedChallenges[skill]).forEach((name) => {
-                if (chunkInfo['challenges'][skill].hasOwnProperty(name) && chunkInfo['challenges'][skill][name]['Level'] > highestChallengeLevelArr[skill]) {
+            let hiscoreLevel = getHiscoreSkillLevel(skill);
+            if (hiscoreLevel !== null) {
+                highestChallengeLevelArr[skill] = hiscoreLevel;
+            } else {
+                !!completedChallenges[skill] && Object.keys(completedChallenges[skill]).forEach((name) => {
+                    if (chunkInfo['challenges'][skill].hasOwnProperty(name) && chunkInfo['challenges'][skill][name]['Level'] > highestChallengeLevelArr[skill]) {
                     if (rules["Boosting"] && chunkInfo['codeItems']['boostItems'].hasOwnProperty(skill) && !chunkInfo['challenges'][skill][name].hasOwnProperty('NoBoost')) {
                         let bestBoost = 0;
                         let ownsCrystalSaw = false;
@@ -11944,8 +13115,9 @@ let calcCurrentChallenges2 = function() {
                         highestChallengeLevelArr[skill] = chunkInfo['challenges'][skill][name]['Level'];
                         highestOverall[skill] = name;
                     }
-                }
-            });
+                    }
+                });
+            }
             let isPrimary = checkPrimaryMethod(skill, globalValids, baseChunkData);
             Object.keys(globalValids[skill]).forEach((challenge) => {
                 realLevel[skill][challenge] = chunkInfo['challenges'][skill][challenge]['Level'];
@@ -11978,13 +13150,17 @@ let calcCurrentChallenges2 = function() {
                         bestBoost = chunkInfo['challenges'][skill][challenge]['Level'] - 1;
                     }
                 }
-                if (isPrimary || realLevel[skill][challenge] === 1 || (!!passiveSkill && !!passiveSkill.hasOwnProperty(skill) && passiveSkill[skill] >= realLevel[skill][challenge]) || (manualTasks.hasOwnProperty(skill) && manualTasks[skill].hasOwnProperty(challenge)) || (userTasks.hasOwnProperty(skill) && userTasks[skill].hasOwnProperty(challenge))) {
-                    if (globalValids[skill][challenge] !== false && (realLevel[skill][challenge] > highestChallengeLevelArr[skill]) && !chunkInfo['challenges'][skill][challenge]['NeverShow'] && (!completedChallenges[skill] || (!completedChallenges[skill].hasOwnProperty(challenge) && !completedChallenges[skill][challenge.replaceAll('#', '/')]))) {
+                if (splitBacklogActiveEntries[skill] && challenge !== splitBacklogActiveEntries[skill].syntheticName && realLevel[skill][challenge] > splitBacklogActiveEntries[skill].milestoneLevel) {
+                    return;
+                }
+                let isActiveSplitBacklogSynthetic = splitBacklogActiveEntries[skill] && challenge === splitBacklogActiveEntries[skill].syntheticName;
+                if (isPrimary || realLevel[skill][challenge] === 1 || meetsKnownSkillLevel(skill, realLevel[skill][challenge]) || (manualTasks.hasOwnProperty(skill) && manualTasks[skill].hasOwnProperty(challenge)) || (userTasks.hasOwnProperty(skill) && userTasks[skill].hasOwnProperty(challenge))) {
+                    if (globalValids[skill][challenge] !== false && (isActiveSplitBacklogSynthetic || realLevel[skill][challenge] > highestChallengeLevelArr[skill]) && !chunkInfo['challenges'][skill][challenge]['NeverShow'] && (!completedChallenges[skill] || (!completedChallenges[skill].hasOwnProperty(challenge) && !completedChallenges[skill][challenge.replaceAll('#', '/')]))) {
                         if ((!highestChallenge[skill] || (realLevel[skill][challenge] > realLevel[skill][highestChallenge[skill]])) || ((!highestChallenge[skill] || (realLevel[skill][challenge] === realLevel[skill][highestChallenge[skill]])) && (!highestChallenge[skill] || !chunkInfo['challenges'][skill][highestChallenge[skill]]['Priority'] || (!!chunkInfo['challenges'][skill][challenge]['Priority'] && chunkInfo['challenges'][skill][challenge]['Priority'] < chunkInfo['challenges'][skill][highestChallenge[skill]]['Priority'])))) {
                             if ((!backlog[skill] || (!backlog[skill].hasOwnProperty(challenge) && !backlog[skill].hasOwnProperty(challenge.replaceAll('#', '/'))))) {
                                 if (!!chunkInfo['challenges'][skill][challenge]['Skills']) {
                                     let tempValid = true;
-                                    Object.keys(chunkInfo['challenges'][skill][challenge]['Skills']).filter(subSkill => (!checkPrimaryMethod(subSkill, globalValids, baseChunkData) && (!passiveSkill || !passiveSkill.hasOwnProperty(subSkill) || passiveSkill[subSkill] < chunkInfo['challenges'][skill][challenge]['Skills'][subSkill]) && (subSkill !== 'Slayer' || !slayerLocked || chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > slayerLocked['level'])) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > maxSkill[subSkill])).length > 0 && (tempValid = false);
+                                    Object.keys(chunkInfo['challenges'][skill][challenge]['Skills']).filter(subSkill => isSkillRequirementBlocked(subSkill, chunkInfo['challenges'][skill][challenge]['Skills'][subSkill], globalValids, baseChunkData) || (subSkill === 'Slayer' && !!slayerLocked && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > slayerLocked['level']) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > maxSkill[subSkill])).length > 0 && (tempValid = false);
                                     if (tempValid) {
                                         highestChallenge[skill] = challenge;
                                     }
@@ -11995,7 +13171,7 @@ let calcCurrentChallenges2 = function() {
                                 Object.keys(tempAlwaysGlobal[skill][challenge]).filter(tempChallenge => !backlog[skill] || (!backlog[skill].hasOwnProperty(tempChallenge) && !backlog[skill].hasOwnProperty(tempChallenge.replaceAll('#', '/')))).sort((a, b) => { return a['Level'] - b['Level'] }).forEach((tempChallenge) => {
                                     if (!!chunkInfo['challenges'][skill][tempChallenge]['Skills']) {
                                         let tempValid = true;
-                                        Object.keys(chunkInfo['challenges'][skill][tempChallenge]['Skills']).filter(subSkill => (!checkPrimaryMethod(subSkill, globalValids, baseChunkData) && (!passiveSkill || !passiveSkill.hasOwnProperty(subSkill) || passiveSkill[subSkill] < chunkInfo['challenges'][skill][tempChallenge]['Skills'][subSkill]) && (subSkill !== 'Slayer' || !slayerLocked || chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > slayerLocked['level'])) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > maxSkill[subSkill])).length > 0 && (tempValid = false);
+                                        Object.keys(chunkInfo['challenges'][skill][tempChallenge]['Skills']).filter(subSkill => isSkillRequirementBlocked(subSkill, chunkInfo['challenges'][skill][tempChallenge]['Skills'][subSkill], globalValids, baseChunkData) || (subSkill === 'Slayer' && !!slayerLocked && chunkInfo['challenges'][skill][tempChallenge]['Skills'][subSkill] > slayerLocked['level']) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && chunkInfo['challenges'][skill][tempChallenge]['Skills'][subSkill] > maxSkill[subSkill])).length > 0 && (tempValid = false);
                                         if (tempValid) {
                                             highestChallenge[skill] = tempChallenge;
                                         }
@@ -12008,7 +13184,7 @@ let calcCurrentChallenges2 = function() {
                             if ((!backlog[skill] || (!backlog[skill].hasOwnProperty(challenge) && !backlog[skill].hasOwnProperty(challenge.replaceAll('#', '/'))))) {
                                 if (!!chunkInfo['challenges'][skill][challenge]['Skills']) {
                                     let tempValid = true;
-                                    Object.keys(chunkInfo['challenges'][skill][challenge]['Skills']).filter(subSkill => (!checkPrimaryMethod(subSkill, globalValids, baseChunkData) && (!passiveSkill || !passiveSkill.hasOwnProperty(subSkill) || passiveSkill[subSkill] < chunkInfo['challenges'][skill][challenge]['Skills'][subSkill]) && (subSkill !== 'Slayer' || !slayerLocked || chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > slayerLocked['level'])) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > maxSkill[subSkill])).length > 0 && (tempValid = false);
+                                    Object.keys(chunkInfo['challenges'][skill][challenge]['Skills']).filter(subSkill => isSkillRequirementBlocked(subSkill, chunkInfo['challenges'][skill][challenge]['Skills'][subSkill], globalValids, baseChunkData) || (subSkill === 'Slayer' && !!slayerLocked && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > slayerLocked['level']) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > maxSkill[subSkill])).length > 0 && (tempValid = false);
                                     if (tempValid) {
                                         highestChallenge[skill] = challenge;
                                     }
@@ -12019,7 +13195,7 @@ let calcCurrentChallenges2 = function() {
                                 Object.keys(tempAlwaysGlobal[skill][challenge]).filter(tempChallenge => !backlog[skill] || (!backlog[skill].hasOwnProperty(tempChallenge) && !backlog[skill].hasOwnProperty(tempChallenge.replaceAll('#', '/')))).sort((a, b) => { return a['Level'] - b['Level'] }).forEach((tempChallenge) => {
                                     if (!!chunkInfo['challenges'][skill][tempChallenge]['Skills']) {
                                         let tempValid = true;
-                                        Object.keys(chunkInfo['challenges'][skill][tempChallenge]['Skills']).filter(subSkill => (!checkPrimaryMethod(subSkill, globalValids, baseChunkData) && (!passiveSkill || !passiveSkill.hasOwnProperty(subSkill) || passiveSkill[subSkill] < chunkInfo['challenges'][skill][tempChallenge]['Skills'][subSkill]) && (subSkill !== 'Slayer' || !slayerLocked || chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > slayerLocked['level'])) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > maxSkill[subSkill])).length > 0 && (tempValid = false);
+                                        Object.keys(chunkInfo['challenges'][skill][tempChallenge]['Skills']).filter(subSkill => isSkillRequirementBlocked(subSkill, chunkInfo['challenges'][skill][tempChallenge]['Skills'][subSkill], globalValids, baseChunkData) || (subSkill === 'Slayer' && !!slayerLocked && chunkInfo['challenges'][skill][tempChallenge]['Skills'][subSkill] > slayerLocked['level']) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && chunkInfo['challenges'][skill][tempChallenge]['Skills'][subSkill] > maxSkill[subSkill])).length > 0 && (tempValid = false);
                                         if (tempValid) {
                                             highestChallenge[skill] = tempChallenge;
                                         }
@@ -12037,7 +13213,7 @@ let calcCurrentChallenges2 = function() {
             highestCurrent[skill] = highestChallenge[skill];
             if (!!highestChallenge[skill] && !!chunkInfo['challenges'][skill][highestChallenge[skill]] && !!chunkInfo['challenges'][skill][highestChallenge[skill]]['Skills']) {
                 Object.keys(chunkInfo['challenges'][skill][highestChallenge[skill]]['Skills']).forEach((subSkill) => {
-                    if ((!highestChallenge[subSkill] || chunkInfo['challenges'][subSkill][highestChallenge[subSkill]]['Level'] < chunkInfo['challenges'][skill][highestChallenge[skill]]['Skills'][subSkill]) && Object.keys(chunkInfo['challenges'][subSkill]).length > 0 && chunkInfo['challenges'][skill][highestChallenge[skill]]['Skills'][subSkill] > highestChallengeLevelArr[subSkill]) {
+                    if ((!highestChallenge[subSkill] || chunkInfo['challenges'][subSkill][highestChallenge[subSkill]]['Level'] < chunkInfo['challenges'][skill][highestChallenge[skill]]['Skills'][subSkill]) && Object.keys(chunkInfo['challenges'][subSkill]).length > 0 && chunkInfo['challenges'][skill][highestChallenge[skill]]['Skills'][subSkill] > (highestChallengeLevelArr[subSkill] || getHiscoreSkillLevel(subSkill) || 0)) {
                         highestChallenge[subSkill] = highestChallenge[skill];
                         tempChallengeArr[subSkill] = highestChallenge[subSkill];
                         highestCurrent[subSkill] = highestChallenge[subSkill];
@@ -12045,7 +13221,7 @@ let calcCurrentChallenges2 = function() {
                 });
             }
         } else {
-            Object.keys(globalValids[skill]).filter(challenge => !!chunkInfo['challenges'][skill][challenge]['Skills'] && (!manualTasks.hasOwnProperty(skill) || !manualTasks[skill].hasOwnProperty(challenge))).forEach((challenge) => {
+            Object.keys(globalValids[skill]).filter(challenge => !!chunkInfo['challenges'][skill][challenge] && !!chunkInfo['challenges'][skill][challenge]['Skills'] && (!manualTasks.hasOwnProperty(skill) || !manualTasks[skill].hasOwnProperty(challenge))).forEach((challenge) => {
                 let tempValid = true;
                 Object.keys(chunkInfo['challenges'][skill][challenge]['Skills']).some(subSkill => {
                     let bestBoost = 0;
@@ -12073,7 +13249,7 @@ let calcCurrentChallenges2 = function() {
                             }
                         });
                     }
-                    if ((!checkPrimaryMethod(subSkill, globalValids, baseChunkData) && (!passiveSkill || !passiveSkill.hasOwnProperty(subSkill) || passiveSkill[subSkill] < (chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] - (bestBoost + (ownsCrystalSaw ? 3 : 0))))) || (subSkill === 'Slayer' && !!slayerLocked && (chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] - (bestBoost + (ownsCrystalSaw ? 3 : 0))) > slayerLocked['level']) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > maxSkill[subSkill])) {
+                    if (isSkillRequirementBlocked(subSkill, chunkInfo['challenges'][skill][challenge]['Skills'][subSkill], globalValids, baseChunkData, bestBoost + (ownsCrystalSaw ? 3 : 0)) || (subSkill === 'Slayer' && !!slayerLocked && (chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] - (bestBoost + (ownsCrystalSaw ? 3 : 0))) > slayerLocked['level']) || (!!maxSkill && maxSkill.hasOwnProperty(subSkill) && chunkInfo['challenges'][skill][challenge]['Skills'][subSkill] > maxSkill[subSkill])) {
                         tempValid = false;
                         return true;
                     }
@@ -12213,7 +13389,8 @@ let calcCurrentChallenges2 = function() {
         return calcCurrentChallenges2();
     }
     !!outputTasks && Object.keys(outputTasks).forEach((skill) => {
-        !!outputTasks[skill] && Object.keys(outputTasks[skill]).filter(challenge => { return chunkInfo['challenges'].hasOwnProperty(skill) && chunkInfo['challenges'][skill].hasOwnProperty(challenge) && chunkInfo['challenges'][skill][challenge].hasOwnProperty('Level') && !!highestOverall[skill] && chunkInfo['challenges'][skill].hasOwnProperty(highestOverall[skill].split('{')[0]) && chunkInfo['challenges'][skill][highestOverall[skill].split('{')[0]].hasOwnProperty('Level') && chunkInfo['challenges'][skill][challenge]['Level'] <= chunkInfo['challenges'][skill][highestOverall[skill].split('{')[0]]['Level'] }).forEach((challenge) => {
+        let outputTaskLevelThreshold = getOutputTaskSkillThreshold(skill);
+        !!outputTasks[skill] && Object.keys(outputTasks[skill]).filter(challenge => { return chunkInfo['challenges'].hasOwnProperty(skill) && chunkInfo['challenges'][skill].hasOwnProperty(challenge) && chunkInfo['challenges'][skill][challenge].hasOwnProperty('Level') && outputTaskLevelThreshold > 0 && chunkInfo['challenges'][skill][challenge]['Level'] <= outputTaskLevelThreshold }).forEach((challenge) => {
             let stillValid = true;
             chunkInfo['challenges'][skill][challenge]['Tasks'] && Object.keys(chunkInfo['challenges'][skill][challenge]['Tasks']).filter(subTask => !globalValids.hasOwnProperty(chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]) || !globalValids[chunkInfo['challenges'][skill][challenge]['Tasks'][subTask]].hasOwnProperty(subTask)).length > 0 && (stillValid = false);
             chunkInfo['challenges'][skill][challenge]['Items'] && Object.keys(chunkInfo['challenges'][skill][challenge]['Items']).filter(item => !baseChunkData['items'][item.replaceAll(/\*/g, '')]).length > 0 && (stillValid = false);
@@ -12417,7 +13594,7 @@ let gatherChunksInfo = function(chunksIn) {
                                     dropTablesGlobal[monster][drop] = {};
                                 }
                                 dropTablesGlobal[monster][drop][quantity] = (chunkInfo['drops'][monster][drop][quantity].split('/').length <= 1) ? chunkInfo['drops'][monster][drop][quantity] : findFraction(parseFloat(chunkInfo['drops'][monster][drop][quantity].split('/')[0].replaceAll('~', '')) / parseFloat(chunkInfo['drops'][monster][drop][quantity].split('/')[1].replaceAll('~', '')));
-                            } 
+                            }
                         });
                     });
                 });
@@ -12507,7 +13684,7 @@ let gatherChunksInfo = function(chunksIn) {
                         if (!items[spawn]) {
                             items[spawn] = {};
                         }
-                        items[spawn][num + '-' + section] = rules['Primary Spawns'] ? 'primary-spawn' : 'secondary-spawn';
+                        items[spawn][num + '-' + section] = getItemSpawnSourceType(spawn);
                     }
                 });
 
@@ -12641,7 +13818,7 @@ let gatherChunksInfo = function(chunksIn) {
                                 dropTablesGlobal[monster][drop] = {};
                             }
                             dropTablesGlobal[monster][drop][quantity] = (chunkInfo['drops'][monster][drop][quantity].split('/').length <= 1) ? chunkInfo['drops'][monster][drop][quantity] : findFraction(parseFloat(chunkInfo['drops'][monster][drop][quantity].split('/')[0].replaceAll('~', '')) / parseFloat(chunkInfo['drops'][monster][drop][quantity].split('/')[1].replaceAll('~', '')));
-                        } 
+                        }
                     });
                 });
             });
@@ -12731,7 +13908,7 @@ let gatherChunksInfo = function(chunksIn) {
                     if (!items[spawn]) {
                         items[spawn] = {};
                     }
-                    items[spawn][num] = rules['Primary Spawns'] ? 'primary-spawn' : 'secondary-spawn';
+                    items[spawn][num] = getItemSpawnSourceType(spawn);
                 }
             });
 

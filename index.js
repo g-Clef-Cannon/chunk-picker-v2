@@ -40,6 +40,11 @@ let clickY;                                                                     
 let chunkInfo = {};                                                             // Data of all chunk info
 let infoLockedId = -1;                                                          // Id of chunk locked for info
 let userName = '';                                                              // Runescape Username of user
+let hiscoreCharacterName = '';                                                  // Character name for OSRS hiscore lookup
+let hiscoreSkillLevels = {};                                                    // Skill levels fetched from OSRS hiscores
+let hiscoreStatus = '';                                                         // Status text for OSRS hiscore lookup
+let hiscoreRefreshTimeout = null;                                               // Debounce timer for hiscore refreshes
+let hiscoreLookupToken = 0;                                                      // Guards against stale hiscore responses
 
 let ratio = 6528 / 9216;                                                        // Image ratio
 let movedNum = 0;                                                               // Amount of times mouse is moved while dragging
@@ -174,8 +179,25 @@ let activeSubTabs = {
 let subCheckboxNames = {};
 let toggleSubCheckboxTime = 0;
 
-let databaseRef = firebase.database().ref();                                    // Firebase database reference
+let localDbMode = window.CHUNK_PICKER_LOCAL_DB === true && !!window.LocalFirebaseDatabase;
+let databaseRef = localDbMode ? window.LocalFirebaseDatabase.ref() : firebase.database().ref(); // Firebase database reference
 let myRef;                                                                      // Firebase database reference for this map ID
+
+let getDatabaseRef = function(path) {
+    return localDbMode ? window.LocalFirebaseDatabase.ref(path) : firebase.database().ref(path);
+}
+
+let enterLocalDbMap = function(mapId) {
+    myRef = getDatabaseRef('maps/' + mapId);
+    signedIn = true;
+    savedPin = savedPin || 'local';
+    locked = false;
+    inEntry = false;
+    atHome = false;
+    $('.background-img').hide();
+    $('#entry-menu, .lock-box, .lock-closed').hide();
+    $('.lock-opened').show();
+}
 
 let BASE10 = "0123456789";                                                      // Base 10 alphabet
 let BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";  // Base 62 alphabet
@@ -207,6 +229,7 @@ const skillNames = [
     "Construction",
     "Combat"
 ];                                                                              // Names of all skills
+const hiscoreUtils = window.HiscoreUtils;                                       // Shared OSRS hiscore helper
 const combatSkills = [
     'Attack',
     'Strength',
@@ -259,6 +282,144 @@ const skillNamesXp = [
     'Construction',
     'Hunter'
 ];                                                                              // Names of all lampable skills
+
+let canEditHiscoreCharacterName = function() {
+    return testMode || !(viewOnly || inEntry || locked);
+}
+
+let getHiscoreSkillLevelText = function(skill) {
+    return hiscoreSkillLevels.hasOwnProperty(skill) ? hiscoreSkillLevels[skill] : '-';
+}
+
+let getHiscoreSkillLevelValue = function(skill) {
+    if (!hiscoreSkillLevels || !hiscoreSkillLevels.hasOwnProperty(skill)) {
+        return null;
+    }
+    let level = parseInt(hiscoreSkillLevels[skill]);
+    return Number.isFinite(level) && level > 0 ? level : null;
+}
+
+let getKnownSkillLevelValue = function(skill) {
+    let hiscoreLevel = getHiscoreSkillLevelValue(skill);
+    if (hiscoreLevel !== null) {
+        return hiscoreLevel;
+    }
+    let level = 0;
+    if (passiveSkill && passiveSkill.hasOwnProperty(skill)) {
+        level = Math.max(level, parseInt(passiveSkill[skill]) || 0);
+    }
+    if (skillQuestXp && skillQuestXp.hasOwnProperty(skill)) {
+        level = Math.max(level, parseInt(skillQuestXp[skill]['level']) || 0);
+    }
+    return level;
+}
+
+let meetsKnownSkillLevelValue = function(skill, requiredLevel, boost) {
+    requiredLevel = parseInt(requiredLevel) || 0;
+    if (requiredLevel <= 1) {
+        return true;
+    }
+    return getKnownSkillLevelValue(skill) + (parseInt(boost) || 0) >= requiredLevel;
+}
+
+let updateHiscoreActivityInfoUi = function() {
+    if ($('#hiscore-character-input').length > 0) {
+        $('#hiscore-character-input').val(hiscoreCharacterName).prop('disabled', !canEditHiscoreCharacterName());
+        $('.hiscore-character-button').prop('disabled', !canEditHiscoreCharacterName());
+    }
+    $('.hiscore-status').text(hiscoreStatus);
+    $('.hiscore-level').each(function() {
+        $(this).text(getHiscoreSkillLevelText($(this).attr('data-skill')));
+    });
+}
+
+let refreshHiscoreSkillLevels = async function() {
+    if (hiscoreRefreshTimeout) {
+        clearTimeout(hiscoreRefreshTimeout);
+        hiscoreRefreshTimeout = null;
+    }
+
+    const lookupToken = ++hiscoreLookupToken;
+    const lookupName = hiscoreUtils.normalizeCharacterName(hiscoreCharacterName);
+    const previousLevels = JSON.stringify(hiscoreSkillLevels || {});
+    hiscoreCharacterName = lookupName;
+    if (lookupName === '') {
+        hiscoreSkillLevels = {};
+        hiscoreStatus = '';
+        updateHiscoreActivityInfoUi();
+        if (previousLevels !== JSON.stringify(hiscoreSkillLevels || {}) && chunkTasksOn && gotData) {
+            calcCurrentChallengesCanvas(true, true, true, undefined, true);
+        }
+        return;
+    }
+    if (!hiscoreUtils.isValidCharacterName(lookupName)) {
+        hiscoreSkillLevels = {};
+        hiscoreStatus = 'Invalid display name.';
+        updateHiscoreActivityInfoUi();
+        if (previousLevels !== JSON.stringify(hiscoreSkillLevels || {}) && chunkTasksOn && gotData) {
+            calcCurrentChallengesCanvas(true, true, true, undefined, true);
+        }
+        return;
+    }
+
+    hiscoreStatus = 'Fetching stats...';
+    updateHiscoreActivityInfoUi();
+
+    try {
+        const response = await fetch(hiscoreUtils.buildHiscoreUrl(lookupName), { cache: 'no-store' });
+        if (response.status === 404) {
+            throw new Error('not_found');
+        }
+        if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+        }
+        const data = await response.json();
+        const fetchedLevels = hiscoreUtils.parseHiscoreSkillLevels(data);
+        if (lookupToken !== hiscoreLookupToken) {
+            return;
+        }
+        hiscoreSkillLevels = fetchedLevels;
+        hiscoreStatus = 'Loaded ' + (data.name || lookupName);
+        updateHiscoreActivityInfoUi();
+        if (previousLevels !== JSON.stringify(hiscoreSkillLevels || {}) && chunkTasksOn && gotData) {
+            calcCurrentChallengesCanvas(true, true, true, undefined, true);
+        }
+    } catch (error) {
+        if (lookupToken !== hiscoreLookupToken) {
+            return;
+        }
+        console.warn('OSRS hiscore lookup failed:', error);
+        hiscoreSkillLevels = {};
+        hiscoreStatus = error.message === 'not_found' ? 'Character not found on hiscores.' : 'Could not fetch hiscores.';
+        updateHiscoreActivityInfoUi();
+        if (previousLevels !== JSON.stringify(hiscoreSkillLevels || {}) && chunkTasksOn && gotData) {
+            calcCurrentChallengesCanvas(true, true, true, undefined, true);
+        }
+    }
+}
+
+let queueHiscoreRefresh = function() {
+    if (hiscoreRefreshTimeout) {
+        clearTimeout(hiscoreRefreshTimeout);
+    }
+    hiscoreRefreshTimeout = setTimeout(refreshHiscoreSkillLevels, 500);
+}
+
+let saveHiscoreCharacterName = function() {
+    if (!canEditHiscoreCharacterName()) {
+        return;
+    }
+    const inputName = hiscoreUtils.normalizeCharacterName($('#hiscore-character-input').val());
+    if (!hiscoreUtils.isValidCharacterName(inputName)) {
+        hiscoreStatus = 'Invalid display name.';
+        updateHiscoreActivityInfoUi();
+        return;
+    }
+    hiscoreCharacterName = inputName;
+    updateHiscoreActivityInfoUi();
+    setData();
+    refreshHiscoreSkillLevels();
+}
 const clueTiers = [
     'Beginner',
     'Easy',
@@ -459,6 +620,7 @@ let rules = {
     "Skill Task Cap": "none",
     "Skill Task Cap Amount": "50",
 };// List of rules and their on/off state
+const defaultRules = JSON.parse(JSON.stringify(rules));
 
 let ruleNames = {
     "Skillcape": "Must obtain skillcapes <span class='rule-asterisk noscroll'>*</span>",
@@ -567,7 +729,7 @@ let ruleNames = {
     "Crewmates": "Getting the Sailing level to recruit crewmates to your ship can be a skill task",
     "Sea Charting": "Require Sea Charting tasks be completed",
     "Fish Offcuts Valid Processing": "Creating fish offcuts and fine fish offcuts counts as a valid way to process raw fish via Cooking (otherwise, most raw fish will require they be cooked to process them)",
-    "Strict Tool Gating": "For gathering skills (Woodcutting, Mining), always limit skill task levels based on your best available tool tier. Cap is lifted when your best tool reaches X-amount% efficiency of the best tool",
+    "Strict Tool Gating": "For gathering skills (Woodcutting, Mining), always limit skill task levels based on your best available tool tier. Cap is lifted when your best tool reaches X-amount% of its configured efficiency baseline",
     "Method-Based Cap": "Cap each skill's task levels based on your highest available primary training method. Prevents tedious grinds far above what your methods can efficiently train",
     "Skill Task Cap": "Limit how high skill tasks can go",
 };// List of rule definitions
@@ -950,10 +1112,13 @@ let settings = {
     "optOutSectionsWater": false,
     "unlockedBorderColor": '#FF0000',
     "rollingChunksOptions": { "karamja": true, "fremennik_province": true, "kharidian_desert": true, "tirannwn": true, "kourend": true, "varlamore": true, "wilderness": true, "morytania": true, "kandarin": true, "asgarnia": true, "misthalin": true, "ocean": true, "noquest": false, "bank": false },
-    "chunkNeighboursOptions": { "neighbors": true, "walkableRollable": true, "autoWalkableRollable": false, "remove": false },
+    "chunkNeighboursOptions": { "neighbors": true, "walkableRollable": true, "autoWalkableRollable": false, "allowTransportation": false, "remove": false },
     "defaultChunkinfo": 'monsters',
     "taskSearchbar": false,
     "generatePluginData": false,
+    "splitBacklogEnabled": true,
+    "splitBacklogChunkCount": "2",
+    "splitBacklogIncludeZeroTaskChunks": false,
 };                                                                              // Current state of all settings
 
 let settingNames = {
@@ -984,7 +1149,10 @@ let settingNames = {
     "unlockedBorderColor": "Change the color of the border surrounding your unlocked chunks",
     "defaultChunkinfo": "Select the default tab when first opening the Chunk Info Panel",
     "taskSearchbar": "Show a searchbar at the top of your Active Tasks to allow filtering. Useful for maps with large task lists that have trouble finding specific tasks",
-    "generatePluginData": "Opt-in to generate data used in the Chunk Tasks plugin"
+    "generatePluginData": "Opt-in to generate data used in the Chunk Tasks plugin",
+    "splitBacklogEnabled": "Show the Split Backlog action for eligible skill tasks",
+    "splitBacklogChunkCount": "Default split count for new split backlog tasks",
+    "splitBacklogIncludeZeroTaskChunks": "Count newly unlocked chunks with no active tasks when advancing split backlog tasks"
 };                                                                              // Descriptions of the settings
 
 let settingStructure = {
@@ -1025,6 +1193,9 @@ let settingStructure = {
         "optOutSections": ["optOutSectionsWater"],
         "newTasks": true,
         "generatePluginData": true
+    },
+    "Backlog": {
+        "splitBacklogEnabled": ["splitBacklogChunkCount", "splitBacklogIncludeZeroTaskChunks"]
     }
 };                                                                              // Structure of the settings
 
@@ -1039,6 +1210,291 @@ let settingsStructureConflict = {
     "remove": ["neighbors"],
     "taskSidebar": ["recent"]
 };                                                                              // Rules that conflict with each other and can't both be checked
+
+const getLevelXpFloor = function(level) {
+    level = Math.max(1, Math.min(99, parseInt(level) || 1));
+    let points = 0;
+    for (let lvl = 1; lvl < level; lvl++) {
+        points += Math.floor(lvl + 300 * Math.pow(2, lvl / 7));
+    }
+    return Math.floor(points / 4);
+}
+
+const getLevelFromXp = function(xp) {
+    xp = Math.max(0, parseInt(xp) || 0);
+    let level = 1;
+    for (let lvl = 2; lvl <= 99; lvl++) {
+        if (getLevelXpFloor(lvl) > xp) {
+            return level;
+        }
+        level = lvl;
+    }
+    return level;
+}
+
+const parseSplitBacklogCount = function(value) {
+    value = value === undefined || value === null ? '' : value.toString().trim();
+    if (!value.match(/^[0-9]+$/)) return null;
+    let splitCount = parseInt(value);
+    if (splitCount < 1 || splitCount > 99) return null;
+    return splitCount;
+}
+
+const getSplitBacklogCount = function() {
+    return parseSplitBacklogCount(settings['splitBacklogChunkCount']) || 2;
+}
+
+const getSplitBacklogEntry = function(challenge, skill) {
+    challenge = decodeQueryParam(challenge);
+    return splitBacklog && splitBacklog[skill] ? splitBacklog[skill][challenge] : null;
+}
+
+const getReadableChallengeName = function(challenge) {
+    return decodeQueryParam(challenge).replaceAll(/~\|/g, '').replaceAll(/\|~/g, '').replaceAll(/\*/g, '');
+}
+
+const promptSplitBacklogCount = function(challenge, skill) {
+    let existingEntry = getSplitBacklogEntry(challenge, skill);
+    let defaultCount = existingEntry && existingEntry.splitCount ? existingEntry.splitCount : getSplitBacklogCount();
+    let promptText = 'Split this backlog task across how many qualifying future chunks?\n\n' + getReadableChallengeName(challenge);
+    let response = window.prompt(promptText, defaultCount);
+    if (response === null) return null;
+    let splitCount = parseSplitBacklogCount(response);
+    if (!splitCount) {
+        window.alert('Enter a whole number from 1 to 99.');
+        return null;
+    }
+    return splitCount;
+}
+
+const getHighestStateLevelForSkill = function(skill) {
+    let hiscoreLevel = getHiscoreSkillLevelValue(skill);
+    if (hiscoreLevel !== null) {
+        return { level: hiscoreLevel, source: 'hiscore' };
+    }
+    let best = { level: 1, source: 'base' };
+    const consider = function(level, source) {
+        level = parseInt(level) || 0;
+        if (level > best.level) {
+            best = { level, source };
+        }
+    };
+    const considerTaskSet = function(taskSet, source) {
+        if (!taskSet || !taskSet[skill] || !chunkInfo['challenges'] || !chunkInfo['challenges'][skill]) return;
+        Object.keys(taskSet[skill]).forEach((name) => {
+            if (chunkInfo['challenges'][skill][name] && chunkInfo['challenges'][skill][name]['Level']) {
+                consider(chunkInfo['challenges'][skill][name]['Level'], source);
+            }
+        });
+    };
+    considerTaskSet(completedChallenges, 'completed');
+    considerTaskSet(checkedChallenges, 'checked');
+    considerTaskSet(manualTasks, 'manual');
+    considerTaskSet(userTasks, 'user');
+    if (passiveSkill && passiveSkill.hasOwnProperty(skill)) {
+        consider(passiveSkill[skill], 'passive');
+    }
+    return best;
+}
+
+const buildSplitBacklogMilestones = function(startLevel, targetLevel, splitCount) {
+    let startXp = getLevelXpFloor(startLevel);
+    let targetXp = getLevelXpFloor(targetLevel);
+    let milestones = [];
+    for (let split = 1; split <= splitCount; split++) {
+        let xp = Math.ceil(startXp + ((targetXp - startXp) * split / splitCount));
+        if (split === splitCount) {
+            xp = targetXp;
+        }
+        let level = Math.max(startLevel, Math.min(targetLevel, getLevelFromXp(xp)));
+        milestones.push({ split, xp, level });
+    }
+    return { startXp, targetXp, milestones };
+}
+
+const isSplitBacklogEligible = function(challenge, skill) {
+    challenge = decodeQueryParam(challenge);
+    if (!settings['splitBacklogEnabled'] || !skillNames.includes(skill)) return false;
+    let task = chunkInfo['challenges'] && chunkInfo['challenges'][skill] && chunkInfo['challenges'][skill][challenge];
+    if (!task) return false;
+    if (task['SplitBacklog'] || task['SplitBacklogTarget'] || getSplitBacklogCompanionInfo(challenge, skill)) return false;
+    if (task['Synthetic'] && !task['MethodCapSynthetic']) return false;
+    let targetLevel = parseInt(task['Level']) || 0;
+    if (targetLevel <= 1) return false;
+    return getHighestStateLevelForSkill(skill).level < targetLevel;
+}
+
+const hasSplitBacklogEntry = function(challenge, skill) {
+    challenge = decodeQueryParam(challenge);
+    return !!splitBacklog && !!splitBacklog[skill] && !!splitBacklog[skill][challenge];
+}
+
+const cleanupSplitBacklogEntry = function(challenge, skill) {
+    challenge = decodeQueryParam(challenge);
+    if (!splitBacklog || !splitBacklog[skill]) return;
+    delete splitBacklog[skill][challenge];
+    if (Object.keys(splitBacklog[skill]).length === 0) {
+        delete splitBacklog[skill];
+    }
+}
+
+const getSplitBacklogCompanionInfo = function(challenge, skill) {
+    challenge = decodeQueryParam(challenge);
+    if (!splitBacklog || !splitBacklog[skill] || !chunkInfo['challenges'] || !chunkInfo['challenges'][skill]) return null;
+    let result = null;
+    Object.keys(chunkInfo['challenges'][skill]).some((taskName) => {
+        let task = chunkInfo['challenges'][skill][taskName];
+        if (!task || task['SplitBacklogCompanion'] !== challenge || !task['SplitBacklogTarget']) return false;
+        let targetTask = task['SplitBacklogTarget'];
+        let entry = splitBacklog[skill][targetTask];
+        if (!entry) return false;
+        result = {
+            targetTask,
+            entry,
+            splitKey: (parseInt(entry.currentSplit) || 1).toString()
+        };
+        return true;
+    });
+    return result;
+}
+
+const markSplitBacklogCompanionDone = function(challenge, skill, done) {
+    let companionInfo = getSplitBacklogCompanionInfo(challenge, skill);
+    if (!companionInfo) return;
+    if (!companionInfo.entry.completedCompanions) {
+        companionInfo.entry.completedCompanions = {};
+    }
+    if (done) {
+        companionInfo.entry.completedCompanions[companionInfo.splitKey] = decodeQueryParam(challenge);
+    } else {
+        delete companionInfo.entry.completedCompanions[companionInfo.splitKey];
+        if (Object.keys(companionInfo.entry.completedCompanions).length === 0) {
+            delete companionInfo.entry.completedCompanions;
+        }
+    }
+}
+
+const getLatestChunkRollMarker = function() {
+    let markers = Object.keys(chunkOrder || {});
+    if (markers.length === 0) return null;
+    return markers.sort((a, b) => parseInt(b) - parseInt(a))[0];
+}
+
+const getSplitBacklogCurrentSplit = function(entry) {
+    let splitCount = Math.max(1, parseInt(entry && entry.splitCount) || (entry && entry.milestones ? entry.milestones.length : 1) || 1);
+    return Math.max(1, Math.min(splitCount, parseInt(entry && entry.currentSplit) || 1));
+}
+
+const getSplitBacklogSyntheticName = function(skill, targetTask, entry) {
+    if (!entry || !entry.milestones || entry.milestones.length === 0) return null;
+    let splitCount = Math.max(1, parseInt(entry.splitCount) || entry.milestones.length);
+    let currentSplit = getSplitBacklogCurrentSplit(entry);
+    let milestone = entry.milestones[Math.min(currentSplit - 1, entry.milestones.length - 1)];
+    if (!milestone || (!milestone.level && !milestone.xp)) return null;
+    let milestoneXp = parseInt(milestone.xp);
+    let milestoneLevel = parseInt(milestone.level);
+    if ((!milestoneLevel || milestoneLevel < 1) && !isNaN(milestoneXp)) {
+        milestoneLevel = getLevelFromXp(milestoneXp);
+    }
+    let targetLevel = parseInt(entry.targetLevel) || (chunkInfo['challenges'] && chunkInfo['challenges'][skill] && chunkInfo['challenges'][skill][targetTask] ? chunkInfo['challenges'][skill][targetTask]['Level'] : milestoneLevel);
+    milestoneLevel = Math.max(1, Math.min(targetLevel || 99, milestoneLevel || targetLevel || 1));
+    if (isNaN(milestoneXp)) {
+        milestoneXp = getLevelXpFloor(milestoneLevel);
+    }
+    let targetLabel = targetTask.includes('|') ? targetTask.split('|')[1] : targetTask;
+    return 'Get to ' + milestoneXp.toLocaleString() + ' XP in ' + skill + ' [level ' + milestoneLevel + '] (' + currentSplit + '/' + splitCount + ') by training towards ~|' + targetLabel + '|~';
+}
+
+const challengeSetHasChallenge = function(taskSet, skill, challenge) {
+    return !!taskSet && !!taskSet[skill] && !!challenge && (!!taskSet[skill][challenge] || !!taskSet[skill][challenge.replaceAll('#', '/')]);
+}
+
+const deleteChallengeFromSet = function(taskSet, skill, challenge) {
+    if (!taskSet || !taskSet[skill] || !challenge) return;
+    delete taskSet[skill][challenge];
+    delete taskSet[skill][challenge.replaceAll('#', '/')];
+    if (Object.keys(taskSet[skill]).length === 0) {
+        delete taskSet[skill];
+    }
+}
+
+const isCurrentSplitBacklogTaskDone = function(skill, targetTask, entry) {
+    let syntheticName = getSplitBacklogSyntheticName(skill, targetTask, entry);
+    return challengeSetHasChallenge(checkedChallenges, skill, syntheticName) || challengeSetHasChallenge(completedChallenges, skill, syntheticName);
+}
+
+const clearCurrentSplitBacklogTaskDone = function(skill, targetTask, entry) {
+    let syntheticName = getSplitBacklogSyntheticName(skill, targetTask, entry);
+    deleteChallengeFromSet(checkedChallenges, skill, syntheticName);
+    deleteChallengeFromSet(completedChallenges, skill, syntheticName);
+}
+
+const splitBacklogHasEntries = function() {
+    return !!splitBacklog && Object.keys(splitBacklog).some((skill) => splitBacklog[skill] && Object.keys(splitBacklog[skill]).length > 0);
+}
+
+const getSplitBacklogTaskKey = function(challenge, skill) {
+    return skill + '::' + challenge;
+}
+
+const getDisplayedTaskInfo = function(taskEntry) {
+    let taskName = Object.keys(taskEntry || {}).filter((key) => key !== 'prefix')[0];
+    if (!taskName) return null;
+    let skill = taskEntry[taskName];
+    return { taskName, skill };
+}
+
+const isSplitBacklogSyntheticTask = function(challenge, skill) {
+    challenge = decodeQueryParam(challenge);
+    let task = chunkInfo['challenges'] && chunkInfo['challenges'][skill] && chunkInfo['challenges'][skill][challenge];
+    return !!(task && task['SplitBacklog']);
+}
+
+const getSplitBacklogAdvanceTaskCount = function(displayedTasks) {
+    if (typeof displayedTasks === 'number') return displayedTasks;
+    if (!Array.isArray(displayedTasks)) return 0;
+    let splitCompanionTasks = {};
+    displayedTasks.forEach((taskEntry) => {
+        let taskInfo = getDisplayedTaskInfo(taskEntry);
+        if (!taskInfo) return;
+        let task = chunkInfo['challenges'] && chunkInfo['challenges'][taskInfo.skill] && chunkInfo['challenges'][taskInfo.skill][taskInfo.taskName];
+        if (task && task['SplitBacklog'] && task['SplitBacklogCompanion']) {
+            splitCompanionTasks[getSplitBacklogTaskKey(task['SplitBacklogCompanion'], taskInfo.skill)] = true;
+        }
+    });
+    return displayedTasks.filter((taskEntry) => {
+        let taskInfo = getDisplayedTaskInfo(taskEntry);
+        if (!taskInfo) return false;
+        if (isSplitBacklogSyntheticTask(taskInfo.taskName, taskInfo.skill)) return false;
+        return !splitCompanionTasks[getSplitBacklogTaskKey(taskInfo.taskName, taskInfo.skill)];
+    }).length;
+}
+
+const maybeAdvanceSplitBacklog = function(displayedTasks) {
+    if (!chunkJustRolled || !splitBacklogHasEntries()) return false;
+    let activeTaskCount = getSplitBacklogAdvanceTaskCount(displayedTasks);
+    if (!settings['splitBacklogIncludeZeroTaskChunks'] && activeTaskCount < 1) return false;
+    let marker = getLatestChunkRollMarker();
+    if (!marker) return false;
+    let changed = false;
+    Object.keys(splitBacklog).forEach((skill) => {
+        Object.keys(splitBacklog[skill]).forEach((taskName) => {
+            let entry = splitBacklog[skill][taskName];
+            if (!entry || entry.lastAdvancedChunkMarker === marker) return;
+            if (getSplitBacklogCurrentSplit(entry) >= (parseInt(entry.splitCount) || 1)) return;
+            if (!isCurrentSplitBacklogTaskDone(skill, taskName, entry)) return;
+            clearCurrentSplitBacklogTaskDone(skill, taskName, entry);
+            entry.currentSplit = getSplitBacklogCurrentSplit(entry) + 1;
+            entry.lastAdvancedChunkMarker = marker;
+            changed = true;
+        });
+    });
+    if (changed) {
+        setData();
+        calcCurrentChallengesCanvas(true, true, true);
+    }
+    return changed;
+}
 
 let maybePrimary = [
     "Normal Farming",
@@ -1170,6 +1626,7 @@ let globalSectionsValid = true;
 let challengeArr = [];
 let checkedChallenges = {};
 let backlog = {};
+let splitBacklog = {};
 let completedChallenges = {};
 let possibleAreas = {};
 let manualAreas = {};
@@ -1367,6 +1824,7 @@ let userTasksListModalOpen = false;
 let userTaskDeleteConfirmationModalOpen = false;
 let searchModalOpen = false;
 let searchDetailsModalOpen = false;
+let monsterTableModalOpen = false;
 let highestModalOpen = false;
 let bisUpgradesModalOpen = false;
 let highest2ModalOpen = false;
@@ -1404,6 +1862,70 @@ let workersOut = {
     'future': false
 };
 let gotData = false;
+let mapSettingsLoaded = false;
+let mapChunksLoaded = false;
+let startupDataLoadActive = false;
+let startupDataLoadFinishQueued = false;
+let startupDataLoadRequired = new Set();
+const startupDataLoadPaths = [
+    'settings',
+    'rules',
+    'recent',
+    'randomLoot',
+    'friends',
+    'friendsAlt',
+    'chunkNotes',
+    'pluginOutput',
+    'topbarSelection',
+    'userTasks',
+    'manualPrimary',
+    'hiscoreCharacterName',
+    'chunks',
+    'activeSubTabs',
+    'chunkinfo/checkedChallenges',
+    'chunkinfo/completedChallenges',
+    'chunkinfo/backlog',
+    'chunkinfo/splitBacklog',
+    'chunkinfo/possibleAreas',
+    'chunkinfo/manualAreas',
+    'chunkinfo/manualTasks',
+    'chunkinfo/manualEquipment',
+    'chunkinfo/manualSections',
+    'chunkinfo/backloggedSources',
+    'chunkinfo/altChallenges',
+    'chunkinfo/manualMonsters',
+    'chunkinfo/slayerLocked',
+    'chunkinfo/constructionLocked',
+    'chunkinfo/passiveSkill',
+    'chunkinfo/maxSkill',
+    'chunkinfo/prevValueLevelInput',
+    'chunkinfo/checkedAllTasks',
+    'chunkinfo/activeTasks',
+    'chunkinfo/assignedXpRewards'
+];
+let finishStartupDataLoad = function() {
+    if (!startupDataLoadActive || startupDataLoadRequired.size > 0) {
+        return;
+    }
+    startupDataLoadActive = false;
+    startupDataLoadFinishQueued = false;
+    chunkTasksOn && calcCurrentChallengesCanvas(true, true, !viewOnly);
+}
+let beginStartupDataLoad = function() {
+    startupDataLoadActive = true;
+    startupDataLoadFinishQueued = false;
+    startupDataLoadRequired = new Set(startupDataLoadPaths);
+}
+let markStartupDataLoaded = function(childName) {
+    if (!startupDataLoadActive || !startupDataLoadRequired.has(childName)) {
+        return;
+    }
+    startupDataLoadRequired.delete(childName);
+    if (startupDataLoadRequired.size === 0 && !startupDataLoadFinishQueued) {
+        startupDataLoadFinishQueued = true;
+        setTimeout(finishStartupDataLoad, 0);
+    }
+}
 let questPointTotal = 0;
 let combatPointTotal = 0;
 let highestOverallCompleted = {};
@@ -1685,6 +2207,9 @@ let userTaskSavedName;
 let userTaskSavedSkill;
 let searchDetailSortBy = 'Alphabetical';
 let searchDetailsParams = [];
+let monsterTableSortBy = 'name';
+let monsterTableSortDirection = 'asc';
+let monsterTableFilter = '';
 let recentFancyRollTimeout;
 let recentFancyRollTime = 0;
 let mapsData = [];
@@ -2363,6 +2888,9 @@ document.body.addEventListener('mousedown', function (event) {
     } else if (searchModalOpen) {
         rect = $('#searchModal .modal-content')[0].getBoundingClientRect();
         hasSet = true;
+    } else if (monsterTableModalOpen) {
+        rect = $('#monsterTableModal .modal-content')[0].getBoundingClientRect();
+        hasSet = true;
     } else if (addEquipmentModalOpen) {
         rect = $('#addEquipmentModal .modal-content')[0].getBoundingClientRect();
         hasSet = true;
@@ -2476,6 +3004,9 @@ document.body.addEventListener('mouseup', function (event) {
     } else if (searchModalOpen) {
         rect = $('#searchModal .modal-content')[0].getBoundingClientRect();
         hasSet = true;
+    } else if (monsterTableModalOpen) {
+        rect = $('#monsterTableModal .modal-content')[0].getBoundingClientRect();
+        hasSet = true;
     } else if (addEquipmentModalOpen) {
         rect = $('#addEquipmentModal .modal-content')[0].getBoundingClientRect();
         hasSet = true;
@@ -2567,6 +3098,7 @@ document.body.addEventListener('mouseup', function (event) {
         questStepsModalOpen && !detailsModalOpen && closeQuestSteps();
         methodsModalOpen && !detailsModalOpen && closeMethods();
         searchModalOpen && !searchDetailsModalOpen && !detailsModalOpen && closeSearch();
+        monsterTableModalOpen && !searchDetailsModalOpen && !detailsModalOpen && closeMonsterTable();
         detailsModalOpen && !searchDetailsModalOpen && closeChallengeDetails();
         rulesModalOpen && !presetWarningModalOpen && closeRules();
         settingsModalOpen && !mapIntroOpen && closeSettings();
@@ -2760,6 +3292,53 @@ let handleMouseMove = function(e) {
 // Checks if chunk is locked
 let checkIfGray = function(chunkId) {
     return (!tempChunks['unlocked'] || !tempChunks['unlocked'].hasOwnProperty(chunkId)) && (!tempChunks['selected'] || !tempChunks['selected'].hasOwnProperty(chunkId)) && (!tempChunks['potential'] || !tempChunks['potential'].hasOwnProperty(chunkId)) && (!tempChunks['blacklisted'] || !tempChunks['blacklisted'].hasOwnProperty(chunkId));
+}
+
+let normalizeChunkId = function(chunkId) {
+    return chunkId === undefined || chunkId === null ? '' : chunkId.toString();
+}
+
+let canMarkChunkRollable = function(chunkId, requireWalkable = false) {
+    let normalizedChunkId = normalizeChunkId(chunkId);
+    return normalizedChunkId !== '' && checkIfGray(normalizedChunkId) && (!requireWalkable || (chunkInfo['walkableChunks'].includes(normalizedChunkId) && (!rules['F2P'] || chunkInfo['walkableChunksF2P'].includes(normalizedChunkId))));
+}
+
+let markChunkRollable = function(chunkId, requireWalkable = false) {
+    let normalizedChunkId = normalizeChunkId(chunkId);
+    if (!canMarkChunkRollable(normalizedChunkId, requireWalkable)) {
+        return false;
+    }
+    if (!tempChunks['selected']) {
+        tempChunks['selected'] = {};
+    }
+    tempSelectedChunks.push(normalizedChunkId);
+    tempChunks['selected'][normalizedChunkId] = tempSelectedChunks.indexOf(normalizedChunkId) + 1;
+    return true;
+}
+
+let getTransportConnectionData = function() {
+    if (chunkInfo['transportConnections']) {
+        return chunkInfo['transportConnections'];
+    }
+    return typeof transportConnectionData === 'undefined' ? {} : transportConnectionData;
+}
+
+let getDirectTransportDestinationIds = function(chunkId) {
+    let normalizedChunkId = normalizeChunkId(chunkId);
+    let connectionData = getTransportConnectionData();
+    let destinationIds = [];
+    if (!!connectionData['routes'] && !!connectionData['routes'][normalizedChunkId]) {
+        Object.keys(connectionData['routes'][normalizedChunkId]).forEach((destinationId) => {
+            destinationIds.push(normalizeChunkId(destinationId));
+        });
+    }
+    return Array.from(new Set(destinationIds));
+}
+
+let hasReciprocalTransportConnection = function(sourceId, destinationId) {
+    sourceId = normalizeChunkId(sourceId);
+    destinationId = normalizeChunkId(destinationId);
+    return getDirectTransportDestinationIds(destinationId).includes(sourceId);
 }
 
 // Handles the key down event
@@ -2988,6 +3567,7 @@ let handleMouseUp = function(e) {
                 });
                 delete tempChunks['potential'];
                 settings['chunkNeighboursOptions']['neighbors'] && selectNeighborsCanvas(parseInt(chunkId));
+                settings['chunkNeighboursOptions']['allowTransportation'] && selectTransportationCanvas(chunkId);
                 if (settings['chunkNeighboursOptions']['remove']) {
                     tempSelectedChunks = [];
                     !!tempChunks['selected'] && Object.keys(tempChunks['selected']).forEach((otherChunkId) => {
@@ -3046,14 +3626,39 @@ let selectNeighborsCanvas = function(chunkId) {
             newChunkId = chunkId + ((i - 3) * 2 + 1);
         }
         if (checkIfGray(newChunkId) && (!settings['chunkNeighboursOptions']['walkableRollable'] || chunkInfo['walkableChunksF2P'].includes(newChunkId.toString()) || (!rules['F2P'] && chunkInfo['walkableChunks'].includes(newChunkId.toString())))) {
-            tempSelectedChunks.push(newChunkId.toString());
-            if (!tempChunks['selected']) {
-                tempChunks['selected'] = {};
-            }
-            tempChunks['selected'][newChunkId] = tempSelectedChunks.indexOf(newChunkId.toString()) + 1;
+            markChunkRollable(newChunkId);
         }
     }
     drawCanvas();
+}
+
+let selectTransportationCanvas = function(chunkIds, shouldDraw = true) {
+    if (!settings['chunkNeighboursOptions']['allowTransportation']) {
+        return 0;
+    }
+    let added = 0;
+    (Array.isArray(chunkIds) ? chunkIds : [chunkIds]).forEach((chunkId) => {
+        let sourceId = normalizeChunkId(chunkId);
+        getDirectTransportDestinationIds(sourceId).forEach((destinationId) => {
+            if (hasReciprocalTransportConnection(sourceId, destinationId) && markChunkRollable(destinationId, true)) {
+                added++;
+            }
+        });
+    });
+    if (shouldDraw && added > 0) {
+        drawCanvas();
+    }
+    return added;
+}
+
+let selectAllTransportationCanvas = function() {
+    let chunks = !!tempChunks['unlocked'] ? Object.keys(tempChunks['unlocked']) : [];
+    let added = selectTransportationCanvas(chunks, false);
+    if (added > 0) {
+        sortSelectedChunks();
+        drawCanvas();
+    }
+    return added;
 }
 
 // Sets all neighbors of all chunks to selected
@@ -3061,6 +3666,7 @@ let selectAllNeighborsCanvas = function() {
     let chunks = !!tempChunks['unlocked'] ? Object.keys(tempChunks['unlocked']) : [];
     let ops = ['-x', '+x', '-y', '+y'];
     let newChunkId;
+    let added = 0;
     chunks.forEach((chunkId) => {
         chunkId = parseInt(chunkId);
         for (let i = 0; i < 4; i++) {
@@ -3097,6 +3703,7 @@ let selectAllNeighborsCanvas = function() {
                                 tempChunks['selected'] = {};
                             }
                             tempChunks['selected'][newChunkId] = tempSelectedChunks.indexOf(newChunkId.toString()) + 1;
+                            added++;
                         }
                     });
                 });
@@ -3105,6 +3712,7 @@ let selectAllNeighborsCanvas = function() {
     });
     sortSelectedChunks();
     drawCanvas();
+    return added;
 }
 
 // Resorts the order/numbering of selected chunks
@@ -3283,8 +3891,12 @@ let setRecentRoll = function(chunkId) {
         let timeNow = new Date().getTime();
         setSnap['chunkOrder'] = { ...setSnap['chunkOrder'], [timeNow]: parseInt(chunkId) };
         myRef.child('recentFancyRollTime').set(recentFancyRollTime);
-        const setRoll = firebase.functions().httpsCallable('setRoll');
-        setRoll({ mapCode: mid, chunkId: parseInt(chunkId) });
+        if (localDbMode) {
+            myRef.child('chunkOrder').set(setSnap['chunkOrder']);
+        } else {
+            const setRoll = firebase.functions().httpsCallable('setRoll');
+            setRoll({ mapCode: mid, chunkId: parseInt(chunkId) });
+        }
     }
     chunkOrder[new Date().getTime()] = parseInt(chunkId);
     let chunkOrderArr = Object.keys(chunkOrder).sort().reverse();
@@ -3313,8 +3925,15 @@ let setRecentRoll = function(chunkId) {
     setData();
 }
 
+let chunkActionDataLoaded = function() {
+    return gotData && mapSettingsLoaded && mapChunksLoaded && !!settings['rollingChunksOptions'] && !!settings['chunkNeighboursOptions'] && !!chunkInfo['rollingChunks'];
+}
+
 // Pick button: picks a random chunk from selected/potential
 let pickCanvas = function(both, override) {
+    if (!testMode && !chunkActionDataLoaded()) {
+        return;
+    }
     if (!testMode && (locked || importMenuOpen || highscoreMenuOpen || helpMenuOpen || patchNotesOpen || manualModalOpen || detailsModalOpen || notesModalOpen || rulesModalOpen || settingsModalOpen || userTasksModalOpen || searchModalOpen || searchDetailsModalOpen || highestModalOpen || highest2ModalOpen || methodsModalOpen || completeModalOpen || addEquipmentModalOpen || stickerModalOpen || paintModalOpen || backlogSourcesModalOpen || chunkHistoryModalOpen || challengeAltsModalOpen || manualOuterModalOpen || monsterModalOpen || slayerLockedModalOpen || constructionLockedModalOpen || rollChunkModalOpen || questStepsModalOpen || friendsListModalOpen || friendsAddModalOpen || passiveSkillModalOpen || mapIntroOpen || xpRewardOpen || manualAreasModalOpen || chunkSectionsModalOpen || chunkSectionPickerModalOpen || slayerMasterInfoModalOpen || doableClueStepsModalOpen || clueChunksModalOpen || notesOpen || newTasksOpen || clipboardModalOpen || overlaysModalOpen || userTasksListModalOpen || userTaskDeleteConfirmationModalOpen || exitSandboxWarningModalOpen || mobileMenuOpen || mobileTasksOpen || mobileChunkMenuOpen || customizeTopbarModalOpen || questChunksModalOpen || (unlockedChunks !== 0 && selectedChunks === 0 && !settings['randomStartAlways']))) {
         return;
     }
@@ -3347,6 +3966,7 @@ let pickCanvas = function(both, override) {
             recentChunks[el[rand]] = el[rand];
             scrollToChunkCanvas(el[rand]);
             settings['chunkNeighboursOptions']['neighbors'] && !didRandomStart && selectNeighborsCanvas(parseInt(el[rand]));
+            settings['chunkNeighboursOptions']['allowTransportation'] && selectTransportationCanvas(el[rand]);
             setRecentRoll(el[rand]);
             chunkJustRolled = true;
         }
@@ -3467,6 +4087,7 @@ let pickCanvas = function(both, override) {
         return;
     }
     settings['chunkNeighboursOptions']['neighbors'] && !didRandomStart && selectNeighborsCanvas(parseInt(el[rand]));
+    settings['chunkNeighboursOptions']['allowTransportation'] && selectTransportationCanvas(el[rand]);
     if (settings['chunkNeighboursOptions']['remove']) {
         tempSelectedChunks = [];
         !!tempChunks['selected'] && Object.keys(tempChunks['selected']).forEach((chunkId) => {
@@ -3481,7 +4102,7 @@ let pickCanvas = function(both, override) {
     completeChallenges(true);
     setCurrentChallenges(['No tasks currently backlogged.'], ['No tasks currently completed.'], true);
     setCalculating('.panel-completed');
-    !activeSubTabs['skill'] && expandActive('skill');   
+    !activeSubTabs['skill'] && expandActive('skill');
     !activeSubTabs['bis'] && expandActive('bis');
     !activeSubTabs['quest'] && expandActive('quest');
     !activeSubTabs['diary'] && expandActive('diary');
@@ -3493,6 +4114,9 @@ let pickCanvas = function(both, override) {
 
 // Roll 2 button: rolls 2 chunks from all selected chunks
 let roll2Canvas = function(override) {
+    if (!testMode && !chunkActionDataLoaded()) {
+        return;
+    }
     if (!testMode && (locked || importMenuOpen || highscoreMenuOpen || helpMenuOpen || patchNotesOpen || manualModalOpen || detailsModalOpen || notesModalOpen || rulesModalOpen || settingsModalOpen || userTasksModalOpen || searchModalOpen || searchDetailsModalOpen || highestModalOpen || highest2ModalOpen || methodsModalOpen || completeModalOpen || addEquipmentModalOpen || stickerModalOpen || paintModalOpen || backlogSourcesModalOpen || chunkHistoryModalOpen || challengeAltsModalOpen || manualOuterModalOpen || monsterModalOpen || slayerLockedModalOpen || constructionLockedModalOpen || rollChunkModalOpen || questStepsModalOpen || friendsListModalOpen || friendsAddModalOpen || passiveSkillModalOpen || mapIntroOpen || xpRewardOpen || manualAreasModalOpen || chunkSectionsModalOpen || chunkSectionPickerModalOpen || slayerMasterInfoModalOpen || doableClueStepsModalOpen || clueChunksModalOpen || notesOpen || newTasksOpen || clipboardModalOpen || overlaysModalOpen || userTasksListModalOpen || userTaskDeleteConfirmationModalOpen || exitSandboxWarningModalOpen || mobileMenuOpen || mobileTasksOpen || mobileChunkMenuOpen || customizeTopbarModalOpen || questChunksModalOpen || (((!tempChunks['selected'] || Object.keys(tempChunks['selected']).length < 1) && !isPicking) || ((!tempChunks['potential'] || Object.keys(tempChunks['potential']).length < 1) && isPicking)))) {
         return;
     }
@@ -3560,6 +4184,9 @@ let roll2Canvas = function(override) {
 
 // Unpicks a random unlocked chunk
 let unpickCanvas = function() {
+    if (!testMode && !chunkActionDataLoaded()) {
+        return;
+    }
     if (!testMode && (locked || importMenuOpen || highscoreMenuOpen || helpMenuOpen || patchNotesOpen || manualModalOpen || detailsModalOpen || notesModalOpen || rulesModalOpen || settingsModalOpen || userTasksModalOpen || searchModalOpen || searchDetailsModalOpen || highestModalOpen || highest2ModalOpen || methodsModalOpen || completeModalOpen || addEquipmentModalOpen || stickerModalOpen || paintModalOpen || backlogSourcesModalOpen || chunkHistoryModalOpen || challengeAltsModalOpen || manualOuterModalOpen || monsterModalOpen || slayerLockedModalOpen || constructionLockedModalOpen || rollChunkModalOpen || questStepsModalOpen || friendsListModalOpen || friendsAddModalOpen || passiveSkillModalOpen || mapIntroOpen || xpRewardOpen || manualAreasModalOpen || chunkSectionsModalOpen || chunkSectionPickerModalOpen || slayerMasterInfoModalOpen || doableClueStepsModalOpen || clueChunksModalOpen || notesOpen || newTasksOpen || clipboardModalOpen || overlaysModalOpen || userTasksListModalOpen || userTaskDeleteConfirmationModalOpen || exitSandboxWarningModalOpen || mobileMenuOpen || mobileTasksOpen || mobileChunkMenuOpen || customizeTopbarModalOpen || questChunksModalOpen || (!tempChunks['unlocked'] || Object.keys(tempChunks['unlocked']).length < 1))) {
         return;
     }
@@ -3607,12 +4234,15 @@ let setUpSelected = function() {
 }
 
 // Finds the current challenge in each skill
-let calcCurrentChallengesCanvas = function(useOld, proceed, fromLoadData, inputTempSections) {
+let calcCurrentChallengesCanvas = function(useOld, proceed, fromLoadData, inputTempSections, skipHiscoreRefresh) {
     if (!proceed) {
         $('.panel-active .calculating').remove();
         $('.panel-active').prepend(`<div class="noscroll calculating"><div class='noscroll display-button' onclick='calcCurrentChallengesCanvas(${useOld}, true)'>Calculate Tasks</div></div>`);
         myWorker.terminate();
         return;
+    }
+    if (!skipHiscoreRefresh) {
+        queueHiscoreRefresh();
     }
 
     let tempSections = inputTempSections || {};
@@ -3645,7 +4275,7 @@ let calcCurrentChallengesCanvas = function(useOld, proceed, fromLoadData, inputT
                     }
                     tempSections[chunk][sec] = true;
                 });
-                calcCurrentChallengesCanvas(useOld, proceed, fromLoadData, tempSections);
+                calcCurrentChallengesCanvas(useOld, proceed, fromLoadData, tempSections, skipHiscoreRefresh);
                 sectionsValid = false;
                 globalSectionsValid = true;
             }
@@ -3661,7 +4291,7 @@ let calcCurrentChallengesCanvas = function(useOld, proceed, fromLoadData, inputT
         setCalculating('.panel-active', useOld);
         setCurrentChallenges(['No tasks currently backlogged.'], ['No tasks currently completed.'], true, true);
         myWorker.terminate();
-        myWorker = new Worker("./worker.js?v=6.9.56");
+        myWorker = new Worker("./worker.js?v=6.9.61");
         myWorker.onmessage = workerOnMessage;
         myWorker.postMessage({
             type: 'current',
@@ -3684,6 +4314,7 @@ let calcCurrentChallengesCanvas = function(useOld, proceed, fromLoadData, inputT
             manualTasks,
             completedChallenges,
             backlog,
+            splitBacklog,
             rareDropNum: "1/" + rules['Rare Drop Amount'],
             universalPrimary,
             elementalStaves,
@@ -3704,6 +4335,7 @@ let calcCurrentChallengesCanvas = function(useOld, proceed, fromLoadData, inputT
             manualMonsters,
             slayerLocked,
             passiveSkill,
+            hiscoreSkillLevels,
             f2pSkills,
             assignedXpRewards,
             isDiary2Tier: mid === diary2Tier,
@@ -3723,6 +4355,7 @@ let calcCurrentChallengesCanvas = function(useOld, proceed, fromLoadData, inputT
             maxSkill,
             userTasks,
             manualPrimary,
+            taskIdMap: tasksMap,
             updateLevel
         });
         workersOut['current'] = true;
@@ -4026,8 +4659,8 @@ $(document).ready(function() {
 // ------------------------------------------------------------
 
 // Recieve message from worker
-let myWorker = new Worker("./worker.js?v=6.9.56");
-let myWorker2 = new Worker("./worker.js?v=6.9.56");
+let myWorker = new Worker("./worker.js?v=6.9.61");
+let myWorker2 = new Worker("./worker.js?v=6.9.61");
 let workerOnMessage = function(e) {
     if (e.data.type === 'reload') {
         window.location.reload();
@@ -4209,8 +4842,15 @@ let workerOnMessage = function(e) {
                 }
             });
             if (!tempChunks['unlocked'] || Object.keys(tempChunks['unlocked']).length < 100) {
-                calcCurrentChallenges2(tempChallengeArrSaved);
+                let displayedTasks = calcCurrentChallenges2(tempChallengeArrSaved) || [];
+                if (maybeAdvanceSplitBacklog(displayedTasks)) {
+                    return;
+                }
             } else {
+                let displayedTasks = setupCurrentChallenges(tempChallengeArrSaved, true, true) || [];
+                if (maybeAdvanceSplitBacklog(displayedTasks)) {
+                    return;
+                }
                 $('.panel-active.calculating > i').remove();
                 $('.panel-active > .calculating').removeClass('outer-loading-bar').html(`<div class='noscroll display-button' onclick='calcCurrentChallenges2()'>Show New Tasks</div>`);
             }
@@ -4224,7 +4864,18 @@ let workerOnMessage = function(e) {
             checkSlayerLocked();
             checkConstructionLocked();
             (testMode || !(viewOnly || inEntry || locked)) && checkQuestChunks();
-            settings['chunkNeighboursOptions']['autoWalkableRollable'] && chunkJustRolled && selectAllNeighborsCanvas();
+            if (chunkJustRolled) {
+                let postRollRollableChunksAdded = 0;
+                if (settings['chunkNeighboursOptions']['autoWalkableRollable']) {
+                    postRollRollableChunksAdded += selectAllNeighborsCanvas() || 0;
+                    if (settings['chunkNeighboursOptions']['allowTransportation']) {
+                        postRollRollableChunksAdded += selectAllTransportationCanvas() || 0;
+                    }
+                }
+                if (postRollRollableChunksAdded > 0) {
+                    setData();
+                }
+            }
             chunkJustRolled = false;
         }
     }
@@ -4371,7 +5022,7 @@ $(document).ready(function() {
             $(this).val(prevValueLockPin);
         } else {
             prevValueLockPin = e.target.value;
-            if (e.target.value.length >= 4 && e.target.value.length <= 16) {
+            if (localDbMode || (e.target.value.length >= 4 && e.target.value.length <= 16)) {
                 $('#lock-unlock').prop('disabled', false);
                 $('.lock-pin').removeClass('wrong');
             } else {
@@ -4385,7 +5036,7 @@ $(document).ready(function() {
             $(this).val(prevValueLockPin);
         } else {
             prevValueLockPin = e.target.value;
-            if (e.target.value.length >= 4 && e.target.value.length <= 16) {
+            if (localDbMode || (e.target.value.length >= 4 && e.target.value.length <= 16)) {
                 $('#unlock-entry').prop('disabled', false);
                 $('.pin.entry').removeClass('wrong');
             } else {
@@ -4590,6 +5241,7 @@ $(document).on({
             if (questStepsModalOpen && !detailsModalOpen) { closeQuestSteps(); modalJustClosed = true; }
             if (methodsModalOpen && !detailsModalOpen) { closeMethods(); modalJustClosed = true; }
             if (searchModalOpen && !searchDetailsModalOpen && !detailsModalOpen) { closeSearch(); modalJustClosed = true; }
+            if (monsterTableModalOpen && !searchDetailsModalOpen && !detailsModalOpen) { closeMonsterTable(); modalJustClosed = true; }
             if (rulesModalOpen && !presetWarningModalOpen) { closeRules(); modalJustClosed = true; }
             if (settingsModalOpen && !mapIntroOpen) { closeSettings(); modalJustClosed = true; }
             if (highestModalOpen && !addEquipmentModalOpen && !searchDetailsModalOpen && !detailsModalOpen && !bisUpgradesModalOpen) { closeHighest(); modalJustClosed = true; }
@@ -4645,6 +5297,7 @@ let unlock = function() {
     $('.lock-box').show();
     $('.lock-closed').hide();
     $('.lock-pin').val('').removeClass('wrong').focus();
+    localDbMode && $('#lock-unlock').prop('disabled', false);
 }
 
 // Copies unlocked chunks/tasks to clipboard
@@ -5126,10 +5779,52 @@ let checkPin = function() {
     changeLocked();
 }
 
+let showLocalUnlockedUi = function() {
+    signedIn = true;
+    locked = false;
+    inEntry = false;
+    $('.center').css('margin-top', '15px');
+    $('#entry-menu').stop(true, true).css('opacity', 1).hide();
+    $('.lock-box').stop(true, true).css('opacity', 1).hide();
+    $('.lock-closed').hide();
+    $('.lock-opened, .pick, #toggleNeighbors, #toggleRemove, .toggleNeighbors.text, .toggleRemove.text, .import, .pinchange, .toggleNeighbors, .toggleRemove, .roll2toggle, .unpicktoggle, .recenttoggle, .highscoretoggle, .settingstoggle, .friendslist, .blacklist-mobile, .open-sticker-mobile, .open-paint-mobile, .taskstoggle').css('opacity', 1).show();
+    roll2On && $('.roll2').css('opacity', 1).show();
+    !isPicking && unpickOn && $('.unpick').css('opacity', 1).show();
+    recentOn && !settings['taskSidebar'] && $('.menu7').show();
+    $('.open-manual-outer-container').css('opacity', 1).show();
+    $('.dropdown-item-customize-topbar').css('opacity', 1).show();
+    rules['Manually Complete Tasks'] && $('.open-complete-container').css('opacity', 1).show();
+    $('.pin.entry, .lock-pin').val('').removeClass('animated shake wrong');
+    $('#unlock-entry').prop('disabled', false).text('Unlock map');
+    $('#lock-unlock').prop('disabled', false).text('Unlock');
+    lockBoxOpen = false;
+    if (!chunkActionDataLoaded()) {
+        $('.pick, .roll2, .unpick').prop('disabled', true).css('opacity', 0).hide();
+    } else {
+        $('.pick').prop('disabled', false).css('opacity', 1).show();
+        roll2On && $('.roll2').prop('disabled', false).css('opacity', 1).show();
+        !isPicking && unpickOn && $('.unpick').prop('disabled', false).css('opacity', 1).show();
+    }
+}
+
+let finishLocalUnlock = function(fromEntry) {
+    showLocalUnlockedUi();
+    helpMenuOpenSoon && helpFunc();
+    patchNotesOpenSoon && openPatchNotesModal();
+    mapIntroOpenSoon && openMapIntroModal(justStartingChunkSet);
+    unlockChallenges();
+    setRecentLogin();
+    !doesPluginOutputExist && setData();
+}
+
 // Confirms if the pin is entered correctly in the entry menu, and acts accordingly
 let unlockEntry = function() {
     savedPin = $('.pin.entry').val();
     $('#unlock-entry').prop('disabled', true).html('<i class="spin fa-solid fa-spinner"></i>');
+    if (localDbMode) {
+        finishLocalUnlock(true);
+        return;
+    }
     firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
     firebase.auth().fetchSignInMethodsForEmail('sourcechunk+' + mid + '@yandex.com').then((methods) => {
         if (signInAttempts > 5) {
@@ -5321,6 +6016,10 @@ let accessMap = function() {
     $('#access').prop('disabled', true).html('<i class="spin fa-solid fa-spinner"></i>');
     mid = $('.mid').removeClass('wrong').val().toLowerCase();
     savedPin = $('.pin.old').removeClass('wrong').val();
+    if (localDbMode) {
+        window.location.href = window.location.href.split('?')[0] + '?' + mid;
+        return;
+    }
     databaseRef.child('mapids/' + mid).once('value', function(snap) {
         if (!snap.val()) {
             databaseRef.child('maps/' + mid).once('value', function(snap) {
@@ -5339,7 +6038,7 @@ let accessMap = function() {
         if ($('.pin.old').val()) {
             firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
             firebase.auth().fetchSignInMethodsForEmail('sourcechunk+' + mid + '@yandex.com').then((methods) => {
-                myRef = firebase.database().ref('maps/' + mid);
+                myRef = getDatabaseRef('maps/' + mid);
                 if (!!methods && methods.length > 0) {
                     setTimeout(function() {
                         firebase.auth().signInWithEmailAndPassword('sourcechunk+' + mid + '@yandex.com', savedPin + mid).then((userCredential) => {
@@ -5413,7 +6112,7 @@ let accessMap = function() {
                                     helpMenuOpenSoon && helpFunc();
                                     patchNotesOpenSoon && openPatchNotesModal();
                                     mapIntroOpenSoon && openMapIntroModal(justStartingChunkSet);
-                                    myRef = firebase.database().ref('maps/' + mid);
+                                    myRef = getDatabaseRef('maps/' + mid);
                                     atHome = false;
                                     $('.loading').show();
                                     $('#page2b, .entry-home-menu-container, .entry-home-menu-extra').hide();
@@ -5456,7 +6155,7 @@ let accessMap = function() {
             $('.lock-closed, .lock-opened').hide();
             locked = true;
             inEntry = true;
-            myRef = firebase.database().ref('maps/' + mid);
+            myRef = getDatabaseRef('maps/' + mid);
             atHome = false;
             $('.loading').show();
             $('#page2b, .entry-home-menu-container, .entry-home-menu-extra').hide();
@@ -5472,6 +6171,17 @@ let changePin = function() {
     let mid = $('.mid-old').removeClass('wrong').val().toLowerCase();
     let pinOld = $('.pin.old2.first').removeClass('wrong').val();
     let pinNew = $('.pin.old2.second').val();
+    if (localDbMode) {
+        databaseRef.child('maps/' + mid + '/pin').set(pinNew, function(error) {
+            if (error) {
+                console.error(error);
+                $('#change-pin').text('Change Password');
+                return;
+            }
+            window.location.replace(window.location.href.split('?')[0] + '?' + mid);
+        });
+        return;
+    }
     databaseRef.child('maps/' + mid).once('value', function(snap) {
         if (!snap.val()) {
             setTimeout(function() {
@@ -5496,7 +6206,7 @@ let changePin = function() {
                         return;
                     }
                     signedIn = true;
-                    myRef = firebase.database().ref('maps/' + mid);
+                    myRef = getDatabaseRef('maps/' + mid);
                     if (!onTestServer && !testMode) {
                         firebase.auth().currentUser.updatePassword(pinNew + mid).then(() => {
                             window.location.replace(window.location.href.split('?')[0] + '?' + mid);
@@ -6099,13 +6809,15 @@ let doneLoading = function() {
                 $(this).val(prevValueLockPin);
             } else {
                 prevValueLockPin = $('.pin.entry').val();
-                if ($('.pin.entry').val().length >= 4 && $('.pin.entry').val().length <= 16) {
+                if (localDbMode || ($('.pin.entry').val().length >= 4 && $('.pin.entry').val().length <= 16)) {
                     $('#unlock-entry').prop('disabled', false);
                     $('.pin.entry').removeClass('wrong');
                 } else {
                     $('#unlock-entry').prop('disabled', true);
                 }
             }
+        } else if (localDbMode) {
+            $('#unlock-entry').prop('disabled', false);
         }
     }, 500);
 }
@@ -6113,6 +6825,13 @@ let doneLoading = function() {
 // Creates board of boxes, sets initial sizes of scalable elements, and hides certain elements if needed
 let setupMap = async function() {
     if (!atHome) {
+        if (localDbMode) {
+            signedIn = true;
+            locked = false;
+            inEntry = false;
+            $('#entry-menu, .lock-box, .lock-closed').hide();
+            $('.lock-opened').show();
+        }
         $('.body').show();
         $('#page1, #page1extra, #page1search, #import-menu, #highscore-menu, #highscore-menu2, #help-menu, .entry-home-menu-container, .entry-home-menu-extra').hide();
         if (locked) {
@@ -6441,6 +7160,8 @@ let checkPrimaryMethod = function(skill, valids, baseChunkData, wantMethods) {
     } else if (!!manualTasks[skill] && Object.keys(manualTasks[skill]).length > 0) {
         hardValid = true;
         methods['Manually added skill'] = 1;
+    } else if (getHiscoreSkillLevelValue(skill) !== null) {
+        methods['Hiscore Level'] = 1;
     } else if (!!passiveSkill && passiveSkill.hasOwnProperty(skill) && passiveSkill[skill] > 1) {
         methods['Passive Leveling'] = 1;
     } else if (!!skillQuestXp && skillQuestXp.hasOwnProperty(skill)) {
@@ -6484,7 +7205,7 @@ let checkPrimaryMethod = function(skill, valids, baseChunkData, wantMethods) {
                         bestBoost += 3;
                     }
                 }
-                if (((chunkInfo['challenges'][skill][challenge]['Primary'] && (!chunkInfo['challenges'][skill][challenge]['Secondary'] || rules['Secondary Primary'])) && (chunkInfo['challenges'][skill][challenge]['Level'] === 1 || (!!passiveSkill && passiveSkill.hasOwnProperty(skill) && chunkInfo['challenges'][skill][challenge]['Level'] <= passiveSkill[skill] + bestBoost) || ((skillQuestXp.hasOwnProperty(skill) && chunkInfo['challenges'][skill][challenge]['Level'] <= skillQuestXp[skill]['level'] + bestBoost)) || wantMethods) && (!backlog[skill] || !backlog[skill].hasOwnProperty(challenge))) || chunkInfo['challenges'][skill][challenge]['Manual']) {
+                if (((chunkInfo['challenges'][skill][challenge]['Primary'] && (!chunkInfo['challenges'][skill][challenge]['Secondary'] || rules['Secondary Primary'])) && (meetsKnownSkillLevelValue(skill, chunkInfo['challenges'][skill][challenge]['Level'], bestBoost) || wantMethods) && (!backlog[skill] || !backlog[skill].hasOwnProperty(challenge))) || chunkInfo['challenges'][skill][challenge]['Manual']) {
                     if (skill !== 'Smithing' || rules['Smithing by Smelting'] || baseChunkData['objects'].hasOwnProperty('Anvil') || baseChunkData['objects'].hasOwnProperty('Rusted anvil')) {
                         primaryValid = true;
                         methods[challenge] = chunkInfo['challenges'][skill][challenge]['Level'];
@@ -6616,6 +7337,7 @@ let calcCurrentChallenges2 = function(tempChallengeArr) {
     !tempChallengeArr && (tempChallengeArr = tempChallengeArrSaved);
     listOfTasksPlugin = setupCurrentChallenges(tempChallengeArr);
     setData();
+    return listOfTasksPlugin;
 };
 
 // Sets up data for displaying
@@ -6655,6 +7377,14 @@ let setupCurrentChallenges = function(tempChallengeArr, noDisplay, noClear) {
                     challengeArr.push(`<div class="challenge skill-challenge noscroll clickable ${skill + '-challenge'} ${(!!checkedChallenges[skill] && !!checkedChallenges[skill][skillTask]) && 'hide-backlog'} ${!activeSubTabs['skill'] ? 'stay-hidden' : ''}" onclick="showDetails('${encodeRFC5987ValueChars(skillTask)}', '${skill}', 'current')"><label class="checkbox noscroll ${(!testMode && (viewOnly || inEntry || locked)) ? "checkbox--disabled" : ''}"><span class="checkbox__input noscroll"><input type="checkbox" name="checkbox" ${(!!checkedChallenges[skill] && !!checkedChallenges[skill][skillTask]) ? "checked" : ''} class='noscroll' onclick="checkOffChallenge('${skill}', '${encodeRFC5987ValueChars(skillTask)}')" ${(!testMode && (viewOnly || inEntry || locked)) ? "disabled" : ''}><span class="checkbox__control noscroll"><svg viewBox='0 0 24 24' aria-hidden="true" focusable="false"><path fill='none' stroke='currentColor' stroke-width='3' d='M1.73 12.91l6.37 6.37L22.79 4.59' /></svg></span></span><span class="radio__label noscroll"><b class="noscroll">[${(boost > 0 ? (((chunkInfo['challenges'][skill][skillTask]['Level'] - boost) <= 0 ? 1 : (chunkInfo['challenges'][skill][skillTask]['Level'] - boost)) + '] (+' + boost + ')') : chunkInfo['challenges'][skill][skillTask]['Level'] + ']')} <span class="inner noscroll">${skill}</b>: ${skillTask.split('~')[0]}<a class='link noscroll' href="${"https://oldschool.runescape.wiki/w/" + encodeForUrl((skillTask.split('|')[1]))}" target="_blank">${skillTask.split('~')[1].split('|').join('')}</a>${skillTask.split('~')[2]}</span></span></label> <span class="burger noscroll${!testMode && (viewOnly || inEntry || locked) ? ' hidden-burger' : ''}" onclick="openActiveContextMenu('${encodeRFC5987ValueChars(skillTask)}', '${skill}', ${hasAlts})"><i class="fa-solid fa-sliders-h noscroll">${hasAlts ? `<i class="fa-solid fa-star burger-star noscroll"></i>` : ''}</i></span></div>`);
                     listOfTasks.push({ [skillTask]: skill, prefix: `[${(boost > 0 ? (((chunkInfo['challenges'][skill][skillTask]['Level'] - boost) <= 0 ? 1 : (chunkInfo['challenges'][skill][skillTask]['Level'] - boost)) + '] (+' + boost + ')') : chunkInfo['challenges'][skill][skillTask]['Level'] + ']')} ${skill}:` });
                     activeTasks[skill] = { [skillTask]: `${chunkInfo['challenges'][skill][skillTask]['Level']}${boost > 0 ? `{${boost}}` : ''}` };
+                    let splitCompanion = chunkInfo['challenges'][skill][skillTask]['SplitBacklogCompanion'];
+                    if (splitCompanion && chunkInfo['challenges'][skill][splitCompanion]) {
+                        let companionBoost = globalValidsBoosts.hasOwnProperty(skill) && globalValidsBoosts[skill].hasOwnProperty(splitCompanion) ? globalValidsBoosts[skill][splitCompanion] : 0;
+                        let companionLevel = chunkInfo['challenges'][skill][splitCompanion]['Level'];
+                        challengeArr.push(`<div class="challenge skill-challenge split-companion-challenge noscroll clickable ${skill + '-challenge'} ${(!!checkedChallenges[skill] && !!checkedChallenges[skill][splitCompanion]) && 'hide-backlog'} ${!activeSubTabs['skill'] ? 'stay-hidden' : ''}" onclick="showDetails('${encodeRFC5987ValueChars(splitCompanion)}', '${skill}', 'current')"><label class="checkbox noscroll ${(!testMode && (viewOnly || inEntry || locked)) ? "checkbox--disabled" : ''}"><span class="checkbox__input noscroll"><input type="checkbox" name="checkbox" ${(!!checkedChallenges[skill] && !!checkedChallenges[skill][splitCompanion]) ? "checked" : ''} class='noscroll' onclick="checkOffChallenge('${skill}', '${encodeRFC5987ValueChars(splitCompanion)}')" ${(!testMode && (viewOnly || inEntry || locked)) ? "disabled" : ''}><span class="checkbox__control noscroll"><svg viewBox='0 0 24 24' aria-hidden="true" focusable="false"><path fill='none' stroke='currentColor' stroke-width='3' d='M1.73 12.91l6.37 6.37L22.79 4.59' /></svg></span></span><span class="radio__label noscroll"><b class="noscroll">[${(companionBoost > 0 ? (((companionLevel - companionBoost) <= 0 ? 1 : (companionLevel - companionBoost)) + '] (+' + companionBoost + ')') : companionLevel + ']')} <span class="inner noscroll">${skill}</b>: ${splitCompanion.split('~')[0]}<a class='link noscroll' href="${"https://oldschool.runescape.wiki/w/" + encodeForUrl((splitCompanion.split('|')[1]))}" target="_blank">${splitCompanion.split('~')[1].split('|').join('')}</a>${splitCompanion.split('~')[2]}</span></span></label> <span class="burger noscroll${!testMode && (viewOnly || inEntry || locked) ? ' hidden-burger' : ''}" onclick="openActiveContextMenu('${encodeRFC5987ValueChars(splitCompanion)}', '${skill}', false)"><i class="fa-solid fa-sliders-h noscroll"></i></span></div>`);
+                        listOfTasks.push({ [splitCompanion]: skill, prefix: `[${(companionBoost > 0 ? (((companionLevel - companionBoost) <= 0 ? 1 : (companionLevel - companionBoost)) + '] (+' + companionBoost + ')') : companionLevel + ']')} ${skill}:` });
+                        activeTasks[skill][splitCompanion] = `${companionLevel}${companionBoost > 0 ? `{${companionBoost}}` : ''}`;
+                    }
                 }
             }
         });
@@ -6837,19 +7567,20 @@ let setupCurrentChallengesFromSaved = function() {
     challengeArr = [];
     Object.keys(activeTasks).filter((skill) => skillNames.includes(skill)).length > 0 && challengeArr.push(`<div class="marker marker-skill noscroll" onclick="expandActive('skill')"><i class="expand-button fa-solid ${activeSubTabs['skill'] ? 'fa-caret-down' : 'fa-caret-right'} noscroll"></i><span class="noscroll">Skill Tasks</span></div>`);
     Object.keys(activeTasks).filter((skill) => skillNames.includes(skill)).sort().forEach((skill) => {
-        let skillTask = Object.keys(activeTasks[skill])[0];
-        if (!skillTask) return;
-        let level;
-        let boost;
-        if (activeTasks[skill][skillTask].match(/\{[0-9]+\}/g)) {
-            level = activeTasks[skill][skillTask].split('{')[0];
-            boost = activeTasks[skill][skillTask].match(/\{[0-9]+\}/g)[0].match(/\d+/)[0];
-        } else {
-            level = activeTasks[skill][skillTask];
-            boost = 0;
-        }
-        listOfTasksSaved.push({ [skillTask]: skill, prefix: `[${(boost > 0 ? (((level - boost) <= 0 ? 1 : (level - boost)) + '] (+' + boost + ')') : level + ']')} ${skill}:` });
-        challengeArr.push(`<div class="challenge skill-challenge noscroll clickable ${skill + '-challenge'} ${(!!checkedChallenges[skill] && !!checkedChallenges[skill][skillTask]) ? "hide-backlog" : ''} ${!activeSubTabs['skill'] ? 'stay-hidden' : ''}"><label class="checkbox noscroll checkbox--disabled"><span class="checkbox__input noscroll"><input type="checkbox" name="checkbox" ${(!!checkedChallenges[skill] && !!checkedChallenges[skill][skillTask]) ? "checked" : ''} class='noscroll' disabled><span class="checkbox__control noscroll"><svg viewBox='0 0 24 24' aria-hidden="true" focusable="false"><path fill='none' stroke='currentColor' stroke-width='3' d='M1.73 12.91l6.37 6.37L22.79 4.59' /></svg></span></span><span class="radio__label noscroll"><b class="noscroll">[${(boost > 0 ? (((level - boost) <= 0 ? 1 : (level - boost)) + '] (+' + boost + ')') : level + ']')} <span class="inner noscroll">${skill}</b>: ${decodeQueryParam(skillTask.split('~')[0])}<a class='link noscroll' href="${"https://oldschool.runescape.wiki/w/" + encodeForUrl(skillTask.split('|')[1])}" target="_blank">${decodeQueryParam(skillTask.split('~')[1].split('|').join(''))}</a>${decodeQueryParam(skillTask.split('~')[2])}</span></span></label></div>`);
+        Object.keys(activeTasks[skill]).forEach((skillTask) => {
+            if (!skillTask) return;
+            let level;
+            let boost;
+            if (activeTasks[skill][skillTask].match(/\{[0-9]+\}/g)) {
+                level = activeTasks[skill][skillTask].split('{')[0];
+                boost = activeTasks[skill][skillTask].match(/\{[0-9]+\}/g)[0].match(/\d+/)[0];
+            } else {
+                level = activeTasks[skill][skillTask];
+                boost = 0;
+            }
+            listOfTasksSaved.push({ [skillTask]: skill, prefix: `[${(boost > 0 ? (((level - boost) <= 0 ? 1 : (level - boost)) + '] (+' + boost + ')') : level + ']')} ${skill}:` });
+            challengeArr.push(`<div class="challenge skill-challenge noscroll clickable ${skill + '-challenge'} ${(!!checkedChallenges[skill] && !!checkedChallenges[skill][skillTask]) ? "hide-backlog" : ''} ${!activeSubTabs['skill'] ? 'stay-hidden' : ''}"><label class="checkbox noscroll checkbox--disabled"><span class="checkbox__input noscroll"><input type="checkbox" name="checkbox" ${(!!checkedChallenges[skill] && !!checkedChallenges[skill][skillTask]) ? "checked" : ''} class='noscroll' disabled><span class="checkbox__control noscroll"><svg viewBox='0 0 24 24' aria-hidden="true" focusable="false"><path fill='none' stroke='currentColor' stroke-width='3' d='M1.73 12.91l6.37 6.37L22.79 4.59' /></svg></span></span><span class="radio__label noscroll"><b class="noscroll">[${(boost > 0 ? (((level - boost) <= 0 ? 1 : (level - boost)) + '] (+' + boost + ')') : level + ']')} <span class="inner noscroll">${skill}</b>: ${decodeQueryParam(skillTask.split('~')[0])}<a class='link noscroll' href="${"https://oldschool.runescape.wiki/w/" + encodeForUrl(skillTask.split('|')[1])}" target="_blank">${decodeQueryParam(skillTask.split('~')[1].split('|').join(''))}</a>${decodeQueryParam(skillTask.split('~')[2])}</span></span></label></div>`);
+        });
     });
     challengeArr = challengeArr.filter(line => !line.includes('Extra-') && !line.includes('BiS-') && !line.includes('Quest-') && !line.includes('marker-extra') && !line.includes('marker-bis') && !line.includes('marker-quest'));
     !!activeTasks['BiS'] && Object.keys(activeTasks['BiS']).length > 0 && challengeArr.push(`<div class="marker marker-bis noscroll" onclick="expandActive('bis')"><i class="expand-button fa-solid ${activeSubTabs['bis'] ? 'fa-caret-down' : 'fa-caret-right'} noscroll"></i><span class="noscroll">BiS Tasks</span></div>`);
@@ -7023,7 +7754,7 @@ let calcFutureChallenges = function() {
     }
     tempSections = combineJSONs(tempSections, manualSections);
     myWorker2.terminate();
-    myWorker2 = new Worker("./worker.js?v=6.9.56");
+    myWorker2 = new Worker("./worker.js?v=6.9.61");
     myWorker2.onmessage = workerOnMessage;
     myWorker2.postMessage({
         type: 'future',
@@ -7046,6 +7777,7 @@ let calcFutureChallenges = function() {
         manualTasks,
         completedChallenges,
         backlog,
+        splitBacklog,
         rareDropNum: "1/" + rules['Rare Drop Amount'],
         universalPrimary,
         elementalStaves,
@@ -7066,6 +7798,7 @@ let calcFutureChallenges = function() {
         manualMonsters,
         slayerLocked,
         passiveSkill,
+        hiscoreSkillLevels,
         f2pSkills,
         assignedXpRewards,
         isDiary2Tier: mid === diary2Tier,
@@ -7085,6 +7818,7 @@ let calcFutureChallenges = function() {
         maxSkill,
         userTasks,
         manualPrimary,
+        taskIdMap: tasksMap,
         updateLevel
     });
     workersOut['future'] = infoLockedId;
@@ -7175,6 +7909,11 @@ let calcFutureChallenges2 = function(valids, baseChunkDataLocal, localHighestOve
                     highestCompletedLevel = chunkInfo['challenges'][skill][highestCurrent[skill]]['Level'];
                 }
             }
+        }
+        let hiscoreLevel = getHiscoreSkillLevelValue(skill);
+        if (hiscoreLevel !== null) {
+            highestCompletedLevel = hiscoreLevel;
+            highestCompletedLevelBoost = 0;
         }
         checkPrimaryMethod(skill, valids, baseChunkDataLocal) && Object.keys(valids[skill]).forEach((challenge) => {
             if (!chunkInfo['challenges'][skill].hasOwnProperty(challenge)) {
@@ -8154,7 +8893,7 @@ let fixTitleTextSize = function(selector, originalSize) {
     function resize_to_fit() {
         let fontSize = window.getComputedStyle(output).fontSize;
         $(selector).css('fontSize', (parseFloat(fontSize) - 1) + 'px');
-        
+
         if (output.clientHeight >= outputContainer.clientHeight) {
             resize_to_fit();
         }
@@ -8995,7 +9734,8 @@ let openSearch = function() {
 
 // Searches for matching names within chunk data
 let searchWithinChunks = function() {
-    let searchTemp = $('#searchChunks').val().toLowerCase();
+    let searchRaw = $('#searchChunks').val();
+    let searchTemp = searchRaw.toLowerCase();
     $('.searchchunks-data').empty();
     onlyInitialData ? $(`.searchchunks-initwarning`).show() : $(`.searchchunks-initwarning`).hide();
     if (searchTemp.startsWith('~') && searchTemp.toLowerCase() === '~items' && Object.keys(baseChunkData).length > 0) {
@@ -9003,6 +9743,9 @@ let searchWithinChunks = function() {
         Object.keys(baseChunkData['items']).length > 0 && Object.keys(baseChunkData['items']).filter((item) => !item.includes('^')).sort().forEach((item) => {
             $('.searchchunks-data').append(`<div class="search-result noscroll"><span class='noscroll' onclick='openSearchDetails("items", "${encodeRFC5987ValueChars(item)}")'>${item.replaceAll(/~/g, '').replaceAll(/\|/g, '').replaceAll(/\*/g, '')}</span></div>`);
         });
+    } else if (searchTemp.startsWith('~') && isMonsterTableCommand(searchTemp) && Object.keys(baseChunkData).length > 0) {
+        openMonsterTable(searchRaw.replace(/^~(?:monsterstats|monstertable)\s*/i, ''));
+        return;
     } else if (searchTemp.startsWith('~') && searchTemp.toLowerCase() === '~monsters' && Object.keys(baseChunkData).length > 0) {
         Object.keys(baseChunkData['monsters']).length > 0 && $('.searchchunks-data').append(`<div class="search-header noscroll"><b class="noscroll">Monsters</b></div>`);
         Object.keys(baseChunkData['monsters']).length > 0 && Object.keys(baseChunkData['monsters']).filter((monster) => !monster.includes('^')).sort().forEach((monster) => {
@@ -9073,6 +9816,287 @@ let searchWithinChunks = function() {
     if ($('.searchchunks-data').children().length === 0) {
         $('.searchchunks-data').append(`<div class="noscroll results"><span class="noscroll holder"><span class="noscroll topline">No results found (0)</span></span></div>`);
     }
+}
+
+let monsterTableColumns = [
+    { key: 'name', label: 'Name', type: 'text', defaultDirection: 'asc' },
+    { key: 'sourceCount', label: 'Sources', type: 'number', defaultDirection: 'desc' },
+    { key: 'chunkCount', label: 'Chunks', type: 'number', defaultDirection: 'desc' },
+    { key: 'combat', label: 'Cmb', type: 'number', stat: 'combat' },
+    { key: 'hitpoints', label: 'HP', type: 'number', stat: 'hitpoints' },
+    { key: 'max_hit', label: 'Max', type: 'number', stat: 'max_hit' },
+    { key: 'attack_speed', label: 'Speed', type: 'number', stat: 'attack_speed' },
+    { key: 'attack_style', label: 'Style', type: 'text', stat: 'attack_style', defaultDirection: 'asc' },
+    { key: 'attack', label: 'Atk', type: 'number', stat: 'attack' },
+    { key: 'strength', label: 'Str', type: 'number', stat: 'strength' },
+    { key: 'defence', label: 'Def', type: 'number', stat: 'defence' },
+    { key: 'magic', label: 'Mag', type: 'number', stat: 'magic' },
+    { key: 'ranged', label: 'Rng', type: 'number', stat: 'ranged' },
+    { key: 'attack_roll', label: 'Atk roll', type: 'number', attackRoll: { level: 'attack', bonus: 'attack_bonus' } },
+    { key: 'magic_attack_roll', label: 'Mag roll', type: 'number', attackRoll: { level: 'magic', bonus: 'magic_attack_bonus' } },
+    { key: 'ranged_attack_roll', label: 'Rng roll', type: 'number', attackRoll: { level: 'ranged', bonus: 'ranged_attack_bonus' } },
+    { key: 'weakness', label: 'Weakness', type: 'text', defaultDirection: 'asc' },
+    { key: 'roll_stab', label: 'D roll stab', type: 'number', statPath: ['defence_rolls', 'stab'] },
+    { key: 'roll_slash', label: 'D roll slash', type: 'number', statPath: ['defence_rolls', 'slash'] },
+    { key: 'roll_crush', label: 'D roll crush', type: 'number', statPath: ['defence_rolls', 'crush'] },
+    { key: 'roll_magic', label: 'D roll magic', type: 'number', statPath: ['defence_rolls', 'magic'] },
+    { key: 'roll_ranged', label: 'D roll ranged', type: 'number', statPath: ['defence_rolls', 'ranged'] },
+    { key: 'roll_light', label: 'D roll light', type: 'number', statPath: ['defence_rolls', 'light'] },
+    { key: 'roll_standard', label: 'D roll standard', type: 'number', statPath: ['defence_rolls', 'standard'] },
+    { key: 'roll_heavy', label: 'D roll heavy', type: 'number', statPath: ['defence_rolls', 'heavy'] },
+    { key: 'attack_bonus', label: 'Atk bonus', type: 'number', stat: 'attack_bonus' },
+    { key: 'strength_bonus', label: 'Str bonus', type: 'number', stat: 'strength_bonus' },
+    { key: 'magic_attack_bonus', label: 'Mag atk', type: 'number', stat: 'magic_attack_bonus' },
+    { key: 'magic_strength_bonus', label: 'Mag str', type: 'number', stat: 'magic_strength_bonus' },
+    { key: 'ranged_attack_bonus', label: 'Rng atk', type: 'number', stat: 'ranged_attack_bonus' },
+    { key: 'ranged_strength_bonus', label: 'Rng str', type: 'number', stat: 'ranged_strength_bonus' },
+    { key: 'defence_stab', label: 'D stab', type: 'number', stat: 'defence_stab' },
+    { key: 'defence_slash', label: 'D slash', type: 'number', stat: 'defence_slash' },
+    { key: 'defence_crush', label: 'D crush', type: 'number', stat: 'defence_crush' },
+    { key: 'defence_magic', label: 'D magic', type: 'number', stat: 'defence_magic' },
+    { key: 'defence_ranged', label: 'D ranged', type: 'number', stat: 'defence_ranged' },
+    { key: 'defence_light', label: 'D light', type: 'number', stat: 'defence_light' },
+    { key: 'defence_standard', label: 'D standard', type: 'number', stat: 'defence_standard' },
+    { key: 'defence_heavy', label: 'D heavy', type: 'number', stat: 'defence_heavy' },
+    { key: 'sourceSummary', label: 'Source summary', type: 'text', defaultDirection: 'asc' }
+];
+
+let monsterTableEscape = function(value) {
+    const text = value == null ? '' : value.toString();
+    return text.replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    })[char]);
+}
+
+let monsterTableCleanText = function(value) {
+    return (value == null ? '' : value.toString()).replaceAll(/~\|/g, '').replaceAll(/\|~/g, '').replaceAll(/\*/g, '');
+}
+
+let isMonsterTableCommand = function(searchText) {
+    return searchText === '~monsterstats' || searchText === '~monstertable' || searchText.startsWith('~monsterstats ') || searchText.startsWith('~monstertable ');
+}
+
+let openMonsterTable = function(filterText) {
+    if (inEntry || importMenuOpen || manualModalOpen || detailsModalOpen || notesModalOpen || highscoreMenuOpen || helpMenuOpen) return;
+    searchModalOpen && closeSearch();
+    modal.generate('monsterTableModal', onMobile);
+    onMobile && hideMobileMenu();
+    monsterTableModalOpen = true;
+    monsterTableFilter = filterText || '';
+    $('#monsterTableModal').show();
+    modalOutsideTime = Date.now();
+    renderMonsterTable();
+    $('#monster-table-filter').focus();
+}
+
+let monsterTableFilterChange = function() {
+    const filterInput = document.getElementById('monster-table-filter');
+    const cursorPosition = filterInput ? filterInput.selectionStart : null;
+    monsterTableFilter = filterInput ? filterInput.value : '';
+    renderMonsterTable();
+    const newFilterInput = document.getElementById('monster-table-filter');
+    if (newFilterInput) {
+        newFilterInput.focus();
+        cursorPosition != null && newFilterInput.setSelectionRange(cursorPosition, cursorPosition);
+    }
+}
+
+let sortMonsterTable = function(columnKey) {
+    const column = monsterTableColumns.find((monsterColumn) => monsterColumn.key === columnKey);
+    if (!column) return;
+    if (monsterTableSortBy === columnKey) {
+        monsterTableSortDirection = monsterTableSortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        monsterTableSortBy = columnKey;
+        monsterTableSortDirection = column.defaultDirection || 'desc';
+    }
+    renderMonsterTable();
+}
+
+let getMonsterStatsForTable = function(monsterName) {
+    const statsData = window.monsterStatsData || {};
+    const cleanName = monsterTableCleanText(monsterName);
+    return statsData[monsterName] || statsData[cleanName] || statsData[monsterName.split('#')[0]] || statsData[cleanName.split('#')[0]] || null;
+}
+
+let getMonsterStatPathValue = function(stats, pathParts) {
+    if (!stats) return null;
+    let current = stats;
+    pathParts.forEach((pathPart) => {
+        current = current == null ? null : current[pathPart];
+    });
+    return current == null ? null : current;
+}
+
+let getMonsterAttackRoll = function(stats, attackRoll) {
+    if (!stats || !attackRoll) return null;
+    const level = stats[attackRoll.level];
+    const bonus = stats[attackRoll.bonus];
+    if (level == null || bonus == null) return null;
+    return Math.round((level + 9) * (bonus + 64));
+}
+
+let getMonsterTableColumnValue = function(stats, column) {
+    if (column.attackRoll) return getMonsterAttackRoll(stats, column.attackRoll);
+    if (column.statPath) return getMonsterStatPathValue(stats, column.statPath);
+    if (column.stat) return stats && stats[column.stat] != null ? stats[column.stat] : null;
+    if (column.key === 'weakness') return getMonsterWeaknessSummary(stats);
+    return null;
+}
+
+let getMonsterExplicitWeakness = function(value) {
+    const weakness = monsterTableCleanText(value).trim();
+    if (!weakness) return '';
+    const normalized = weakness.toLowerCase();
+    if (normalized === 'none' || normalized === 'n/a') return '';
+    const withoutPercent = normalized.replace(/\([^)]*\)/g, '').replace(/\d+%/g, '').trim();
+    if (['stab', 'slash', 'crush', 'magic', 'ranged', 'range', 'melee', 'light', 'standard', 'heavy'].includes(withoutPercent)) return '';
+    return weakness;
+}
+
+let getMonsterWeaknessSummary = function(stats) {
+    if (!stats) return '';
+    const explicitWeakness = getMonsterExplicitWeakness(stats.weakness);
+    if (explicitWeakness) return explicitWeakness;
+    if (stats.elemental_weakness_type) {
+        return stats.elemental_weakness_type + (stats.elemental_weakness_percent != null ? ' (' + stats.elemental_weakness_percent + '%)' : '');
+    }
+    return '';
+}
+
+let getMonsterSourceInfo = function(monsterName) {
+    const sourceData = baseChunkData['monsters'] && baseChunkData['monsters'][monsterName] ? baseChunkData['monsters'][monsterName] : {};
+    const sources = Object.keys(sourceData);
+    const chunkIds = new Set();
+    const labels = sources.map((source) => {
+        const chunkMatch = source.match(/^[0-9]+/);
+        if (chunkMatch) {
+            chunkIds.add(chunkMatch[0]);
+            const chunk = chunkInfo['chunks'] && chunkInfo['chunks'][chunkMatch[0]] ? chunkInfo['chunks'][chunkMatch[0]] : null;
+            const baseName = chunk && (chunk['Nickname'] || chunk['Name']) ? chunk['Nickname'] || chunk['Name'] : chunkMatch[0];
+            if (source.match(/^[0-9]+-(W)?[0-9]+/g)) {
+                return baseName + ' (' + chunkMatch[0] + ' - Section ' + source.split('-')[1] + ')';
+            }
+            return baseName + (baseName === chunkMatch[0] ? '' : ' (' + chunkMatch[0] + ')');
+        }
+        if (source.includes('|')) {
+            return source.split('|')[1].charAt(0).toUpperCase() + source.split('|')[1].slice(1);
+        }
+        return source;
+    });
+    const summary = labels.slice(0, 3).join(', ') + (labels.length > 3 ? ' +' + (labels.length - 3) + ' more' : '');
+    return {
+        sourceCount: sources.length,
+        chunkCount: chunkIds.size || sources.length,
+        sourceSummary: summary
+    };
+}
+
+let buildMonsterTableRow = function(monsterName) {
+    const stats = getMonsterStatsForTable(monsterName);
+    const sourceInfo = getMonsterSourceInfo(monsterName);
+    const values = {
+        name: monsterTableCleanText(monsterName),
+        sourceCount: sourceInfo.sourceCount,
+        chunkCount: sourceInfo.chunkCount,
+        sourceSummary: sourceInfo.sourceSummary
+    };
+    monsterTableColumns.forEach((column) => {
+        if (!values.hasOwnProperty(column.key)) {
+            values[column.key] = getMonsterTableColumnValue(stats, column);
+        }
+    });
+    return {
+        name: monsterName,
+        displayName: monsterTableCleanText(monsterName),
+        hasStats: !!stats,
+        values
+    };
+}
+
+let monsterTableValueMissing = function(value) {
+    return value == null || value === '' || (typeof value === 'number' && isNaN(value));
+}
+
+let compareMonsterTableRows = function(rowA, rowB) {
+    const column = monsterTableColumns.find((monsterColumn) => monsterColumn.key === monsterTableSortBy) || monsterTableColumns[0];
+    const valueA = rowA.values[column.key];
+    const valueB = rowB.values[column.key];
+    const missingA = monsterTableValueMissing(valueA);
+    const missingB = monsterTableValueMissing(valueB);
+    if (missingA && missingB) return rowA.displayName.localeCompare(rowB.displayName);
+    if (missingA) return 1;
+    if (missingB) return -1;
+    let result;
+    if (column.type === 'number') {
+        result = Number(valueA) - Number(valueB);
+    } else {
+        result = valueA.toString().localeCompare(valueB.toString(), undefined, { sensitivity: 'base', numeric: true });
+    }
+    if (result === 0) result = rowA.displayName.localeCompare(rowB.displayName);
+    return monsterTableSortDirection === 'asc' ? result : -result;
+}
+
+let formatMonsterTableValue = function(value, column) {
+    if (monsterTableValueMissing(value)) return '&mdash;';
+    if (column.type === 'number') return Number(value).toLocaleString();
+    return monsterTableEscape(monsterTableCleanText(value));
+}
+
+let monsterTableRowMatchesFilter = function(row, filterText) {
+    if (!filterText) return true;
+    const haystack = [
+        row.displayName,
+        row.values.attack_style,
+        row.values.weakness,
+        row.values.sourceSummary
+    ].filter((value) => value != null && value !== '').join(' ').toLowerCase();
+    return haystack.includes(filterText);
+}
+
+let renderMonsterTableHeader = function() {
+    return monsterTableColumns.map((column) => {
+        const sortMarker = monsterTableSortBy === column.key ? (monsterTableSortDirection === 'asc' ? ' &uarr;' : ' &darr;') : '';
+        return `<th class="noscroll monster-table-sort" onclick="sortMonsterTable('${column.key}')" title="Sort by ${monsterTableEscape(column.label)}">${monsterTableEscape(column.label)}${sortMarker}</th>`;
+    }).join('');
+}
+
+let renderMonsterTableRow = function(row) {
+    const encodedName = encodeRFC5987ValueChars(row.name);
+    const cells = monsterTableColumns.map((column) => {
+        if (column.key === 'name') {
+            return `<td class="noscroll monster-table-name"><span class="noscroll" onclick='openSearchDetails("monsters", "${encodedName}")'>${monsterTableEscape(row.displayName)}</span></td>`;
+        }
+        const cellClass = column.key === 'sourceSummary' ? ' monster-table-source-summary' : '';
+        return `<td class="noscroll${cellClass}">${formatMonsterTableValue(row.values[column.key], column)}</td>`;
+    }).join('');
+    return `<tr class="noscroll${row.hasStats ? '' : ' monster-table-missing'}">${cells}</tr>`;
+}
+
+let renderMonsterTable = function() {
+    const tableContainer = $('#monstertable-data');
+    tableContainer.empty();
+    const filterText = (monsterTableFilter || '').trim().toLowerCase();
+    const monsters = baseChunkData['monsters'] ? Object.keys(baseChunkData['monsters']).filter((monster) => !monster.includes('^')) : [];
+    const rows = monsters.map(buildMonsterTableRow).filter((row) => monsterTableRowMatchesFilter(row, filterText)).sort(compareMonsterTableRows);
+    const missingCount = rows.filter((row) => !row.hasStats).length;
+    tableContainer.append(`
+        <div class="monster-table-controls noscroll">
+            <div class="monster-table-title noscroll">Available monsters (${rows.length}/${monsters.length})</div>
+            <input id="monster-table-filter" class="noscrollhard" type="text" placeholder="Filter table..." value="${monsterTableEscape(monsterTableFilter)}" oninput="monsterTableFilterChange()" autocomplete="off" />
+            <div class="monster-table-note noscroll">Attack and defence rolls are derived as (level + 9) * (bonus + 64). Missing values sort last.${missingCount ? ' Missing stats: ' + missingCount + '.' : ''}</div>
+        </div>
+        <div class="monster-table-wrapper noscroll">
+            <table class="monster-table noscroll">
+                <thead class="noscroll"><tr class="noscroll">${renderMonsterTableHeader()}</tr></thead>
+                <tbody class="noscroll">${rows.map(renderMonsterTableRow).join('')}</tbody>
+            </table>
+        </div>
+    `);
 }
 
 // Finds gcd
@@ -9419,7 +10443,13 @@ let openHighest2 = function(notScrollTop) {
             $('.highest2-data').append(`<div class='noscroll style-body ${combatStyle.replaceAll(' ', '_')}-body'><div class='highest-subtitle noscroll'>${combatStyle}</div></div>`);
             if (combatStyle === 'Skills') {
                 $(`.${combatStyle.replaceAll(' ', '_')}-body`).append(`<div class='noscroll qps'>Quest Points: ${questPointTotal}</div>`);
-                $(`.${combatStyle.replaceAll(' ', '_')}-body`).append(`<div class='noscroll row row-header'><span class='noscroll icon-table-header'>Skill</span><span class='noscroll text-table-header${settings['allTasks'] ? ' narrow' : ''}'>Highest Task</span><span class='noscroll button-table-header ${onMobile ? 'mobile' : ''}'>Skill Training</span>${settings['allTasks'] ? `<span class='noscroll button2-table-header'>All Tasks</span>` : ''}</div>`);
+                $(`.${combatStyle.replaceAll(' ', '_')}-body`).append(`<div class='noscroll hiscore-character-row'><label class='noscroll hiscore-character-label' for='hiscore-character-input'>Character Name:</label><input id='hiscore-character-input' class='noscroll hiscore-character-input' maxlength='12' placeholder='Character name' ${canEditHiscoreCharacterName() ? '' : 'disabled'} /><button class='noscroll hiscore-character-button' onclick='saveHiscoreCharacterName()' ${canEditHiscoreCharacterName() ? '' : 'disabled'}>Lookup</button><span class='noscroll hiscore-status'></span></div>`);
+                $('#hiscore-character-input').val(hiscoreCharacterName).on('change', saveHiscoreCharacterName).on('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        saveHiscoreCharacterName();
+                    }
+                });
+                $(`.${combatStyle.replaceAll(' ', '_')}-body`).append(`<div class='noscroll row row-header'><span class='noscroll icon-table-header'>Skill</span><span class='noscroll level-table-header'>Lvl</span><span class='noscroll text-table-header${settings['allTasks'] ? ' narrow' : ''}'>Highest Task</span><span class='noscroll button-table-header ${onMobile ? 'mobile' : ''}'>Skill Training</span>${settings['allTasks'] ? `<span class='noscroll button2-table-header'>All Tasks</span>` : ''}</div>`);
                 skillNames.filter(skill => { return skill !== 'Combat' }).sort().forEach((skill) => {
                     let skillTask = highestOverall[skill];
                     let boost = 0;
@@ -9428,10 +10458,11 @@ let openHighest2 = function(notScrollTop) {
                         boost = highestOverall[skill].match(/\{[0-9]+\}/g)[0].match(/\d+/)[0];
                     }
                     let completedNum = checkedAllTasks.hasOwnProperty(skill) && globalValids.hasOwnProperty(skill) ? Math.min(Object.keys(checkedAllTasks[skill]).filter(task => globalValids[skill].hasOwnProperty(task) && (!backlog.hasOwnProperty(skill) || !backlog[skill].hasOwnProperty(task))).length, Object.keys(globalValids[skill]).filter(task => !backlog.hasOwnProperty(skill) || !backlog[skill].hasOwnProperty(task)).length) : 0;
-                    $(`.${combatStyle.replaceAll(' ', '_')}-body`).append(`<div class='noscroll row'><span class='noscroll skill-icon-wrapper'><img class='noscroll skill-icon' src='./resources/${skill}_skill.png' title='${skill}' /></span><span class='noscroll skill-text${settings['allTasks'] ? ' narrow' : ''}'>${(testMode || !(viewOnly || inEntry || locked)) ? `<span class='noscroll edit-highest' onclick='openPassiveModal("${skill}")'><i class="noscroll fa-solid fa-edit"></i></span>` : ''}${(!!skillTask ? '<b class="noscroll">[' + (boost > 0 ? (chunkInfo['challenges'][skill][skillTask]['Level'] - boost) + '] (+' + boost + ')' : chunkInfo['challenges'][skill][skillTask]['Level'] + ']') + '</b> ' : '') + (skillTask || 'None').replaceAll('~', '').replaceAll('|', '')} ${skillTask ? `<span class="task-info" onclick="showDetails('${encodeRFC5987ValueChars(skillTask)}', '${skill}', '')"><i class="info-icon fa-solid fa-info-circle"></i></span>` : ''}</span><span class='noscroll skill-button ${onMobile ? 'mobile' : ''} ${(primarySkill[skill] ? 'active' : '')}'>${primarySkill[skill] ? `<div class='noscroll methods-button' onclick='viewPrimaryMethodsOrTasks("${skill}", false)'>View Methods</div></span>` : `<div class='noscroll'>None</div></span>`}${settings['allTasks'] ? `<span class='noscroll skill-button2 ${(!!globalValids[skill] && Object.keys(globalValids[skill]).filter(task => !backlog.hasOwnProperty(skill) || !backlog[skill].hasOwnProperty(task)).length > 0 ? 'active' : '')}'>${!!globalValids[skill] && Object.keys(globalValids[skill]).filter(task => !backlog.hasOwnProperty(skill) || !backlog[skill].hasOwnProperty(task)).length > 0 ? `<div class='noscroll tasks-button ${skill}-tasks-button ${Object.keys(globalValids[skill]).filter(task => !backlog.hasOwnProperty(skill) || !backlog[skill].hasOwnProperty(task)).length > completedNum ? 'yellow' : 'green'}' onclick='viewPrimaryMethodsOrTasks("${skill}", true)'>Tasks <span class='noscroll'>(${completedNum}/${Object.keys(globalValids[skill]).filter(task => !backlog.hasOwnProperty(skill) || !backlog[skill].hasOwnProperty(task)).length})</span></div>` : `<div class='noscroll'>None</div>`}` : ''}${(testMode || !(viewOnly || inEntry || locked)) ? `<span class='noscroll manualprimary-highest' onclick='openManualPrimaryContextMenu("${skill}")'><i class="noscroll fa-solid fa-cogs"></i></span>` : ''}</span></div>`);
+                    $(`.${combatStyle.replaceAll(' ', '_')}-body`).append(`<div class='noscroll row'><span class='noscroll skill-icon-wrapper'><img class='noscroll skill-icon' src='./resources/${skill}_skill.png' title='${skill}' /></span><span class='noscroll hiscore-level' data-skill='${skill}'>${getHiscoreSkillLevelText(skill)}</span><span class='noscroll skill-text${settings['allTasks'] ? ' narrow' : ''}'>${(testMode || !(viewOnly || inEntry || locked)) ? `<span class='noscroll edit-highest' onclick='openPassiveModal("${skill}")'><i class="noscroll fa-solid fa-edit"></i></span>` : ''}${(!!skillTask ? '<b class="noscroll">[' + (boost > 0 ? (chunkInfo['challenges'][skill][skillTask]['Level'] - boost) + '] (+' + boost + ')' : chunkInfo['challenges'][skill][skillTask]['Level'] + ']') + '</b> ' : '') + (skillTask || 'None').replaceAll('~', '').replaceAll('|', '')} ${skillTask ? `<span class="task-info" onclick="showDetails('${encodeRFC5987ValueChars(skillTask)}', '${skill}', '')"><i class="info-icon fa-solid fa-info-circle"></i></span>` : ''}</span><span class='noscroll skill-button ${onMobile ? 'mobile' : ''} ${(primarySkill[skill] ? 'active' : '')}'>${primarySkill[skill] ? `<div class='noscroll methods-button' onclick='viewPrimaryMethodsOrTasks("${skill}", false)'>View Methods</div></span>` : `<div class='noscroll'>None</div></span>`}${settings['allTasks'] ? `<span class='noscroll skill-button2 ${(!!globalValids[skill] && Object.keys(globalValids[skill]).filter(task => !backlog.hasOwnProperty(skill) || !backlog[skill].hasOwnProperty(task)).length > 0 ? 'active' : '')}'>${!!globalValids[skill] && Object.keys(globalValids[skill]).filter(task => !backlog.hasOwnProperty(skill) || !backlog[skill].hasOwnProperty(task)).length > 0 ? `<div class='noscroll tasks-button ${skill}-tasks-button ${Object.keys(globalValids[skill]).filter(task => !backlog.hasOwnProperty(skill) || !backlog[skill].hasOwnProperty(task)).length > completedNum ? 'yellow' : 'green'}' onclick='viewPrimaryMethodsOrTasks("${skill}", true)'>Tasks <span class='noscroll'>(${completedNum}/${Object.keys(globalValids[skill]).filter(task => !backlog.hasOwnProperty(skill) || !backlog[skill].hasOwnProperty(task)).length})</span></div>` : `<div class='noscroll'>None</div>`}` : ''}${(testMode || !(viewOnly || inEntry || locked)) ? `<span class='noscroll manualprimary-highest' onclick='openManualPrimaryContextMenu("${skill}")'><i class="noscroll fa-solid fa-cogs"></i></span>` : ''}</span></div>`);
                 });
                 (testMode || !(viewOnly || inEntry || locked)) ? $(`.skill-button, .skill-button2, .button2-table-header`).addClass('extra-gear-room') : $(`.skill-button, .skill-button2, .button2-table-header`).removeClass('extra-gear-room');
                 settings['allTasks'] && $(`.skill-button`).removeClass('extra-gear-room');
+                updateHiscoreActivityInfoUi();
             } else if (combatStyle === 'Slayer') {
                 $(`.${combatStyle.replaceAll(' ', '_')}-body`).append(`<div class='slayer-section slayer-section-1'></div>`);
                 let tooltipBase = `<span class="slayerlock-question">Slayer Locking <i class="fa-solid fa-question-circle question-help"></i></span>`;
@@ -10475,6 +11506,13 @@ let closeSearchDetails = function() {
     $('#searchDetailsModal').remove();
 }
 
+// Closes the monster table modal
+let closeMonsterTable = function() {
+    monsterTableModalOpen = false;
+    modalOutsideTime = Date.now();
+    $('#monsterTableModal').remove();
+}
+
 // Closes the highest modal
 let closeHighest = function() {
     highestModalOpen = false;
@@ -10839,6 +11877,7 @@ let openActiveContextMenu = function(challenge, skill, hasAlts) {
         activeContextMenuChallenge = challenge;
         activeContextMenuSkill = skill;
         hasAlts ? $('.active-context-menu-alternatives').show() : $('.active-context-menu-alternatives').hide();
+        isSplitBacklogEligible(challenge, skill) ? $('.active-context-menu-split').show() : $('.active-context-menu-split').hide();
         let dims = getBrowserDim();
         let x = event.pageX + $(".active-context-menu").width() + 5 > dims['w'] ? dims['w'] - $(".active-context-menu").width() - 5 : event.pageX - 5;
         let y = event.pageY + $(".active-context-menu").height() + 5 > dims['h'] ? dims['h'] - $(".active-context-menu").height() - 5 : event.pageY - 5;
@@ -10855,6 +11894,10 @@ let openBacklogContextMenu = function(challenge, skill) {
     if (backlogContextMenuChallengeOld !== challenge) {
         backlogContextMenuChallenge = challenge;
         backlogContextMenuSkill = skill;
+        let hasSplitEntry = hasSplitBacklogEntry(challenge, skill);
+        $('.backlog-context-menu-split').text(hasSplitEntry ? 'Edit Split' : 'Split Backlog');
+        (isSplitBacklogEligible(challenge, skill) || hasSplitEntry) ? $('.backlog-context-menu-split').show() : $('.backlog-context-menu-split').hide();
+        hasSplitEntry ? $('.backlog-context-menu-unsplit').show() : $('.backlog-context-menu-unsplit').hide();
         let dims = getBrowserDim();
         let x = event.pageX + $(".backlog-context-menu").width() + 5 > dims['w'] ? dims['w'] - $(".backlog-context-menu").width() - 5 : event.pageX - 5;
         let y = event.pageY + $(".backlog-context-menu").height() + 5 > dims['h'] ? dims['h'] - $(".backlog-context-menu").height() - 5 : event.pageY - 5;
@@ -11919,6 +12962,8 @@ let showSettings = function(keepSettingsClosed) {
                 $('.' + category.replaceAll(/ /g, '_') + '-category').append(`<div class="setting ${setting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-setting'} noscroll"><span class='noscroll'>` + settingNames[setting] + `: ${settings[setting]}<i class="fa-solid fa-edit noscroll change-starting-chunk" title="Change Starting Chunk" onclick="openMapIntroModal(${true})"></i></span></div>`);
             } else if (setting === 'theme') {
                 $('.' + category.replaceAll(/ /g, '_') + '-category').append(`<div class="setting ${setting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-setting'} noscroll"><div class='noscroll theme-header'>Theme:</div><span class='theme-button-container'><button class='theme-button light' onclick="toggleTheme('light')">Light</button><button class='theme-button dark' onclick="toggleTheme('dark')">Dark</button><button class='theme-button terminal' onclick="toggleTheme('terminal')">Terminal</button><button class='theme-button neon' onclick="toggleTheme('neon')">Neon</button><button class='theme-button pumpkin' onclick="toggleTheme('pumpkin')">Pumpkin</button><button class='theme-button mono' onclick="toggleTheme('mono')">Mono</button><button class='theme-button winter' onclick="toggleTheme('winter')">Winter</button><button class='theme-button autumn' onclick="toggleTheme('autumn')">Autumn</button><button class='theme-button voyage' onclick="toggleTheme('voyage')">Voyage</button></span></div>`);
+            } else if (setting === 'splitBacklogChunkCount') {
+                $('.' + category.replaceAll(/ /g, '_') + '-category').append(`<div class="setting ${setting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-setting'} noscroll"><span class='noscroll'>${settingNames[setting]}: </span><input type="number" min="1" max="99" class="split-backlog-count-input" value="${getSplitBacklogCount()}" onchange="checkOffSettings()" ${(viewOnly || inEntry || locked) ? "disabled" : ''} /></div>`);
             } else if (setting === 'rollingChunksOptions') {
                 const outputHtml = `
                     <div class="setting">
@@ -11944,6 +12989,7 @@ let showSettings = function(keepSettingsClosed) {
                                 <div class="${setting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-neighbors-setting subsetting'} noscroll"><label class="checkbox noscroll ${(viewOnly || inEntry || locked) ? "checkbox--disabled" : ''}"><span class="checkbox__input noscroll"><input type="checkbox" name="checkbox" ${settings[setting]['neighbors'] ? "checked" : ''} class='noscroll' onclick="checkOffNeighbourOption('neighbors')" ${(viewOnly || inEntry || locked) ? "disabled" : ''} /><span class="checkbox__control noscroll"><svg viewBox='0 0 24 24' aria-hidden="true" focusable="false"><path fill='none' stroke='currentColor' stroke-width='3' d='M1.73 12.91l6.37 6.37L22.79 4.59' /></svg></span></span><span class="radio__label noscroll">...mark chunks neighbouring/adjacent to the rolled chunk as rollable</span></label></div>
                                 <div class="setting ${setting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-walkableRollable-setting subsetting'} noscroll"><label class="checkbox noscroll ${(viewOnly || inEntry || locked) ? "checkbox--disabled" : ''}"><span class="checkbox__input noscroll"><input type="checkbox" name="checkbox" ${settings[setting]['walkableRollable'] ? "checked" : ''} class='noscroll' onclick="checkOffNeighbourOption('walkableRollable')" ${(viewOnly || inEntry || locked) ? "disabled" : ''} /><span class="checkbox__control noscroll"><svg viewBox='0 0 24 24' aria-hidden="true" focusable="false"><path fill='none' stroke='currentColor' stroke-width='3' d='M1.73 12.91l6.37 6.37L22.79 4.59' /></svg></span></span><span class="radio__label noscroll">Only include chunks that have some walkable area</span></label></div>
                                 <div class="setting ${setting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-autoWalkableRollable-setting subsetting'} noscroll"><label class="checkbox noscroll ${(viewOnly || inEntry || locked) ? "checkbox--disabled" : ''}"><span class="checkbox__input noscroll"><input type="checkbox" name="checkbox" ${settings[setting]['autoWalkableRollable'] ? "checked" : ''} class='noscroll' onclick="checkOffNeighbourOption('autoWalkableRollable')" ${(viewOnly || inEntry || locked) ? "disabled" : ''} /><span class="checkbox__control noscroll"><svg viewBox='0 0 24 24' aria-hidden="true" focusable="false"><path fill='none' stroke='currentColor' stroke-width='3' d='M1.73 12.91l6.37 6.37L22.79 4.59' /></svg></span></span><span class="radio__label noscroll">Across the whole map, mark any actually accessible chunks neighbouring any of my unlocked chunks as rollable${tooltip.generate('neighborsTooltip', tooltipBase, 'neighborsTooltip', onMobile ? 'bottom' : 'right')}</span></label></div>
+                                <div class="setting ${setting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-allowTransportation-setting subsetting'} noscroll"><label class="checkbox noscroll ${(viewOnly || inEntry || locked) ? "checkbox--disabled" : ''}"><span class="checkbox__input noscroll"><input type="checkbox" name="checkbox" ${settings[setting]['allowTransportation'] ? "checked" : ''} class='noscroll' onclick="checkOffNeighbourOption('allowTransportation')" ${(viewOnly || inEntry || locked) ? "disabled" : ''} /><span class="checkbox__control noscroll"><svg viewBox='0 0 24 24' aria-hidden="true" focusable="false"><path fill='none' stroke='currentColor' stroke-width='3' d='M1.73 12.91l6.37 6.37L22.79 4.59' /></svg></span></span><span class="radio__label noscroll">Allow transportation routes to mark chunks as rollable${tooltip.generate('transportationTooltip', tooltipBase, 'transportationTooltip', onMobile ? 'bottom' : 'right')}</span></label></div>
                             </div>
                             <div class="setting neighbors-inner neighbors-inner-2">
                                 <div class="${setting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-remove-setting subsetting'} noscroll"><label class="checkbox noscroll ${(viewOnly || inEntry || locked) ? "checkbox--disabled" : ''}"><span class="checkbox__input noscroll"><input type="checkbox" name="checkbox" ${settings[setting]['remove'] ? "checked" : ''} class='noscroll' onclick="checkOffNeighbourOption('remove')" ${(viewOnly || inEntry || locked) ? "disabled" : ''} /><span class="checkbox__control noscroll"><svg viewBox='0 0 24 24' aria-hidden="true" focusable="false"><path fill='none' stroke='currentColor' stroke-width='3' d='M1.73 12.91l6.37 6.37L22.79 4.59' /></svg></span></span><span class="radio__label noscroll">...remove all rollable chunk markings from my map</span></label></div>
@@ -11959,6 +13005,8 @@ let showSettings = function(keepSettingsClosed) {
             Array.isArray(settingStructure[category][setting]) && settingStructure[category][setting].forEach((subSetting) => {
                 if (subSetting === 'defaultChunkinfo') {
                     $('.' + setting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-setting').append(`<div class="setting ${subSetting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-setting subsetting'} noscroll"><span class='noscroll'>` + settingNames[subSetting] + `</span><select class="chunkinfo-default-rule" onchange="changeDefaultChunkinfo()"><option value='monsters' ${settings[subSetting] === 'monsters' ? 'selected': ''}>Monsters</option><option value='npcs' ${settings[subSetting] === 'npcs' ? 'selected': ''}>NPCs</option><option value='spawns' ${settings[subSetting] === 'spawns' ? 'selected': ''}>Item spawns</option><option value='shops' ${settings[subSetting] === 'shops' ? 'selected': ''}>Shops</option><option value='features' ${settings[subSetting] === 'features' ? 'selected': ''}>Features</option><option value='quests' ${settings[subSetting] === 'quests' ? 'selected': ''}>Quests</option><option value='clues' ${settings[subSetting] === 'clues' ? 'selected': ''}>Clue steps</option><option value='connections' ${settings[subSetting] === 'connections' ? 'selected': ''}>Connected areas</option><option value='challenges' ${settings[subSetting] === 'challenges' ? 'selected': ''}>Possible tasks</option></select></div>`);
+                } else if (subSetting === 'splitBacklogChunkCount') {
+                    $('.' + setting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-setting').append(`<div class="setting ${subSetting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-setting subsetting'} noscroll"><span class='noscroll'>${settingNames[subSetting]}: </span><input type="number" min="1" max="99" class="split-backlog-count-input" value="${getSplitBacklogCount()}" onchange="checkOffSettings()" ${(!settings[setting] || (!testMode && (viewOnly || inEntry || locked))) ? "disabled" : ''} /></div>`);
                 } else {
                     $('.' + setting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-setting').append(`<div class="setting ${subSetting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-setting subsetting'} noscroll"><label class="checkbox noscroll ${!testMode && (viewOnly || inEntry || locked || settingStructure[category][subSetting] === false) ? "checkbox--disabled" : ''}"><span class="checkbox__input noscroll"><input type="checkbox" name="checkbox" ${settings[subSetting] ? "checked" : ''} class='noscroll' onclick="checkOffSettings()" ${!testMode && (viewOnly || inEntry || locked || settingStructure[category][subSetting] === false) ? "disabled" : ''}><span class="checkbox__control noscroll"><svg viewBox='0 0 24 24' aria-hidden="true" focusable="false"><path fill='none' stroke='currentColor' stroke-width='3' d='M1.73 12.91l6.37 6.37L22.79 4.59' /></svg></span></span><span class="radio__label noscroll">${settingNames[subSetting]}</span></label></div>`);
                 }
@@ -11982,9 +13030,21 @@ let checkOffRollingOption = function(inputName) {
 let checkOffNeighbourOption = function(inputName) {
     settings['chunkNeighboursOptions'][inputName] = $(`.chunkneighboursoptions-${inputName}-setting input`).prop('checked');
     if (inputName === 'neighbors' && !settings['chunkNeighboursOptions'][inputName]) {
-        $(`.neighbors-inner-1 .setting input`).prop('checked', false);
+        $(`.chunkneighboursoptions-walkableRollable-setting input`).prop('checked', false);
+        $(`.chunkneighboursoptions-autoWalkableRollable-setting input`).prop('checked', false);
         settings['chunkNeighboursOptions']['walkableRollable'] = false;
         settings['chunkNeighboursOptions']['autoWalkableRollable'] = false;
+    }
+    if ((inputName === 'neighbors' || inputName === 'allowTransportation') && settings['chunkNeighboursOptions'][inputName]) {
+        $(`.chunkneighboursoptions-remove-setting input`).prop('checked', false);
+        settings['chunkNeighboursOptions']['remove'] = false;
+    }
+    if (inputName === 'remove' && settings['chunkNeighboursOptions'][inputName]) {
+        $(`.neighbors-inner-1 input`).prop('checked', false);
+        settings['chunkNeighboursOptions']['neighbors'] = false;
+        settings['chunkNeighboursOptions']['walkableRollable'] = false;
+        settings['chunkNeighboursOptions']['autoWalkableRollable'] = false;
+        settings['chunkNeighboursOptions']['allowTransportation'] = false;
     }
     handleNeighboursDisabling();
     setData();
@@ -11992,27 +13052,19 @@ let checkOffNeighbourOption = function(inputName) {
 
 // Helper function to handle disabling parts of the neighbours settings
 let handleNeighboursDisabling = function() {
-    if (settings['chunkNeighboursOptions']['remove'] && !settings['chunkNeighboursOptions']['neighbors']) {
-        $(`.neighbors-inner-1`).addClass('disabled-neighbors');
-        $(`.neighbors-inner-1 input`).prop('disabled', true);
-    } else {
-        $(`.neighbors-inner-1`).removeClass('disabled-neighbors');
-        $(`.neighbors-inner-1 input`).prop('disabled', false);
-    }
-    if (settings['chunkNeighboursOptions']['neighbors']) {
+    let lockedSettings = viewOnly || inEntry || locked;
+    let addOptionsActive = settings['chunkNeighboursOptions']['neighbors'] || settings['chunkNeighboursOptions']['allowTransportation'];
+    let removeActive = settings['chunkNeighboursOptions']['remove'];
+    $(`.chunkneighboursoptions-neighbors-setting input, .chunkneighboursoptions-allowTransportation-setting input`).prop('disabled', lockedSettings || removeActive);
+    $(`.chunkneighboursoptions-walkableRollable-setting input, .chunkneighboursoptions-autoWalkableRollable-setting input`).prop('disabled', lockedSettings || removeActive || !settings['chunkNeighboursOptions']['neighbors']);
+    $(`.chunkneighboursoptions-walkableRollable-setting, .chunkneighboursoptions-autoWalkableRollable-setting`).toggleClass('disabled-neighbors', removeActive || !settings['chunkNeighboursOptions']['neighbors']);
+    $(`.chunkneighboursoptions-neighbors-setting, .chunkneighboursoptions-allowTransportation-setting`).toggleClass('disabled-neighbors', removeActive);
+    if (addOptionsActive) {
         $(`.neighbors-inner-2`).addClass('disabled-neighbors');
         $(`.neighbors-inner-2 input`).prop('disabled', true);
-        $(`.neighbors-inner-1 .setting`).removeClass('disabled-neighbors');
-        $(`.neighbors-inner-1 .setting input`).prop('disabled', false);
     } else {
         $(`.neighbors-inner-2`).removeClass('disabled-neighbors');
-        $(`.neighbors-inner-2 input`).prop('disabled', false);
-        $(`.neighbors-inner-1 .setting input`).prop('disabled', true);
-        if (!settings['chunkNeighboursOptions']['remove']) {
-            $(`.neighbors-inner-1 .setting`).addClass('disabled-neighbors');
-        } else {
-            $(`.neighbors-inner-1 .setting`).removeClass('disabled-neighbors');
-        }
+        $(`.neighbors-inner-2 input`).prop('disabled', lockedSettings);
     }
 }
 
@@ -12188,6 +13240,7 @@ let switchActiveContext = function(e, opt) {
         switch (opt) {
             case "backlog": backlogChallenge(activeContextMenuChallenge, activeContextMenuSkill, '', e.altKey); break;
             case "backlog note": showNotes(encodeRFC5987ValueChars(activeContextMenuChallenge), activeContextMenuSkill, ''); break;
+            case "split backlog": splitBacklogChallenge(activeContextMenuChallenge, activeContextMenuSkill); break;
             case "alternatives": showAlternatives(activeContextMenuChallenge, activeContextMenuSkill, ''); break;
             case "details": showDetails(encodeRFC5987ValueChars(activeContextMenuChallenge), activeContextMenuSkill, ''); break;
         }
@@ -12202,6 +13255,8 @@ let switchBacklogContext = function(opt) {
         switch (opt) {
             case "unbacklog": unbacklogChallenge(backlogContextMenuChallenge, backlogContextMenuSkill); break;
             case "edit note": showNotes(backlogContextMenuChallenge, backlogContextMenuSkill, backlog[backlogContextMenuSkill][decodeQueryParam(backlogContextMenuChallenge)]); break;
+            case "split backlog": splitBacklogChallenge(backlogContextMenuChallenge, backlogContextMenuSkill); break;
+            case "unsplit backlog": unsplitBacklogChallenge(backlogContextMenuChallenge, backlogContextMenuSkill); break;
             case "details": showDetails(encodeRFC5987ValueChars(backlogContextMenuChallenge), backlogContextMenuSkill, ''); break;
         }
     }
@@ -12233,6 +13288,47 @@ let switchTrainingMethodsContext = function(opt) {
 }
 
 // Sends a challenge to the backlog
+let splitBacklogChallenge = function(challenge, skill) {
+    challenge = decodeQueryParam(challenge);
+    let existingEntry = getSplitBacklogEntry(challenge, skill);
+    if (!existingEntry && !isSplitBacklogEligible(challenge, skill)) {
+        console.warn('Split Backlog is only available for eligible skill tasks above the current proven level.');
+        return;
+    }
+    let splitCount = promptSplitBacklogCount(challenge, skill);
+    if (splitCount === null) return;
+    let targetLevel = parseInt(chunkInfo['challenges'][skill][challenge]['Level']) || 1;
+    let start = existingEntry && existingEntry.startLevel ? { level: existingEntry.startLevel, source: existingEntry.startSource || 'base' } : getHighestStateLevelForSkill(skill);
+    let splitXp = buildSplitBacklogMilestones(start.level, targetLevel, splitCount);
+    let currentSplit = existingEntry ? Math.max(1, Math.min(splitCount, parseInt(existingEntry.currentSplit) || 1)) : 1;
+    if (!splitBacklog[skill]) {
+        splitBacklog[skill] = {};
+    }
+    splitBacklog[skill][challenge] = {
+        targetLevel,
+        targetTask: challenge,
+        startLevel: start.level,
+        startSource: start.source,
+        startXp: splitXp.startXp,
+        targetXp: splitXp.targetXp,
+        splitCount,
+        currentSplit,
+        milestones: splitXp.milestones,
+        includeZeroTaskChunks: existingEntry && existingEntry.hasOwnProperty('includeZeroTaskChunks') ? !!existingEntry.includeZeroTaskChunks : !!settings['splitBacklogIncludeZeroTaskChunks']
+    };
+    if (existingEntry && existingEntry.lastAdvancedChunkMarker) {
+        splitBacklog[skill][challenge].lastAdvancedChunkMarker = existingEntry.lastAdvancedChunkMarker;
+    }
+    let note = backlog[skill] && backlog[skill][challenge] ? backlog[skill][challenge] : '';
+    backlogChallenge(challenge, skill, note);
+}
+
+let unsplitBacklogChallenge = function(challenge, skill) {
+    cleanupSplitBacklogEntry(challenge, skill);
+    calcCurrentChallengesCanvas(true);
+    setData();
+}
+
 let backlogChallenge = function(challenge, skill, note, noUpdate) {
     challenge = decodeQueryParam(challenge);
     if (!backlog[skill]) {
@@ -12423,6 +13519,7 @@ let setupSkippedArr = function() {
 // Removes a challenge from the backlog
 let unbacklogChallenge = function(challenge, skill) {
     challenge = decodeQueryParam(challenge);
+    cleanupSplitBacklogEntry(challenge, skill);
     !!backlog[skill] && delete backlog[skill][challenge];
     if (!!backlog[skill] && Object.keys(backlog[skill]).length === 0) {
         !!backlog[skill] && delete backlog[skill];
@@ -12479,6 +13576,7 @@ let uncompleteChallenge = function(challenge, skill) {
             }
         });
     }
+    markSplitBacklogCompanionDone(challenge, skill, false);
     if ($('.panel-completed .challenge').length === 0) {
         $('.panel-completed').append('No tasks currently completed.');
     }
@@ -12502,6 +13600,24 @@ let checkOffChallenge = function(skill, line, skip) {
             checkedChallenges[skill][line] = true;
         } else {
             delete checkedChallenges[skill][line];
+        }
+        markSplitBacklogCompanionDone(line, skill, !!checkedChallenges[skill] && !!checkedChallenges[skill][line]);
+        let splitTarget = chunkInfo['challenges'][skill] && chunkInfo['challenges'][skill][line] && chunkInfo['challenges'][skill][line]['SplitBacklogTarget'];
+        if (splitTarget && checkedChallenges[skill] && checkedChallenges[skill][line] && splitBacklog[skill] && splitBacklog[skill][splitTarget] && splitBacklog[skill][splitTarget].currentSplit >= splitBacklog[skill][splitTarget].splitCount) {
+            delete checkedChallenges[skill][line];
+            if (Object.keys(checkedChallenges[skill]).length === 0) {
+                delete checkedChallenges[skill];
+            }
+            if (backlog[skill]) {
+                delete backlog[skill][splitTarget];
+                if (Object.keys(backlog[skill]).length === 0) {
+                    delete backlog[skill];
+                }
+            }
+            cleanupSplitBacklogEntry(splitTarget, skill);
+            calcCurrentChallengesCanvas(true);
+            setData();
+            return;
         }
         if (!skip) {
             $('.panel-active .challenge:has(input:checked)').addClass('hide-backlog');
@@ -12537,84 +13653,89 @@ let checkOffRules = function(didRedo, startup) {
     let extraFilter = !onMobile ? '.rules-content ' : '';
     $('.panel-search').hasClass('visible') && (extraFilter = '.panel-search ');
     let redo = false;
+    let ruleClassName = function(rule) {
+        return rule.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase();
+    };
+    let defaultRuleValue = function(rule, fallback) {
+        return defaultRules.hasOwnProperty(rule) ? defaultRules[rule] : fallback;
+    };
+    let updateNumberRule = function(rule, selector, min, max, fallback) {
+        let input = $(extraFilter + selector);
+        if (input.length === 0) {
+            if (rules[rule] === undefined || rules[rule] === null || rules[rule] === '') {
+                rules[rule] = defaultRuleValue(rule, fallback);
+            }
+            return;
+        }
+        if (input.val() < min || !input.val()) {
+            input.val(min);
+        }
+        if (max !== null && input.val() > max) {
+            input.val(max);
+        }
+        rules[rule] = input.val();
+    };
     Object.keys(rules).forEach((rule) => {
-        if (subRuleDefault[rule] && rules[rule] !== $(extraFilter + '.' + rule.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-rule input').prop('checked')) {
-            $(extraFilter + '.' + rule.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-rule').children('.subrule').children('.checkbox').children('.checkbox__input').children('input').prop('checked', subRuleDefault[rule]);
+        let ruleSelector = extraFilter + '.' + ruleClassName(rule) + '-rule';
+        let ruleEl = $(ruleSelector);
+        let ruleInputs = $(ruleSelector + ' input');
+        if (subRuleDefault[rule] && ruleInputs.length > 0 && rules[rule] !== ruleInputs.prop('checked')) {
+            ruleEl.children('.subrule').children('.checkbox').children('.checkbox__input').children('input').prop('checked', subRuleDefault[rule]);
             redo = true;
         }
         if (rule === 'Kill X Amount') {
-            if ($(extraFilter + '.x-num-input').val() < 1 || !$(extraFilter + '.x-num-input').val()) {
-                $(extraFilter + '.x-num-input').val(1);
-            }
-            rules[rule] = $(extraFilter + '.x-num-input').val();
+            updateNumberRule(rule, '.x-num-input', 1, null, "1");
         } else if (rule === 'Rare Drop Amount') {
-            if ($(extraFilter + '.rare-num-input').val() < 0 || !$(extraFilter + '.rare-num-input').val()) {
-                $(extraFilter + '.rare-num-input').val(0);
-            }
-            rules[rule] = $(extraFilter + '.rare-num-input').val();
+            updateNumberRule(rule, '.rare-num-input', 0, null, "1000");
         } else if (rule === 'Secondary Primary Amount') {
-            if ($(extraFilter + '.secondary-primary-input').val() < 0 || !$(extraFilter + '.secondary-primary-input').val()) {
-                $(extraFilter + '.secondary-primary-input').val(0);
-            }
-            rules[rule] = $(extraFilter + '.secondary-primary-input').val();
+            updateNumberRule(rule, '.secondary-primary-input', 0, null, "1");
         } else if (rule === 'Strict Tool Gating Amount') {
-            if ($(extraFilter + '.tool-gating-input').val() < 1 || !$(extraFilter + '.tool-gating-input').val()) {
-                $(extraFilter + '.tool-gating-input').val(1);
-            }
-            if ($(extraFilter + '.tool-gating-input').val() > 100) {
-                $(extraFilter + '.tool-gating-input').val(100);
-            }
-            rules[rule] = $(extraFilter + '.tool-gating-input').val();
+            updateNumberRule(rule, '.tool-gating-input', 1, 100, "75");
         } else if (rule === 'Skill Task Cap') {
-            let selectedRadio = $(extraFilter + '.skill-task-cap-radios input[type="radio"]:checked');
-            rules[rule] = selectedRadio.length ? selectedRadio.val() : 'none';
+            let skillTaskCapRadios = $(extraFilter + '.skill-task-cap-radios input[type="radio"]');
+            let selectedRadio = skillTaskCapRadios.filter(':checked');
+            if (skillTaskCapRadios.length > 0) {
+                rules[rule] = selectedRadio.length ? selectedRadio.val() : (rules[rule] || 'none');
+            } else if (!rules[rule]) {
+                rules[rule] = 'none';
+            }
         } else if (rule === 'Skill Task Cap Amount') {
             let capInput = $(extraFilter + '.skill-task-cap-input');
-            if (capInput.val() < 1 || !capInput.val()) capInput.val(1);
-            if (capInput.val() > 99) capInput.val(99);
-            rules[rule] = capInput.val();
+            if (capInput.length > 0) {
+                if (capInput.val() < 1 || !capInput.val()) capInput.val(1);
+                if (capInput.val() > 99) capInput.val(99);
+                rules[rule] = capInput.val();
+            } else if (!rules[rule]) {
+                rules[rule] = "50";
+            }
         } else if (rule === 'BiS Monster Power Gate Amount') {
-            if ($(extraFilter + '.monster-gate-input').val() < 1 || !$(extraFilter + '.monster-gate-input').val()) {
-                $(extraFilter + '.monster-gate-input').val(1);
-            }
-            if ($(extraFilter + '.monster-gate-input').val() > 5000) {
-                $(extraFilter + '.monster-gate-input').val(5000);
-            }
-            rules[rule] = $(extraFilter + '.monster-gate-input').val();
+            updateNumberRule(rule, '.monster-gate-input', 1, 5000, "5");
         } else if (rule === 'Shop Cost Gate Amount') {
-            if ($(extraFilter + '.shop-cost-gate-input').val() < 1 || !$(extraFilter + '.shop-cost-gate-input').val()) {
-                $(extraFilter + '.shop-cost-gate-input').val(1);
-            }
-            if ($(extraFilter + '.shop-cost-gate-input').val() > 5000) {
-                $(extraFilter + '.shop-cost-gate-input').val(5000);
-            }
-            rules[rule] = $(extraFilter + '.shop-cost-gate-input').val();
+            updateNumberRule(rule, '.shop-cost-gate-input', 1, 5000, "5");
         } else if (rule === 'Primary Drop Monster Gate Amount') {
-            if ($(extraFilter + '.primary-drop-gate-input').val() < 1 || !$(extraFilter + '.primary-drop-gate-input').val()) {
-                $(extraFilter + '.primary-drop-gate-input').val(1);
-            }
-            if ($(extraFilter + '.primary-drop-gate-input').val() > 60) {
-                $(extraFilter + '.primary-drop-gate-input').val(60);
-            }
-            rules[rule] = $(extraFilter + '.primary-drop-gate-input').val();
+            updateNumberRule(rule, '.primary-drop-gate-input', 1, 60, "3");
         } else {
-            rules[rule] = $(extraFilter + '.' + rule.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-rule input').prop('checked');
+            if (ruleInputs.length > 0) {
+                rules[rule] = ruleInputs.prop('checked');
+            } else if (rules[rule] === undefined) {
+                rules[rule] = defaultRuleValue(rule, false);
+            }
         }
-        if ($(extraFilter + '.' + rule.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-rule').children('.subrule').length) {
+        if (ruleEl.children('.subrule').length) {
             if ((rules[rule] || rule === 'Rare Drop') && (!(viewOnly || inEntry || locked) || testMode)) {
-                $(extraFilter + '.' + rule.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-rule').children('.subrule').children('.checkbox').removeClass('checkbox--disabled');
-                $(extraFilter + '.' + rule.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-rule').children('.subrule').children('.checkbox').children('.checkbox__input').children('input').prop('disabled', false);
-                $(extraFilter + '.' + rule.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-rule').find('.skill-task-cap-radios input').prop('disabled', false);
-                $(extraFilter + '.' + rule.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-rule').find('.skill-task-cap-radios label').removeClass('checkbox--disabled');
+                ruleEl.children('.subrule').children('.checkbox').removeClass('checkbox--disabled');
+                ruleEl.children('.subrule').children('.checkbox').children('.checkbox__input').children('input').prop('disabled', false);
+                ruleEl.find('.skill-task-cap-radios input').prop('disabled', false);
+                ruleEl.find('.skill-task-cap-radios label').removeClass('checkbox--disabled');
             } else {
-                $(extraFilter + '.' + rule.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-rule').children('.subrule').children('.checkbox').addClass('checkbox--disabled');
-                $(extraFilter + '.' + rule.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-rule').children('.subrule').children('.checkbox').children('.checkbox__input').children('input').prop('disabled', true);
-                $(extraFilter + '.' + rule.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-rule').find('.skill-task-cap-radios input').prop('disabled', true);
-                $(extraFilter + '.' + rule.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-rule').find('.skill-task-cap-radios label').addClass('checkbox--disabled');
+                ruleEl.children('.subrule').children('.checkbox').addClass('checkbox--disabled');
+                ruleEl.children('.subrule').children('.checkbox').children('.checkbox__input').children('input').prop('disabled', true);
+                ruleEl.find('.skill-task-cap-radios input').prop('disabled', true);
+                ruleEl.find('.skill-task-cap-radios label').addClass('checkbox--disabled');
             }
             if (!rules[rule] && rule !== 'Rare Drop') {
-                $(extraFilter + '.' + rule.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-rule').children('.subrule').children('.checkbox').children('.checkbox__input').children('input').prop('checked', false);
-                $(extraFilter + '.' + rule.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-rule').find('.skill-task-cap-radios input[type="radio"][value="none"]').prop('checked', true);
+                ruleEl.children('.subrule').children('.checkbox').children('.checkbox__input').children('input').prop('checked', false);
+                ruleEl.find('.skill-task-cap-radios input[type="radio"][value="none"]').prop('checked', true);
                 redo = true;
             }
         }
@@ -12639,7 +13760,14 @@ let checkOffSettings = function(didRedo, startup) {
             $('.' + setting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-setting').children('.subsetting').children('.checkbox').children('.checkbox__input').children('input').prop('checked', subSettingDefault[setting]);
             redo = true;
         }
-        if (setting !== 'completedTaskColor' && setting !== 'defaultStickerColor' && setting !== 'unlockedBorderColor' && setting !== 'startingChunk' && setting !== 'theme' && setting !== 'defaultChunkinfo' && setting !== 'rollingChunksOptions' && settingNames.hasOwnProperty(setting)) {
+        if (setting === 'splitBacklogChunkCount') {
+            let countInput = $('.split-backlog-count-input');
+            if (countInput.length) {
+                if (countInput.val() < 1 || !countInput.val()) countInput.val(1);
+                if (countInput.val() > 99) countInput.val(99);
+                settings[setting] = countInput.val();
+            }
+        } else if (setting !== 'completedTaskColor' && setting !== 'defaultStickerColor' && setting !== 'unlockedBorderColor' && setting !== 'startingChunk' && setting !== 'theme' && setting !== 'defaultChunkinfo' && setting !== 'rollingChunksOptions' && settingNames.hasOwnProperty(setting)) {
             settings[setting] = $('.' + setting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-setting input').prop('checked');
         }
         if ($('.' + setting.replaceAll(' ', '_').replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]\^\`{|}~]/g, '').toLowerCase() + '-setting').children('.subsetting').length) {
@@ -12665,6 +13793,7 @@ let checkOffSettings = function(didRedo, startup) {
         checkOffSettings(true, startup);
         return;
     }
+    $('.splitbacklogchunkcount-setting input').prop('disabled', !settings['splitBacklogEnabled'] || (!testMode && (viewOnly || inEntry || locked)));
     toggleIds(settings['ids']);
     toggleVisibility(settings['highvis']);
     toggleTheme(settings['theme']);
@@ -12696,9 +13825,18 @@ let checkOffSettings = function(didRedo, startup) {
 
 // Moves checked off challenges to completed
 let completeChallenges = function(noCalc) {
+    queueHiscoreRefresh();
     let checkedChallengesTemp = decodeObject(checkedChallenges);
+    let preservedCheckedChallenges = {};
     Object.keys(checkedChallengesTemp).forEach((skill) => {
         Object.keys(checkedChallengesTemp[skill]).forEach((name) => {
+            if (chunkInfo['challenges'][skill] && chunkInfo['challenges'][skill][name] && chunkInfo['challenges'][skill][name]['SplitBacklogTarget']) {
+                if (!preservedCheckedChallenges[skill]) {
+                    preservedCheckedChallenges[skill] = {};
+                }
+                preservedCheckedChallenges[skill][name] = checkedChallengesTemp[skill][name];
+                return;
+            }
             if (!completedChallenges[skill]) {
                 completedChallenges[skill] = {};
             }
@@ -12707,9 +13845,18 @@ let completeChallenges = function(noCalc) {
             } else {
                 completedChallenges[skill][name] = decodeObject(checkedChallengesTemp[skill][name]);
             }
+            if (hasSplitBacklogEntry(name, skill)) {
+                cleanupSplitBacklogEntry(name, skill);
+                if (backlog[skill]) {
+                    delete backlog[skill][name];
+                    if (Object.keys(backlog[skill]).length === 0) {
+                        delete backlog[skill];
+                    }
+                }
+            }
         });
     });
-    checkedChallenges = {};
+    checkedChallenges = preservedCheckedChallenges;
     setCalculating('.panel-completed');
     setupCurrentChallenges(tempChallengeArrSaved);
     !noCalc && calcCurrentChallengesCanvas(true, true, true);
@@ -12872,6 +14019,30 @@ let checkMID = function(mid) {
         $('html, body').addClass('a404');
         $('.a404-address').text(window.location.href.split('?')[1]);
         document.title = '404 - Chunk Picker V2';
+    } else if (localDbMode && mid && !['.', '#', '$', '[', ']'].some((char) => mid.includes(char))) {
+        if (mid.split('-')[1] === 'view') {
+            mid = mid.split('-')[0];
+            viewOnly = true;
+        }
+        databaseRef.child('maps/' + mid).once('value', function(snap) {
+            if (snap.val()) {
+                databaseRef.child('mapids/' + mid).set(true);
+                enterLocalDbMap(mid);
+                setupMap();
+            } else {
+                atHome = true;
+                $('.loading, .ui-loader-header').remove();
+                $('.menu, .menu2, .menu3, .menu4, .menu5, .menu6, .menu7, .menu8, .menu9, .menu10, .settings-menu, .topnav, #beta, .hiddenInfo, #entry-menu, #highscore-menu, #highscore-menu2, #import-menu, #help-menu, .canvasDiv, .menu11, .menu12, .menu13, .menu14').hide();
+                $('#home-menu, .entry-home-menu-container, .entry-home-menu-extra').hide();
+                onMobile && $('#a404-menu').addClass('mobile');
+                $('#a404-menu').show();
+                $('html, body').addClass('a404');
+                $('.a404-address').text(window.location.href.split('?')[1]);
+                document.title = '404 - Chunk Picker V2';
+            }
+        }).catch((error) => {
+            console.error('Unable to load local map data', error);
+        });
     } else if (mid && !['.', '#', '$', '[', ']'].some((char) => mid.includes(char))) {
         if (mid.split('-')[1] === 'view') {
             mid = mid.split('-')[0];
@@ -12880,7 +14051,7 @@ let checkMID = function(mid) {
         }
         databaseRef.child('mapids/' + mid).once('value', function(snap) {
             if (snap.val() && (!onTestServer || patreonMaps[mid])) {
-                myRef = firebase.database().ref('maps/' + mid);
+                myRef = getDatabaseRef('maps/' + mid);
                 atHome = false;
                 $('.background-img').hide();
                 inEntry = true && !viewOnly;
@@ -12919,7 +14090,7 @@ let checkMID = function(mid) {
                             }
                         });
                     } else {
-                        myRef = firebase.database().ref('maps/' + mid);
+                        myRef = getDatabaseRef('maps/' + mid);
                         atHome = false;
                         $('.background-img').hide();
                         inEntry = true && !viewOnly;
@@ -12945,6 +14116,10 @@ let checkMID = function(mid) {
 
 // Regains connectivity to firebase
 let regainConnectivity = function(_callback) {
+    if (localDbMode) {
+        _callback();
+        return;
+    }
     if (Date.now() > lastRegain + 1000) {
         lastRegain = Date.now();
         firebase.auth().signOut();
@@ -13014,7 +14189,7 @@ let checkIfImageExists = function(url, callback) {
         img.onload = () => {
             callback(true);
         };
-        
+
         img.onerror = () => {
             callback(false);
         };
@@ -13078,7 +14253,10 @@ let preloadHelper = function(snap, childName) {
         }
         tempSetSnap = tempSetSnap[key];
     });
-    if ((testMode || snapDiff === null || snapDiff === undefined || Date.now() - recentFancyRollTime < 15000) && !recentlyTestMode && setSnapValid) return false;
+    if ((testMode || snapDiff === null || snapDiff === undefined || Date.now() - recentFancyRollTime < 15000) && !recentlyTestMode && setSnapValid) {
+        markStartupDataLoaded(childName);
+        return false;
+    }
     tempSetSnap = setSnap;
     let key = childNameArr[0];
     if (!setSnap.hasOwnProperty(key)) {
@@ -13090,6 +14268,7 @@ let preloadHelper = function(snap, childName) {
         let key2 = childNameArr[1];
         setSnap[key][key2] = snap.val();
     }
+    markStartupDataLoaded(childName);
     clearTimeout(recentFancyRollTimeout);
     return snapDiff;
 }
@@ -13098,6 +14277,11 @@ let preloadHelper = function(snap, childName) {
 let loadData = async function(startup) {
     if (!myRef) {
         return;
+    }
+    if (startup && !initialLoaded) {
+        mapSettingsLoaded = false;
+        mapChunksLoaded = false;
+        beginStartupDataLoad();
     }
     const response = await fetch('./chunkpicker-chunkinfo-export.json');
     const data = await response.json();
@@ -13162,7 +14346,7 @@ let loadData = async function(startup) {
     myRef.child('settings').once('value', function(snap) {
         let snapDiff = preloadHelper(snap, 'settings');
         if (snapDiff === false) return;
-        let settingsTemp = snap.val();
+        let settingsTemp = snap.val() || {};
         settingsTemp['highvis'] = document.cookie.split(';').filter(function(item) {
             return item.indexOf('highvis=true') >= 0
         }).length > 0;
@@ -13190,7 +14374,7 @@ let loadData = async function(startup) {
         if (!settingsTemp.hasOwnProperty('optOutSectionsWater')) {
             settingsTemp['optOutSectionsWater'] = settingsTemp.hasOwnProperty('optOutSections') ? settingsTemp['optOutSections'] : false;
         }
-        
+
         (!settingsTemp['mapIntro'] || (!settingsTemp['startingChunk'] || settingsTemp['startingChunk'] === '0000' || settingsTemp['startingChunk'] === '00000')) && (mapIntroOpenSoon = true);
         justStartingChunkSet = (settingsTemp['mapIntro'] && (!settingsTemp['startingChunk'] || settingsTemp['startingChunk'] === '0000' || settingsTemp['startingChunk'] === '00000'));
         if (!mapIntroOpenSoon) {
@@ -13208,6 +14392,7 @@ let loadData = async function(startup) {
                     "neighbors": settingsTemp['neighbors'],
                     "walkableRollable": settingsTemp['walkableRollable'],
                     "autoWalkableRollable": settingsTemp['autoWalkableRollable'],
+                    "allowTransportation": settingsTemp['allowTransportation'] || false,
                     "remove": settingsTemp['remove']
                 };
             } else {
@@ -13215,14 +14400,30 @@ let loadData = async function(startup) {
                     "neighbors": true,
                     "walkableRollable": true,
                     "autoWalkableRollable": false,
+                    "allowTransportation": false,
                     "remove": false
                 };
             }
+        }
+        if (!settingsTemp['chunkNeighboursOptions'].hasOwnProperty('allowTransportation')) {
+            settingsTemp['chunkNeighboursOptions']['allowTransportation'] = false;
+        }
+
+        if (!settingsTemp.hasOwnProperty('splitBacklogEnabled')) {
+            settingsTemp['splitBacklogEnabled'] = true;
+        }
+        if (!settingsTemp.hasOwnProperty('splitBacklogChunkCount')) {
+            settingsTemp['splitBacklogChunkCount'] = "2";
+        }
+        if (!settingsTemp.hasOwnProperty('splitBacklogIncludeZeroTaskChunks')) {
+            settingsTemp['splitBacklogIncludeZeroTaskChunks'] = false;
         }
 
         Object.keys(settingsTemp).forEach((setting) => {
             settings[setting] = settingsTemp[setting];
         });
+        mapSettingsLoaded = true;
+        localDbMode && showLocalUnlockedUi();
         if (isUnderMaintenance) return;
         toggleIds(settings['ids']);
         toggleVisibility(settings['highvis']);
@@ -13241,6 +14442,12 @@ let loadData = async function(startup) {
     myRef.child('userName').once('value', function(snap) {
         let snapDiff = preloadHelper(snap, 'userName');
         if (snapDiff === false) return;
+    });
+    myRef.child('hiscoreCharacterName').once('value', function(snap) {
+        let snapDiff = preloadHelper(snap, 'hiscoreCharacterName');
+        if (snapDiff === false) return;
+        hiscoreCharacterName = hiscoreUtils.normalizeCharacterName(snap.val());
+        refreshHiscoreSkillLevels();
     });
     myRef.child('recent').once('value', function(snap) {
         let snapDiff = preloadHelper(snap, 'recent');
@@ -13305,7 +14512,7 @@ let loadData = async function(startup) {
 
         $('#chunkInfo2').text('Selected chunks: ' + ((!!tempChunks['selected'] ? Object.keys(tempChunks['selected']).length : 0) + (!!tempChunks['potential'] ? Object.keys(tempChunks['potential']).length : 0)));
         $('#chunkInfo1').text('Unlocked chunks: ' + (!!tempChunks['unlocked'] ? Object.keys(tempChunks['unlocked']).length : 0));
-        isPicking = chunks && chunks['potential'];
+        isPicking = !!(chunks && chunks['potential'] && Object.keys(chunks['potential']).length > 0);
 
         stickered = (chunks ? chunks['stickered'] : {}) || {};
         stickeredNotes = (chunks ? chunks['stickeredNotes'] : {}) || {};
@@ -13327,6 +14534,8 @@ let loadData = async function(startup) {
             $('.roll2').text('Roll 2');
         }
         setUpSelected();
+        mapChunksLoaded = true;
+        localDbMode && showLocalUnlockedUi();
     });
     myRef.child('recentFancyRollTime').once('value', function(snap) {
         if (snap.val() === 0) {
@@ -13344,7 +14553,7 @@ let loadData = async function(startup) {
         } else {
             recentFancyRollTimeout = null;
         }
-        if (recentFancyRollTime === 0) {
+        if (recentFancyRollTime === 0 && !startupDataLoadActive) {
             loadData();
         }
     });
@@ -13368,6 +14577,11 @@ let loadData = async function(startup) {
         let snapDiff = preloadHelper(snap, 'chunkinfo/backlog');
         if (snapDiff === false) return;
         backlog = !!snap.val() ? decodeObject(snap.val()) : {};
+    });
+    myRef.child('chunkinfo/splitBacklog').once('value', function(snap) {
+        let snapDiff = preloadHelper(snap, 'chunkinfo/splitBacklog');
+        if (snapDiff === false) return;
+        splitBacklog = !!snap.val() ? decodeObject(snap.val()) : {};
     });
     myRef.child('chunkinfo/possibleAreas').once('value', function(snap) {
         let snapDiff = preloadHelper(snap, 'chunkinfo/possibleAreas');
@@ -13529,7 +14743,7 @@ let loadData = async function(startup) {
         if (!rulesTemp.hasOwnProperty('Sea Charting')) {
             rulesTemp['Sea Charting'] = rulesTemp.hasOwnProperty('Show Diary Tasks') ? rulesTemp['Show Diary Tasks'] && (rulesTemp['Fossil Island Tasks'] || rulesTemp['Combat Diary Tasks'] || rulesTemp['Crewmates'] || rulesTemp['Sail Trimming'] || rulesTemp['Money Unlockables']) : false;
         }
-        
+
         if (!rulesTemp.hasOwnProperty('Fish Offcuts Valid Processing')) {
             rulesTemp['Fish Offcuts Valid Processing'] = true;
         }
@@ -13550,6 +14764,7 @@ let loadData = async function(startup) {
             activeSubTabs = snap.val();
             toggleHiddenTasks();
         }
+        markStartupDataLoaded('activeSubTabs');
     });
     myRef.child('uid').once('value', function(snap) {
         if (!chunkOrder || chunkOrder.length === 0) {
@@ -13573,6 +14788,7 @@ let loadData = async function(startup) {
         }
         chunkTasksOn && calcCurrentChallengesCanvas(true, !initialLoaded || recentlyTestMode, !viewOnly);
         !initialLoaded && doneLoading();
+        localDbMode && showLocalUnlockedUi();
         chunkTasksOn && $(`.challenge.clickable`).removeClass('clickable');
         recentlyTestMode = false;
         initialLoaded = true;
@@ -13595,6 +14811,11 @@ let setRecentLogin = function() {
         return;
     }
     let timeNow = new Date().getTime();
+    if (localDbMode) {
+        setSnap['recentLoginTime'] = timeNow;
+        myRef.child('recentLoginTime').set(timeNow);
+        return;
+    }
     signedIn && firebase.auth().signInWithEmailAndPassword('sourcechunk+' + mid + '@yandex.com', savedPin + mid).then(function() {
         setSnap['recentLoginTime'] = timeNow;
         myRef.child('recentLoginTime').set(timeNow);
@@ -13609,6 +14830,17 @@ let setRecentLogin = function() {
 // Stores data in Firebase
 let setUsername = function(old) {
     if (onTestServer || testMode) {
+        return;
+    }
+    if (localDbMode) {
+        setSnap['userName'] = userName.toLowerCase();
+        myRef.child('userName').set(userName.toLowerCase());
+        if (!!old && old !== '') {
+            databaseRef.child('highscores/players/' + old.toLowerCase()).set(null);
+        }
+        databaseRef.child('highscores/players/' + userName.toLowerCase()).set(mid);
+        highscoreEnabled = true;
+        setData();
         return;
     }
     signedIn && firebase.auth().signInWithEmailAndPassword('sourcechunk+' + mid + '@yandex.com', savedPin + mid).then(function() {
@@ -13636,7 +14868,7 @@ let setUsername = function(old) {
 
 // Generates the plugin output object
 let createPluginOutput = function() {
-    if (onTestServer || testMode || recentlyTestMode || !signedIn) {
+    if (onTestServer || testMode || recentlyTestMode || !signedIn || localDbMode) {
         return;
     }
     pluginOutput = [];
@@ -13714,13 +14946,14 @@ let convertToIds = function(obj) {
 
 // Stores data in Firebase
 let setData = function() {
-    if (onTestServer || testMode || recentlyTestMode || !signedIn) {
+    if (onTestServer || testMode || recentlyTestMode || !signedIn || startupDataLoadActive) {
         return;
     }
+    queueHiscoreRefresh();
     settings['generatePluginData'] && createPluginOutput();
     Object.keys(rules).forEach((rule) => {
         if (rules[rule] === undefined) {
-            rules[rule] = false;
+            rules[rule] = defaultRules.hasOwnProperty(rule) ? defaultRules[rule] : false;
         }
     });
 
@@ -13765,6 +14998,7 @@ let setData = function() {
         pluginOutput,
         topbarSelection,
         recentFancyRollTime,
+        hiscoreCharacterName,
         userTasks: encodeObject(userTasks, true),
         manualPrimary: encodeObject(manualPrimary, true),
         settings: {
@@ -13798,12 +15032,16 @@ let setData = function() {
             'rollingChunksOptions': settings['rollingChunksOptions'],
             'defaultChunkinfo': settings['defaultChunkinfo'],
             'taskSearchbar': settings['taskSearchbar'],
-            'generatePluginData': settings['generatePluginData']
+            'generatePluginData': settings['generatePluginData'],
+            'splitBacklogEnabled': settings['splitBacklogEnabled'],
+            'splitBacklogChunkCount': settings['splitBacklogChunkCount'],
+            'splitBacklogIncludeZeroTaskChunks': settings['splitBacklogIncludeZeroTaskChunks']
         },
         chunkinfo: {
             checkedChallenges: encodeObject(convertToIds(checkedChallenges), true),
             completedChallenges: encodeObject(convertToIds(completedChallenges), true),
             backlog: encodeObject(convertToIds(backlog), true),
+            splitBacklog: encodeObject(convertToIds(splitBacklog), true),
             possibleAreas: encodeObject(possibleAreas, true),
             manualTasks: encodeObject(manualTasks, true),
             manualEquipment: encodeObject(manualEquipment, true),
@@ -13835,6 +15073,10 @@ let setData = function() {
     };
     let databaseObject = JSON.parse(JSON.stringify(setSnap));
     delete databaseObject['chunkOrder'];
+    if (localDbMode) {
+        myRef.update({...databaseObject});
+        return;
+    }
     if (firebase.auth().currentUser) {
         myRef.child('test').set(null, (error) => {
             if (error) {
@@ -13861,6 +15103,10 @@ let rollMID = function(count) {
     let badNums = true;
     let rollCount = 0;
     savedPin = pin;
+    if (localDbMode) {
+        console.warn('Creating new maps is not supported by the local JSON database server yet.');
+        return;
+    }
     if (onTestServer || testMode) {
         return;
     }
@@ -13942,6 +15188,10 @@ let checkIfGoodFriend = function() {
 // Changes the lock state if pin is correct, otherwise displays error
 let changeLocked = function() {
     $('#lock-unlock').prop('disabled', true).html('<i class="spin fa-solid fa-spinner"></i>');
+    if (localDbMode) {
+        finishLocalUnlock(false);
+        return;
+    }
     firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
     firebase.auth().fetchSignInMethodsForEmail('sourcechunk+' + mid + '@yandex.com').then((methods) => {
         if (!!methods && methods.length > 0) {

@@ -861,6 +861,32 @@ button.menu2 {
     background-color: rgb(125, 125, 175);
 }
 
+.monstertable {
+    background-color: rgb(35, 150, 95);
+    width: min(8vw, 125px);
+    height: 100%;
+    font-size: min(1.2vw, 20px);
+    color: white;
+    display: inline;
+    border-width: 1px 1px 1px 1px;
+    border-style: solid;
+    border-color: black;
+    outline: none;
+    -webkit-transition-duration: 0.4s;
+    transition-duration: 0.4s;
+    cursor: pointer;
+    margin: auto;
+    pointer-events: auto;
+}
+
+.monstertable:hover {
+    background-color: rgb(20, 125, 75);
+}
+
+.monstertable:active {
+    background-color: rgb(65, 170, 120);
+}
+
 .icon-lock {
     width: 50px;
     margin: 0px auto;
@@ -3172,6 +3198,16 @@ label .tooltip-base-el:active {
     height: 40%;
 }
 
+#monsterTableModal {
+    padding-top: 2.5vh;
+}
+
+#monsterTableModal > .modal-content {
+    height: 95vh;
+    width: 95vw;
+    margin-top: 0;
+}
+
 #highestModal > .modal-content {
     height: 67%;
     width: 45%;
@@ -4008,6 +4044,25 @@ label .tooltip-base-el:active {
 
 .setting > input:disabled {
     cursor: not-allowed;
+}
+
+.splitbacklogchunkcount-setting {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+}
+
+.splitbacklogchunkcount-setting > span {
+    display: inline;
+    flex: 1 1 auto;
+    padding-left: 22px;
+}
+
+.splitbacklogchunkcount-setting > input.split-backlog-count-input {
+    font-size: 18px;
+    margin-right: 5px;
+    position: static;
+    width: 64px;
 }
 
 .chunkinfo-default-rule {
@@ -6010,6 +6065,118 @@ input#searchChunks {
     color: gray;
 }
 
+.monstertable-title {
+    align-items: center;
+    background-color: var(--color2);
+    display: flex;
+    font-size: min(4vw, 30px);
+    font-weight: bold;
+    height: 7%;
+    justify-content: center;
+    text-align: center;
+}
+
+.monstertable-data {
+    display: flex;
+    flex-direction: column;
+    height: 93%;
+    min-height: 0;
+    padding: 0 14px 14px;
+}
+
+.monster-table-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px 0;
+    font-size: 16px;
+}
+
+.monster-table-title {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+#monster-table-filter {
+    font-size: 16px;
+    min-width: 180px;
+}
+
+.monster-table-note {
+    flex-basis: 100%;
+    color: var(--colorTextAlt);
+    font-size: 13px;
+}
+
+.monster-table-wrapper {
+    overflow: auto;
+    flex: 1 1 auto;
+    max-height: none;
+    min-height: 0;
+    border: 1px solid var(--color1);
+    border-radius: 5px;
+}
+
+.monster-table {
+    border-collapse: collapse;
+    min-width: 2200px;
+    width: 100%;
+    background-color: var(--color3);
+    font-size: 14px;
+}
+
+.monster-table th,
+.monster-table td {
+    border: 1px solid var(--color1);
+    padding: 4px 6px;
+    white-space: nowrap;
+    text-align: right;
+}
+
+.monster-table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: var(--color2);
+    cursor: pointer;
+    user-select: none;
+}
+
+.monster-table th:first-child,
+.monster-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: var(--color3);
+    text-align: left;
+}
+
+.monster-table th:first-child {
+    z-index: 3;
+    background-color: var(--color2);
+}
+
+.monster-table-name > span {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.monster-table-name > span:hover {
+    color: gray;
+}
+
+.monster-table-source-summary {
+    max-width: 360px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+.monster-table-missing {
+    opacity: 0.7;
+}
+
 .searchdetails-title {
     font-size: 30px;
     text-align: center;
@@ -6640,6 +6807,41 @@ input#searchChunks {
     background-color: var(--color2);
 }
 
+.hiscore-character-row {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 18px;
+    justify-content: center;
+    margin: 5px auto 10px auto;
+    text-align: center;
+    width: 90%;
+}
+
+.hiscore-character-label, .hiscore-character-input, .hiscore-character-button, .hiscore-status {
+    margin: 3px 5px;
+}
+
+.hiscore-character-input {
+    font-size: 18px;
+    text-align: center;
+    width: 145px;
+}
+
+.hiscore-character-button {
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.hiscore-character-button:disabled, .hiscore-character-input:disabled {
+    cursor: not-allowed;
+}
+
+.hiscore-status {
+    color: var(--colorLink);
+    min-width: 180px;
+}
+
 .Clues-body .row {
     width: 90%;
     font-size: min(4vw, 20px);
@@ -6702,32 +6904,41 @@ input#searchChunks {
     padding-left: 10px;
     margin-left: 10px;
     font-size: 20px;
-    min-width: 60%;
-    max-width: 60%;
+    min-width: 53%;
+    max-width: 53%;
     padding-right: 30px;
-    border-left: solid 1px var(--color8);
     border-right: solid 1px var(--color8);
     position: relative;
 }
 
 .mobile .skill-text {
-    min-width: 50%;
-    max-width: 50%;
+    min-width: 40%;
+    max-width: 40%;
 }
 
 .skill-text.narrow {
-    min-width: 50%;
-    max-width: 50%;
+    min-width: 43%;
+    max-width: 43%;
 }
 
 .mobile .skill-text.narrow {
-    min-width: 30%;
-    max-width: 30%;
+    min-width: 23%;
+    max-width: 23%;
 }
 
 .skill-icon-wrapper {
     width: 5%;
     min-width: 25px;
+    text-align: center;
+}
+
+.hiscore-level {
+    border-left: solid 1px var(--color8);
+    font-size: 20px;
+    font-weight: bold;
+    min-width: 7%;
+    max-width: 7%;
+    padding-left: 8px;
     text-align: center;
 }
 
@@ -6812,26 +7023,35 @@ input#searchChunks {
     margin-left: 10px;
     font-size: 18px;
     font-weight: bold;
-    min-width: 60%;
-    max-width: 60%;
+    min-width: 53%;
+    max-width: 53%;
     padding-right: 28px;
-    border-left: solid 1px var(--color8);
     border-right: solid 1px var(--color8);
 }
 
 .mobile .text-table-header {
-    min-width: 50%;
-    max-width: 50%;
+    min-width: 40%;
+    max-width: 40%;
 }
 
 .text-table-header.narrow {
-    min-width: 50%;
-    max-width: 50%;
+    min-width: 43%;
+    max-width: 43%;
 }
 
 .mobile .text-table-header.narrow {
-    min-width: 30%;
-    max-width: 30%;
+    min-width: 23%;
+    max-width: 23%;
+}
+
+.level-table-header {
+    border-left: solid 1px var(--color8);
+    font-size: 18px;
+    font-weight: bold;
+    min-width: 7%;
+    max-width: 7%;
+    padding-left: 8px;
+    text-align: center;
 }
 
 .button-table-header {

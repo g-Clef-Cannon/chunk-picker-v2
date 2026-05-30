@@ -45,6 +45,7 @@
     firebase.initializeApp(firebaseConfig);
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <script src="./local-mode.js?v=6.9.47"></script>
   <title>Chunk Picker V2</title>
   <link id="favicon-link" rel="icon" href="./resources/favicons/favicon-default.png" />
   <link href="https://fonts.googleapis.com/css?family=Roboto:400,600,300" rel="stylesheet" type="text/css">
@@ -64,16 +65,23 @@
 <div class='body' data-role="page" ondragstart="() => {return false;}" ondrop="() => {return false;}">
   <script src="./tooltip.js?v=6.9.47"></script>
   <script src="./modal.js?v=6.9.47"></script>
+  <script src="./local-db.js?v=6.9.47"></script>
+  <script src="./monster-stats-data.js?v=6.9.47"></script>
+  <script src="./transport-connections.js?v=6.9.47"></script>
+  <script src="./hiscore-utils.js?v=6.9.47"></script>
   <script src="./index.js?v=6.9.47"></script>
   <ul class='active-context-menu'>
     <li onclick="switchActiveContext(event, 'backlog')">Backlog</li>
     <li onclick="switchActiveContext(event, 'backlog note')">Backlog Options</li>
+    <li class="active-context-menu-split" onclick="switchActiveContext(event, 'split backlog')">Split Backlog</li>
     <li class="active-context-menu-alternatives" onclick="switchActiveContext(event, 'alternatives')">Alternatives<span class="alteratives-star"><i class="fa-solid fa-star noscroll"></i></span></li>
     <li onclick="switchActiveContext(event, 'details')">Details</li>
   </ul>
   <ul class='backlog-context-menu'>
     <li onclick="switchBacklogContext('unbacklog')">Un-backlog</li>
     <li onclick="switchBacklogContext('edit note')">Backlog Options</li>
+    <li class="backlog-context-menu-split" onclick="switchBacklogContext('split backlog')">Split Backlog</li>
+    <li class="backlog-context-menu-unsplit" onclick="switchBacklogContext('unsplit backlog')">Remove Split</li>
     <li onclick="switchBacklogContext('details')">Details</li>
   </ul>
   <ul class='questfilter-context-menu'>
@@ -172,7 +180,7 @@
       </div>
       <div class='block'>
         <p class='description'>
-          Before you start picking chunks or editing your map, make sure you select some Chunk Rules first! 
+          Before you start picking chunks or editing your map, make sure you select some Chunk Rules first!
           These rules define how you'll play your chunk account, and they can be changed at any time as you go about your Chunk Journey.
           <br />
           <br />
@@ -209,6 +217,7 @@
   <div class='menu6'>
     <button class='highest' onclick="openHighest()">Current BIS</button>
     <button class='highest2' onclick="openHighest2()">Activity Info</button>
+    <button class='monstertable' onclick="openMonsterTable()">Monster Table</button>
   </div>
   <div class='menu7'>
     <div id='recentChunksTitle' class='text'><b>Recently Unlocked</b></div>
@@ -310,6 +319,7 @@
       <div class='mobile-item-header noscroll'>Select Option</div>
       <div class='mobile-item noscroll' onclick="openHighest2()">Activity Info</div>
       <div class='mobile-item noscroll' onclick="openHighest()">Current BIS</div>
+      <div class='mobile-item noscroll' onclick="openMonsterTable()">Monster Table</div>
       <div class='mobile-item noscroll' onclick="openSearch()">Search Within My Chunks</div>
       <div class='mobile-item noscroll open-manual-outer-container' onclick="openManualAddOuter()">Manually Add To My Chunks</div>
       <div class='mobile-item noscroll' onclick="showOverlays()">Show Overlays</div>
@@ -879,7 +889,7 @@
           <li class='noscroll'>Fixed a missing shooting star location in Lumbridge Swamp (thanks Ynybody1).</li>
         </ul>
       </div>
-      <div class='patch-notes-section'> 
+      <div class='patch-notes-section'>
         <h1>v4.15.0</h1>
         <h3>April 11, 2022</h3>
         <h2 class='noscroll'>Major Changes & New Features</h2>
@@ -1268,7 +1278,7 @@
       </div>
       <div class='patch-notes-section'>
         <h3>November 07, 2020</h3>
-        If you don't pay attention to #chunk-req-tech then you might not be aware that I've been working on automatically generating information on every chunk from wiki data recently. That process is now (mostly) done, and you can check it out on your maps! Turn the Chunk Info Panel on in settings and explore unlocked chunks in a brand new way 
+        If you don't pay attention to #chunk-req-tech then you might not be aware that I've been working on automatically generating information on every chunk from wiki data recently. That process is now (mostly) done, and you can check it out on your maps! Turn the Chunk Info Panel on in settings and explore unlocked chunks in a brand new way
       </div>
       <div class='patch-notes-section'>
         <h3>July 31, 2020</h3>
